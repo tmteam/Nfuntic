@@ -36,9 +36,21 @@ namespace nfun.Ti4
     public class ConcreteType
     {
         private static ConcreteType[] IntegerTypes;
+        private static ConcreteType[] UintTypes;
 
         static ConcreteType()
         {
+            UintTypes = new[]
+            {
+
+                U64,
+                U48,
+                U32,
+                U24,
+                U16,
+                U12,
+                U8
+            };
             IntegerTypes = new[]
             {
                 Real,
@@ -50,6 +62,7 @@ namespace nfun.Ti4
                 I16
             };
         }
+
         public ConcreteType(PrimitiveTypeName name)
         {
             Name = name;
@@ -105,6 +118,30 @@ namespace nfun.Ti4
             throw new NotImplementedException();
         }
 
+        public ConcreteType GetFirstCommonDescedantOrNull(ConcreteType otherType)
+        {
+            if (otherType.Name == this.Name)
+                return this;
+
+            if (otherType.CanBeImplicitlyConvertedTo(this))
+                return otherType;
+            if (this.CanBeImplicitlyConvertedTo(otherType))
+                return this;
+
+            if (!otherType.IsNumeric || !this.IsNumeric)
+                return null;
+
+            var uintType = this;
+            var intType = otherType;
+            if (otherType.Name.HasFlag(PrimitiveTypeName._IsUint))
+            {
+                uintType = otherType;
+                intType = this;
+            }
+
+            var layer = intType.Layer + 1;
+            return UintTypes[layer-3];
+        }
         public ConcreteType GetLastCommonAncestor(ConcreteType otherType)
         {
             if (otherType.Name == this.Name)
@@ -117,15 +154,11 @@ namespace nfun.Ti4
                 return otherType;
             
             var uintType = this;
-            var nonUintType = otherType;
             if (otherType.Name.HasFlag(PrimitiveTypeName._IsUint))
             {
                 uintType = otherType;
-                nonUintType = this;
             }
 
-            if (nonUintType.Name == PrimitiveTypeName.Real)
-                return nonUintType;
             for (int i = uintType.Layer; i >= 1; i--)
             {
                 if (uintType.CanBeImplicitlyConvertedTo(IntegerTypes[i]))
