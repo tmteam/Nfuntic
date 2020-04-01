@@ -22,7 +22,7 @@ namespace nfun.ti4.app
             
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
-            graph.SetIntConst(1, SolvingNode.U8);
+            graph.SetIntConst(1, ConcreteType.U8);
             graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
             graph.PrintTrace();

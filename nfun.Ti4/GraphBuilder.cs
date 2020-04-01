@@ -43,7 +43,9 @@ namespace nfun.Ti4
             var idNode = GetOrCreateNode(node);
             if (idNode.NodeState is ConstrainsSolvingState constrains)
             {
-                constrains.Ancestors.Add(varnode);
+                varnode.Ancestors.Add(idNode);
+                //
+                //idNode.Ancestors.Add(varnode);
             }
             else
             {
@@ -58,10 +60,10 @@ namespace nfun.Ti4
             var result = GetOrCreateNode(resultId);
             if (result.NodeState is ConstrainsSolvingState constrains)
             {
-                constrains.Descedants.Add(left);
-                constrains.Descedants.Add(right);
-                constrains.Descedants.Add(SolvingNode.U24);
-                constrains.Ancestors.Add(SolvingNode.Real);
+                left.Ancestors.Add(result);
+                right.Ancestors.Add(result);
+                constrains.DescedantTypes.Add(ConcreteType.U24);
+                constrains.AncestorTypes.Add(ConcreteType.Real);
             }
             else
             {
@@ -70,8 +72,8 @@ namespace nfun.Ti4
             
             if (left.NodeState is ConstrainsSolvingState lconstrains)
             {
-                lconstrains.Descedants.Add(SolvingNode.U24);
-                lconstrains.Ancestors.Add(SolvingNode.Real);
+                lconstrains.DescedantTypes.Add(ConcreteType.U24);
+                lconstrains.AncestorTypes.Add(ConcreteType.Real);
             }
             else if(!left.IsSolved)
             {
@@ -80,8 +82,8 @@ namespace nfun.Ti4
 
             if (right.NodeState is ConstrainsSolvingState rconstrains)
             {
-                rconstrains.Descedants.Add(SolvingNode.U24);
-                rconstrains.Ancestors.Add(SolvingNode.Real);
+                rconstrains.DescedantTypes.Add(ConcreteType.U24);
+                rconstrains.AncestorTypes.Add(ConcreteType.Real);
             }
             else if(!right.IsSolved)
             {
@@ -102,13 +104,13 @@ namespace nfun.Ti4
             _nodes[id] = type;
         }
 
-        public void SetIntConst(int id, SolvingNode desc)
+        public void SetIntConst(int id, ConcreteType desc)
         {
             var node = GetOrCreateNode(id);
             if (node.NodeState is ConstrainsSolvingState constrains)
             {
-                constrains.Ancestors.Add(SolvingNode.Real);
-                constrains.Descedants.Add(desc);
+                constrains.AncestorTypes.Add(ConcreteType.Real);
+                constrains.DescedantTypes.Add(desc);
                 constrains.PreferedType = ConcreteType.Real;
             }
             else
@@ -119,17 +121,15 @@ namespace nfun.Ti4
 
         public void SetDef(string name, int rightNodeId)
         {
-            var node = GetOrCreateNode(rightNodeId);
-            var varnode = GetVarNode(name);
+            var exprNode = GetOrCreateNode(rightNodeId);
+            var defNode = GetVarNode(name);
 
-            if (node.IsSolved)
-                varnode.NodeState = node.NodeState;
-            else
-                if (varnode.NodeState is ConstrainsSolvingState constrains)
-                {
-                    constrains.Descedants.Add(node);
-                }
-            else throw new NotImplementedException();
+            if (exprNode.IsSolved)
+                defNode.NodeState = exprNode.NodeState;
+            else if (defNode.NodeState is ConstrainsSolvingState constrains)
+                exprNode.Ancestors.Add(defNode);
+            else 
+                throw new NotImplementedException();
         }
 
         private void PrintNode(SolvingNode solvingNode)
@@ -152,18 +152,22 @@ namespace nfun.Ti4
             {
                 Console.Write($"[ ");
 
-                if (constrains.Descedants.Count == 1)
-                    Console.Write(constrains.Descedants.First().Name);
-                else if (constrains.Descedants.Any())
-                    Console.Write($"({string.Join(", ", constrains.Descedants.Select(a => a.Name))})");
+                if (constrains.DescedantTypes.Count == 1)
+                    Console.Write(constrains.DescedantTypes.First().Name);
+                else if (constrains.DescedantTypes.Any())
+                    Console.Write($"({string.Join(", ", constrains.DescedantTypes.Select(a => a.Name))})");
 
                 Console.Write(" .. ");
 
-                if (constrains.Ancestors.Count == 1)
-                    Console.Write(constrains.Ancestors.First().Name);
-                else if (constrains.Ancestors.Any())
-                    Console.Write($"({(string.Join(", ", constrains.Ancestors.Select(a => a.Name)))})");
+                if (constrains.AncestorTypes.Any() || solvingNode.Ancestors.Any())
+                {
+                    var typeNames = constrains
+                        .AncestorTypes
+                        .Select(a => a.Name.ToString());
+                    var ancestorNames = solvingNode.Ancestors.Select(a => a.Name);
 
+                    Console.Write($"({(string.Join(", ",typeNames.Concat(ancestorNames)))})");
+                }
 
                 Console.Write(" ]");
 
