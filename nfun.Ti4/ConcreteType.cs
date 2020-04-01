@@ -35,6 +35,21 @@ namespace nfun.Ti4
 
     public class ConcreteType
     {
+        private static ConcreteType[] IntegerTypes;
+
+        static ConcreteType()
+        {
+            IntegerTypes = new[]
+            {
+                Real,
+                I96,
+                I64,
+                I48,
+                I32,
+                I24,
+                I16
+            };
+        }
         public ConcreteType(PrimitiveTypeName name)
         {
             Name = name;
@@ -42,27 +57,30 @@ namespace nfun.Ti4
 
         public PrimitiveTypeName Name { get; }
         public bool IsPrimitive => true;
-        public bool IsNumeric => Name >= PrimitiveTypeName.Real;
+        public bool IsNumeric => Name.HasFlag(PrimitiveTypeName._IsNumber);
 
-        private int Layer => (int)((int)Name & 0xb11110000);
+        private int Layer => (int)((int)Name >>5 & 0b1111);
 
-        public bool CanBeImplicitlConvertedTo(ConcreteType type)
+        public bool CanBeImplicitlyConvertedTo(ConcreteType type)
         {
-            if (this.Name == PrimitiveTypeName.Any)
+            if (type.Name == PrimitiveTypeName.Any)
                 return true;
             if (this.Name == type.Name)
                 return true;
             if (!this.IsNumeric || !type.IsNumeric)
                 return false;
             //So both are numbers
-            if (this.Name == PrimitiveTypeName.Real)
+            if (type.Name == PrimitiveTypeName.Real)
                 return true;
-            if (this.Layer >= type.Layer)
+            if (this.Layer <= type.Layer)
                 return false;
-            if (this.Name.HasFlag(PrimitiveTypeName._IsUint))
-                return type.Name.HasFlag(PrimitiveTypeName._IsUint);
+            if (type.Name.HasFlag(PrimitiveTypeName._IsUint))
+                return this.Name.HasFlag(PrimitiveTypeName._IsUint);
             return true;
         }
+
+        public override string ToString() => Name.ToString();
+
         public static ConcreteType Any { get; } = new ConcreteType(PrimitiveTypeName.Any);
         public static ConcreteType Bool { get; } = new ConcreteType(PrimitiveTypeName.Bool);
         public static ConcreteType Char { get; } = new ConcreteType(PrimitiveTypeName.Char);
@@ -82,6 +100,39 @@ namespace nfun.Ti4
         public static ConcreteType U12 { get; } = new ConcreteType(PrimitiveTypeName.U12);
         public static ConcreteType U8 { get; } = new ConcreteType(PrimitiveTypeName.U8);
 
+        public static ConcreteType GetLastCommonAncestor(IEnumerable<ConcreteType> types)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ConcreteType GetLastCommonAncestor(ConcreteType otherType)
+        {
+            if (otherType.Name == this.Name)
+                return this;
+            if (!otherType.IsNumeric || !this.IsNumeric)
+                return ConcreteType.Any;
+            if (otherType.CanBeImplicitlyConvertedTo(this))
+                return this;
+            if (this.CanBeImplicitlyConvertedTo(otherType))
+                return otherType;
+            
+            var uintType = this;
+            var nonUintType = otherType;
+            if (otherType.Name.HasFlag(PrimitiveTypeName._IsUint))
+            {
+                uintType = otherType;
+                nonUintType = this;
+            }
+
+            if (nonUintType.Name == PrimitiveTypeName.Real)
+                return nonUintType;
+            for (int i = uintType.Layer; i >= 1; i--)
+            {
+                if (uintType.CanBeImplicitlyConvertedTo(IntegerTypes[i]))
+                    return IntegerTypes[i];
+            }
+            throw new InvalidOperationException();
+        }
 
     }
 }

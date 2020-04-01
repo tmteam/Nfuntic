@@ -40,6 +40,7 @@ namespace nfun.Ti4
         public void SetVar(string name, int node)
         {
             var varnode = GetVarNode(name);
+            varnode.Type = SolvingNodeType.Variable;
             var idNode = GetOrCreateNode(node);
             if (idNode.NodeState is ConstrainsSolvingState constrains)
             {
@@ -134,6 +135,9 @@ namespace nfun.Ti4
 
         public SolvingNode[] Toposort()
         {
+            while (true)
+            {
+                
             var allNodes = _nodes.Concat(_variables.Values).ToArray();
             var graph = new int[allNodes.Length][];
             for (int i = 0; i < allNodes.Length; i++)
@@ -156,55 +160,39 @@ namespace nfun.Ti4
             }
 
             var sorted = GraphTools.SortTopology(graph);
+            var result = sorted.NodeNames.Select(n => allNodes[n]).ToArray();
 
-            if(sorted.HasCycle)
-                throw new NotImplementedException("Cycles not implemented yet");
-            var result =  sorted.NodeNames.Select(n => allNodes[n]).ToArray();
+            if (sorted.HasCycle)
+            {
+                //main node. every other node has to reference on it
+                var main = result.FirstOrDefault(r => r.Type == SolvingNodeType.Variable)??result.First();
+                for (int i = 0; i < result.Length; i++)
+                {
+                    var nextNodeId = i + 1;
+                    if (nextNodeId == result.Length) nextNodeId = 0;
+                    var current = result[i];
+                    var next = result[nextNodeId];
+                    if (current.Ancestors.Contains(next))
+                    {
+                        current.Ancestors.Remove(next);
+                        //merge!
+                    }
+                    else if (current.NodeState is ReferenceSolvingState)
+                    {
+                        current.NodeState = new ReferenceSolvingState{RefTo = main};
+                    }
+                }
+            }
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Toposort results: ");
             Console.ResetColor();
             Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
             return result;
-        }
-
-        private void PrintNode(SolvingNode solvingNode)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"{solvingNode.Name}:");
-            Console.ResetColor();
-
-            if (solvingNode.NodeState is ConcreteType concrete)
-                Console.WriteLine($"{concrete.Name} ");
-            else if (solvingNode.NodeState is ReferenceSolvingState reference)
-                Console.WriteLine($"{reference.RefTo.Name} ");
-            else if (solvingNode.NodeState is ConstrainsSolvingState constrains)
-            {
-                Console.Write($"[ ");
-
-                if (constrains.DescedantTypes.Count == 1)
-                    Console.Write(constrains.DescedantTypes.First().Name);
-                else if (constrains.DescedantTypes.Any())
-                    Console.Write($"({string.Join(", ", constrains.DescedantTypes.Select(a => a.Name))})");
-
-                Console.Write(" .. ");
-
-                if (constrains.AncestorTypes.Any() || solvingNode.Ancestors.Any())
-                {
-                    var typeNames = constrains
-                        .AncestorTypes
-                        .Select(a => a.Name.ToString());
-                    var ancestorNames = solvingNode.Ancestors.Select(a => a.Name);
-
-                    Console.Write($"({(string.Join(", ",typeNames.Concat(ancestorNames)))})");
-                }
-
-                Console.Write(" ]");
-
-                if (constrains.PreferedType != null)
-                    Console.Write($" Pref: {constrains.PreferedType.Name}");
-                Console.WriteLine();
             }
+
         }
+
+       
         public void PrintTrace()
         {
             foreach (var solvingNode in _nodes)
@@ -212,12 +200,12 @@ namespace nfun.Ti4
                 if(solvingNode==null)
                     continue;
                 
-                PrintNode(solvingNode);
+                solvingNode.PrintToConsole();
             }
 
             foreach (var solvingNode in _variables)
             {
-                PrintNode(solvingNode.Value);
+                solvingNode.Value.PrintToConsole();
             }
         }
     }
