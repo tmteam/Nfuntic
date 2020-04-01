@@ -91,9 +91,9 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetConst(int id, SolvingNode type)
+        public void SetConst(int id, ConcreteType type)
         {
-            while (_nodes.Count < id)
+            while (_nodes.Count <= id)
             {
                 _nodes.Add(null);
             }
@@ -101,7 +101,7 @@ namespace nfun.Ti4
             var alreadyExists = _nodes[id];
             if (alreadyExists != null)
                 throw new NotImplementedException();
-            _nodes[id] = type;
+            _nodes[id] = new ConcreteTypeSolvingNode(type.Name, "T"+id);
         }
 
         public void SetIntConst(int id, ConcreteType desc)
@@ -132,22 +132,51 @@ namespace nfun.Ti4
                 throw new NotImplementedException();
         }
 
+        public SolvingNode[] Toposort()
+        {
+            var allNodes = _nodes.Concat(_variables.Values).ToArray();
+            var graph = new int[allNodes.Length][];
+            for (int i = 0; i < allNodes.Length; i++)
+            {
+                allNodes[i].GraphId = i;
+            }
+
+            for (int i = 0; i < allNodes.Length; i++)
+            {
+                var node = allNodes[i];
+                var edges =  node.Ancestors.Select(a => a.GraphId);
+                if (node.NodeState is ReferenceSolvingState reference)
+                {
+                    graph[i] = edges.Append(reference.RefTo.GraphId).ToArray();
+                }
+                else
+                {
+                    graph[i] = edges.ToArray();
+                }
+            }
+
+            var sorted = GraphTools.SortTopology(graph);
+
+            if(sorted.HasCycle)
+                throw new NotImplementedException("Cycles not implemented yet");
+            var result =  sorted.NodeNames.Select(n => allNodes[n]).ToArray();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Toposort results: ");
+            Console.ResetColor();
+            Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
+            return result;
+        }
+
         private void PrintNode(SolvingNode solvingNode)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write($"{solvingNode.Name}:");
             Console.ResetColor();
 
-            if (solvingNode.NodeState is ConcreteTypeSolvingNode concrete)
-            {
-                Console.Write($"{concrete.Name} ");
-            }
-
+            if (solvingNode.NodeState is ConcreteType concrete)
+                Console.WriteLine($"{concrete.Name} ");
             else if (solvingNode.NodeState is ReferenceSolvingState reference)
-            {
-                Console.Write($"{reference.RefTo.Name} ");
-            }
-
+                Console.WriteLine($"{reference.RefTo.Name} ");
             else if (solvingNode.NodeState is ConstrainsSolvingState constrains)
             {
                 Console.Write($"[ ");
@@ -175,7 +204,6 @@ namespace nfun.Ti4
                     Console.Write($" Pref: {constrains.PreferedType.Name}");
                 Console.WriteLine();
             }
-
         }
         public void PrintTrace()
         {

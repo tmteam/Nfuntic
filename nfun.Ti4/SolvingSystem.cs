@@ -6,13 +6,14 @@ namespace nfun.Ti4
 
     public class ConcreteTypeSolvingNode : SolvingNode
     {
-        public ConcreteTypeSolvingNode(PrimitiveTypeName typeName):base(typeName.ToString())
+        public ConcreteTypeSolvingNode(PrimitiveTypeName typeName, string nodeName):base(nodeName)
         {
             this.NodeState = new ConcreteType(typeName);
         }
     }
     public class SolvingNode
     {
+        public int GraphId { get; set; }
         public SolvingNode(string name)
         {
             Name = name;
