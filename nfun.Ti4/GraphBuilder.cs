@@ -215,7 +215,18 @@ namespace nfun.Ti4
             }
         }
 
-        public static void UpdateUpwards(SolvingNode[] toposortedNodes)
+        public static void MergeDownwards(SolvingNode[] toposortedNodes)
+        {
+            for (int i = toposortedNodes.Length - 1; i >= 0; i--)
+            {
+                var node = toposortedNodes[i];
+                foreach (var nodeAncestor in node.Ancestors)
+                {
+                    node.NodeState = MergeDownwardsStates(node, nodeAncestor);
+                }
+            }
+        }
+        public static void MergeUpwards(SolvingNode[] toposortedNodes)
         {
             foreach (var node in toposortedNodes)
             {
@@ -282,6 +293,46 @@ namespace nfun.Ti4
                 }
             }
             throw new NotSupportedException();
+        }
+
+        private static object MergeDownwardsStates(SolvingNode descendant, SolvingNode ancestor)
+        {
+            if (descendant.NodeState is ReferenceSolvingState referenceDesc)
+            {
+                referenceDesc.RefTo.NodeState = MergeDownwardsStates(descendant, referenceDesc.RefTo);
+                return referenceDesc;
+            }
+
+           ConcreteType upType = null;
+           if (ancestor.NodeState is ConcreteType concreteAnc)
+               upType = concreteAnc;
+           else if (ancestor.NodeState is ConstrainsSolvingState constrainsAnc)
+           {
+               if (constrainsAnc.AncestorTypes.Any())
+                   upType = ConcreteType.GetFirstCommonDescendantOrNull(constrainsAnc.AncestorTypes);
+               else
+                   return descendant.NodeState;
+           }
+           if(upType==null)
+               throw new InvalidOperationException();
+
+           if (descendant.NodeState is ConcreteType concreteDesc)
+           {
+               if (concreteDesc.CanBeImplicitlyConvertedTo(upType))
+                   return descendant.NodeState;
+               throw new InvalidOperationException();
+           }
+           if (descendant.NodeState is ConstrainsSolvingState constrainsDesc)
+           {
+               var newUpLimit = ConcreteType.GetFirstCommonDescendantOrNull(constrainsDesc.AncestorTypes.Append(upType));
+                if(newUpLimit==null)
+                    throw new InvalidOperationException();
+                constrainsDesc.AncestorTypes.Clear();
+                constrainsDesc.AncestorTypes.Add(newUpLimit);
+                return descendant.NodeState;
+           }
+           throw new InvalidOperationException();
+
         }
 
 
