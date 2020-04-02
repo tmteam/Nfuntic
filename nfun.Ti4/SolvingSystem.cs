@@ -7,7 +7,7 @@ namespace nfun.Ti4
 
     public class ConcreteTypeSolvingNode : SolvingNode
     {
-        public ConcreteTypeSolvingNode(PrimitiveTypeName typeName, string nodeName):base(nodeName)
+        public ConcreteTypeSolvingNode(PrimitiveTypeName typeName, string nodeName) : base(nodeName)
         {
             this.NodeState = new ConcreteType(typeName);
         }
@@ -18,9 +18,11 @@ namespace nfun.Ti4
         Variable,
         Node
     }
+
     public class SolvingNode
     {
         public int GraphId { get; set; }
+
         public SolvingNode(string name)
         {
             Name = name;
@@ -33,10 +35,8 @@ namespace nfun.Ti4
         public object NodeState { get; set; }
 
         public string Name { get; }
-        public override string ToString()
-        {
-            return Name + "." + NodeState?.GetType().Name;
-        }
+        public override string ToString() => Name + "." + NodeState?.GetType().Name;
+
         public void PrintToConsole()
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -76,31 +76,65 @@ namespace nfun.Ti4
             }
         }
 
-        
+
     }
+
     public static class SolvingStateMergeFunctions
     {
         public static object Merge(ConcreteType a, ConcreteType b)
         {
-            if(a.Name!= b.Name)
+            if (a.Name != b.Name)
                 throw new InvalidOperationException();
             return a;
         }
 
         public static object Merge(ConstrainsSolvingState limits, ConcreteType concrete)
         {
-            if(!limits.AncestorTypes.TrueForAll(concrete.CanBeImplicitlyConvertedTo))
+            if (!limits.AncestorTypes.TrueForAll(concrete.CanBeImplicitlyConvertedTo))
                 throw new InvalidOperationException();
-            if (!limits.DescedantTypes.TrueForAll(d=>d.CanBeImplicitlyConvertedTo(concrete)))
+            if (!limits.DescedantTypes.TrueForAll(d => d.CanBeImplicitlyConvertedTo(concrete)))
                 throw new InvalidOperationException();
             return concrete;
         }
 
-        public static object Merge(ConcreteTypeSolvingNode a, ConcreteTypeSolvingNode b)
+        public static object Merge(ConstrainsSolvingState a, ConstrainsSolvingState b)
         {
-            throw new NotImplementedException();
+            var result = new ConstrainsSolvingState();
+            ConcreteType ancestor = null;
+
+            if (a.AncestorTypes.Any() || b.AncestorTypes.Any())
+            {
+                ancestor = ConcreteType.GetLastCommonAncestor(a.AncestorTypes.Union(b.AncestorTypes));
+                result.AncestorTypes.Add(ancestor);
+            }
+
+            ConcreteType descendant = null;
+
+            if (a.DescedantTypes.Any() || b.DescedantTypes.Any())
+            {
+                descendant = ConcreteType.GetFirstCommonDescendantOrNull(a.DescedantTypes.Union(b.DescedantTypes));
+                if (descendant == null)
+                    throw new InvalidOperationException();
+                result.DescedantTypes.Add(descendant);
+            }
+
+            if (ancestor != null && descendant != null)
+                if (!descendant.CanBeImplicitlyConvertedTo(ancestor))
+                    throw new InvalidOperationException();
+            if (a.PreferedType != null)
+            {
+                if (b.PreferedType == null || a.PreferedType.Name == b.PreferedType.Name)
+                {
+                    result.PreferedType = a.PreferedType;
+                }
+            }
+            else
+                result.PreferedType = b.PreferedType;
+
+            return result;
         }
     }
+
     public class ReferenceSolvingState
     {
         public SolvingNode RefTo { get; set; }
@@ -109,7 +143,7 @@ namespace nfun.Ti4
     public class ConstrainsSolvingState
     {
         public List<ConcreteType> AncestorTypes { get; } = new List<ConcreteType>();
-        public List<ConcreteType> DescedantTypes { get;  } = new List<ConcreteType>();
+        public List<ConcreteType> DescedantTypes { get; } = new List<ConcreteType>();
         public ConcreteType PreferedType { get; set; }
     }
 

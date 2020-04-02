@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace nfun.Ti4
 {
@@ -16,21 +15,22 @@ namespace nfun.Ti4
         
         Char = _IsPrimitive | 1<<5 | 1<<9,
         Bool = _IsPrimitive | 1<<5 | 2<<9,
-        Real = _IsPrimitive | _IsNumber | 1 << 5,
-        I96 =  _IsPrimitive | _IsNumber | 2 << 5 | _isAbstract,
-        I64 = _IsPrimitive | _IsNumber  | 3 << 5,
-        I48 = _IsPrimitive | _IsNumber  | 4 << 5 | _isAbstract,
-        I32 = _IsPrimitive | _IsNumber  | 5 << 5,
-        I24 = _IsPrimitive | _IsNumber  | 6 << 5 | _isAbstract,
-        I16 = _IsPrimitive | _IsNumber  | 7 << 5,
 
-        U64 = _IsPrimitive | _IsNumber | _IsUint  | 3 << 5,
-        U48 = _IsPrimitive | _IsNumber | _IsUint  | 4 << 5 | _isAbstract,
+        Real = _IsPrimitive | _IsNumber | 1 << 5,
+        I96  = _IsPrimitive | _IsNumber | 2 << 5 | _isAbstract,
+        I64  = _IsPrimitive | _IsNumber | 3 << 5,
+        I48  = _IsPrimitive | _IsNumber | 4 << 5 | _isAbstract,
+        I32  = _IsPrimitive | _IsNumber | 5 << 5,
+        I24  = _IsPrimitive | _IsNumber | 6 << 5 | _isAbstract,
+        I16  = _IsPrimitive | _IsNumber | 7 << 5,
+
+        U64  = _IsPrimitive | _IsNumber | _IsUint | 3 << 5,
+        U48  = _IsPrimitive | _IsNumber | _IsUint | 4 << 5 | _isAbstract,
         U32  = _IsPrimitive | _IsNumber | _IsUint | 5 << 5,
-        U24 = _IsPrimitive | _IsNumber | _IsUint  | 6 << 5 | _isAbstract,
-        U16 = _IsPrimitive | _IsNumber | _IsUint  | 7 << 5,
-        U12 = _IsPrimitive | _IsNumber | _IsUint  | 8 << 5 | _isAbstract,
-        U8 = _IsPrimitive | _IsNumber | _IsUint   | 9 << 5
+        U24  = _IsPrimitive | _IsNumber | _IsUint | 6 << 5 | _isAbstract,
+        U16  = _IsPrimitive | _IsNumber | _IsUint | 7 << 5,
+        U12  = _IsPrimitive | _IsNumber | _IsUint | 8 << 5 | _isAbstract,
+        U8   = _IsPrimitive | _IsNumber | _IsUint | 9 << 5
     }
 
     public class ConcreteType
@@ -113,12 +113,12 @@ namespace nfun.Ti4
         public static ConcreteType U12 { get; } = new ConcreteType(PrimitiveTypeName.U12);
         public static ConcreteType U8 { get; } = new ConcreteType(PrimitiveTypeName.U8);
 
-        public static ConcreteType GetLastCommonAncestor(IEnumerable<ConcreteType> types)
-        {
-            throw new NotImplementedException();
-        }
+        public static ConcreteType GetLastCommonAncestor(IEnumerable<ConcreteType> types) 
+            => types.Aggregate((t1, t2) => t1.GetLastCommonAncestor(t2));
+        public static ConcreteType GetFirstCommonDescendantOrNull(IEnumerable<ConcreteType> types)
+            => types.Aggregate((t1, t2) => t1?.GetFirstCommonDescendantOrNull(t2));
 
-        public ConcreteType GetFirstCommonDescedantOrNull(ConcreteType otherType)
+        public ConcreteType GetFirstCommonDescendantOrNull(ConcreteType otherType)
         {
             if (otherType.Name == this.Name)
                 return this;
@@ -131,41 +131,37 @@ namespace nfun.Ti4
             if (!otherType.IsNumeric || !this.IsNumeric)
                 return null;
 
-            var uintType = this;
             var intType = otherType;
+
             if (otherType.Name.HasFlag(PrimitiveTypeName._IsUint))
-            {
-                uintType = otherType;
                 intType = this;
-            }
 
             var layer = intType.Layer + 1;
             return UintTypes[layer-3];
         }
+
         public ConcreteType GetLastCommonAncestor(ConcreteType otherType)
         {
             if (otherType.Name == this.Name)
                 return this;
             if (!otherType.IsNumeric || !this.IsNumeric)
-                return ConcreteType.Any;
+                return Any;
             if (otherType.CanBeImplicitlyConvertedTo(this))
                 return this;
             if (this.CanBeImplicitlyConvertedTo(otherType))
                 return otherType;
-            
+
             var uintType = this;
             if (otherType.Name.HasFlag(PrimitiveTypeName._IsUint))
-            {
                 uintType = otherType;
-            }
 
             for (int i = uintType.Layer; i >= 1; i--)
             {
                 if (uintType.CanBeImplicitlyConvertedTo(IntegerTypes[i]))
                     return IntegerTypes[i];
             }
+
             throw new InvalidOperationException();
         }
-
     }
 }

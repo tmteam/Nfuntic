@@ -33,10 +33,11 @@ namespace nfun.Ti4
             if (alreadyExists != null)
                 return alreadyExists;
 
-            var res = new SolvingNode("T"+id) { NodeState = new ConstrainsSolvingState() };
+            var res = new SolvingNode("T" + id) {NodeState = new ConstrainsSolvingState()};
             _nodes[id] = res;
             return res;
         }
+
         public void SetVar(string name, int node)
         {
             var varnode = GetVarNode(name);
@@ -50,7 +51,8 @@ namespace nfun.Ti4
             }
             else
             {
-                throw new InvalidOperationException($"Node {node} cannot be referenced by '{name}' because it is not constrained node.");
+                throw new InvalidOperationException(
+                    $"Node {node} cannot be referenced by '{name}' because it is not constrained node.");
             }
         }
 
@@ -70,13 +72,13 @@ namespace nfun.Ti4
             {
                 throw new NotImplementedException();
             }
-            
+
             if (left.NodeState is ConstrainsSolvingState lconstrains)
             {
                 lconstrains.DescedantTypes.Add(ConcreteType.U24);
                 lconstrains.AncestorTypes.Add(ConcreteType.Real);
             }
-            else if(!left.IsSolved)
+            else if (!left.IsSolved)
             {
                 throw new NotImplementedException();
             }
@@ -86,7 +88,7 @@ namespace nfun.Ti4
                 rconstrains.DescedantTypes.Add(ConcreteType.U24);
                 rconstrains.AncestorTypes.Add(ConcreteType.Real);
             }
-            else if(!right.IsSolved)
+            else if (!right.IsSolved)
             {
                 throw new NotImplementedException();
             }
@@ -102,7 +104,7 @@ namespace nfun.Ti4
             var alreadyExists = _nodes[id];
             if (alreadyExists != null)
                 throw new NotImplementedException();
-            _nodes[id] = new ConcreteTypeSolvingNode(type.Name, "T"+id);
+            _nodes[id] = new ConcreteTypeSolvingNode(type.Name, "T" + id);
         }
 
         public void SetIntConst(int id, ConcreteType desc)
@@ -129,77 +131,98 @@ namespace nfun.Ti4
                 defNode.NodeState = exprNode.NodeState;
             else if (defNode.NodeState is ConstrainsSolvingState constrains)
                 exprNode.Ancestors.Add(defNode);
-            else 
+            else
                 throw new NotImplementedException();
         }
 
         public SolvingNode[] Toposort()
         {
+            int iteration = 0;
             while (true)
             {
-                
-            var allNodes = _nodes.Concat(_variables.Values).ToArray();
-            var graph = new int[allNodes.Length][];
-            for (int i = 0; i < allNodes.Length; i++)
-            {
-                allNodes[i].GraphId = i;
-            }
 
-            for (int i = 0; i < allNodes.Length; i++)
-            {
-                var node = allNodes[i];
-                var edges =  node.Ancestors.Select(a => a.GraphId);
-                if (node.NodeState is ReferenceSolvingState reference)
+                var allNodes = _nodes.Concat(_variables.Values).ToArray();
+                if (iteration > allNodes.Length * allNodes.Length)
+                    throw new InvalidOperationException();
+                iteration++;
+
+                var graph = new int[allNodes.Length][];
+                for (int i = 0; i < allNodes.Length; i++)
                 {
-                    graph[i] = edges.Append(reference.RefTo.GraphId).ToArray();
+                    allNodes[i].GraphId = i;
+                }
+
+                for (int i = 0; i < allNodes.Length; i++)
+                {
+                    var node = allNodes[i];
+                    var edges = node.Ancestors.Select(a => a.GraphId);
+                    if (node.NodeState is ReferenceSolvingState reference)
+                    {
+                        graph[i] = edges.Append(reference.RefTo.GraphId).ToArray();
+                    }
+                    else
+                    {
+                        graph[i] = edges.ToArray();
+                    }
+                }
+
+                var sorted = GraphTools.SortTopology(graph);
+                var result = sorted.NodeNames.Select(n => allNodes[n]).ToArray();
+                if (sorted.HasCycle)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"Found cycle: ");
+                    Console.ResetColor();
+                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
+
+                    //main node. every other node has to reference on it
+                    MergeCycle(result);
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Cycle normalization results: ");
+                    Console.ResetColor();
+                    foreach (var solvingNode in result)
+                        solvingNode.PrintToConsole();
                 }
                 else
                 {
-                    graph[i] = edges.ToArray();
+                    foreach (var solvingNode in result)
+                    {
+                        if (solvingNode.NodeState is ConstrainsSolvingState constrains)
+                        {
+                            if (constrains.AncestorTypes.Count > 1)
+                            {
+                                var ancestor = ConcreteType.GetLastCommonAncestor(constrains.AncestorTypes);
+                                constrains.AncestorTypes.Clear();
+                                constrains.AncestorTypes.Add(ancestor);
+                            }
+
+                            if (constrains.DescedantTypes.Count>1)
+                            {
+                                var descedants = ConcreteType.GetFirstCommonDescendantOrNull(constrains.DescedantTypes);
+                                constrains.DescedantTypes.Clear();
+                                constrains.DescedantTypes.Add(descedants);
+                            }
+                        }
+                    }
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Toposort results: ");
+                    Console.ResetColor();
+                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
+                    return result;
                 }
             }
-
-            var sorted = GraphTools.SortTopology(graph);
-            var result = sorted.NodeNames.Select(n => allNodes[n]).ToArray();
-
-            if (sorted.HasCycle)
-            {
-                //main node. every other node has to reference on it
-                var main = result.FirstOrDefault(r => r.Type == SolvingNodeType.Variable)??result.First();
-                for (int i = 0; i < result.Length; i++)
-                {
-                    var nextNodeId = i + 1;
-                    if (nextNodeId == result.Length) nextNodeId = 0;
-                    var current = result[i];
-                    var next = result[nextNodeId];
-                    if (current.Ancestors.Contains(next))
-                    {
-                        current.Ancestors.Remove(next);
-                        //merge!
-                    }
-                    else if (current.NodeState is ReferenceSolvingState)
-                    {
-                        current.NodeState = new ReferenceSolvingState{RefTo = main};
-                    }
-                }
-            }
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Toposort results: ");
-            Console.ResetColor();
-            Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
-            return result;
-            }
-
         }
 
-       
+
+
         public void PrintTrace()
         {
             foreach (var solvingNode in _nodes)
             {
-                if(solvingNode==null)
+                if (solvingNode == null)
                     continue;
-                
+
                 solvingNode.PrintToConsole();
             }
 
@@ -207,6 +230,54 @@ namespace nfun.Ti4
             {
                 solvingNode.Value.PrintToConsole();
             }
+        }
+
+        private static void MergeCycle(SolvingNode[] result)
+        {
+            var main = result.FirstOrDefault(r => r.Type == SolvingNodeType.Variable) ?? result.First();
+            foreach (var current in result)
+            {
+                if(current==main)
+                    continue;
+                
+                if (current.NodeState is ReferenceSolvingState refState)
+                {
+                    if (!result.Contains(refState.RefTo))
+                        throw new NotImplementedException();
+                }
+                else
+                {
+                    //merge main and current
+                    main.Ancestors.AddRange(current.Ancestors);
+                    if (main.NodeState is ConcreteType concrete)
+                    {
+                        if (current.NodeState is ConcreteType concreteB)
+                            main.NodeState = SolvingStateMergeFunctions.Merge(concrete, concreteB);
+                        else if (current.NodeState is ConstrainsSolvingState constrainsB)
+                            main.NodeState = SolvingStateMergeFunctions.Merge(constrainsB, concrete);
+                        else throw new NotImplementedException();
+                    }
+                    else if (main.NodeState is ConstrainsSolvingState constrainsA)
+                    {
+                        if (current.NodeState is ConcreteType concreteB)
+                            main.NodeState = SolvingStateMergeFunctions.Merge(constrainsA, concreteB);
+                        else if (current.NodeState is ConstrainsSolvingState constrainsB)
+                            main.NodeState = SolvingStateMergeFunctions.Merge(constrainsB, constrainsA);
+                        else throw new NotImplementedException();
+                    }
+                    else throw new NotImplementedException();
+                }
+                current.NodeState = new ReferenceSolvingState() { RefTo = main };
+            }
+
+            var newAncestors = result
+                .SelectMany(r => r.Ancestors)
+                .Where(r => !result.Contains(r))
+                .Distinct()
+                .ToList();
+
+            main.Ancestors.Clear();
+            main.Ancestors.AddRange(newAncestors);
         }
     }
 }

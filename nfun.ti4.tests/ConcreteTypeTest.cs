@@ -27,9 +27,9 @@ namespace nfun.ti4.tests
         [TestCase(PrimitiveTypeName.Bool, PrimitiveTypeName.Char)]
         public void GetFirstCommonDescedant_returnsNull(PrimitiveTypeName a, PrimitiveTypeName b)
         {
-            var result = new ConcreteType(a).GetFirstCommonDescedantOrNull(new ConcreteType(b));
+            var result = new ConcreteType(a).GetFirstCommonDescendantOrNull(new ConcreteType(b));
             Assert.IsNull(result);
-            var revresult = new ConcreteType(b).GetFirstCommonDescedantOrNull(new ConcreteType(a));
+            var revresult = new ConcreteType(b).GetFirstCommonDescendantOrNull(new ConcreteType(a));
             Assert.IsNull(revresult);
         }
 
@@ -50,9 +50,9 @@ namespace nfun.ti4.tests
 
         public void GetFirstCommonDescedant(PrimitiveTypeName a, PrimitiveTypeName b, PrimitiveTypeName expected)
         {
-            var result = new ConcreteType(a).GetFirstCommonDescedantOrNull(new ConcreteType(b)).Name;
+            var result = new ConcreteType(a).GetFirstCommonDescendantOrNull(new ConcreteType(b)).Name;
             Assert.AreEqual(expected, result);
-            var revresult = new ConcreteType(b).GetFirstCommonDescedantOrNull(new ConcreteType(a)).Name;
+            var revresult = new ConcreteType(b).GetFirstCommonDescendantOrNull(new ConcreteType(a)).Name;
             Assert.AreEqual(expected, revresult);
         }
 

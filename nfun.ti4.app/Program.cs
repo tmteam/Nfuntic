@@ -41,6 +41,8 @@ namespace nfun.ti4.app
             graph.SetDef("x", 2);
             graph.PrintTrace();
             graph.Toposort();
+            Console.WriteLine();
+            graph.PrintTrace();
         }
 
         private static void Trace3()
@@ -63,6 +65,9 @@ namespace nfun.ti4.app
             graph.PrintTrace();
             Console.WriteLine();
             graph.Toposort();
+            Console.WriteLine();
+            graph.PrintTrace();
+
         }
 
     }
