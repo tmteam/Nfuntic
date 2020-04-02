@@ -26,7 +26,11 @@ namespace nfun.ti4.app
             graph.SetDef("y", 2);
             graph.PrintTrace();
             Console.WriteLine();
-            graph.Toposort();
+            var sorted = graph.Toposort();
+            GraphBuilder.UpdateUpwards(sorted);
+            Console.WriteLine();
+            Console.WriteLine("Merge up");
+            graph.PrintTrace();
         }
 
         private static void Trace2()
@@ -65,7 +69,7 @@ namespace nfun.ti4.app
             var sorted = graph.Toposort();
             Console.WriteLine();
             graph.PrintTrace();
-            GraphBuilder.MergeUpwards(sorted);
+            GraphBuilder.UpdateUpwards(sorted);
             Console.WriteLine();
             Console.WriteLine("Merge up");
             graph.PrintTrace();

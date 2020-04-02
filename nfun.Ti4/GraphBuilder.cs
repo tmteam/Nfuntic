@@ -168,7 +168,7 @@ namespace nfun.Ti4
                 }
 
                 var sorted = GraphTools.SortTopology(graph);
-                var result = sorted.NodeNames.Select(n => allNodes[n]).ToArray();
+                var result = sorted.NodeNames.Select(n => allNodes[n]).Reverse().ToArray();
                 if (sorted.HasCycle)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -215,7 +215,7 @@ namespace nfun.Ti4
             }
         }
 
-        public static void MergeUpwards(SolvingNode[] toposortedNodes)
+        public static void UpdateUpwards(SolvingNode[] toposortedNodes)
         {
             foreach (var node in toposortedNodes)
             {
