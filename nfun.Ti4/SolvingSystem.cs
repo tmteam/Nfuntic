@@ -145,6 +145,20 @@ namespace nfun.Ti4
         public List<ConcreteType> AncestorTypes { get; } = new List<ConcreteType>();
         public List<ConcreteType> DescedantTypes { get; } = new List<ConcreteType>();
         public ConcreteType PreferedType { get; set; }
+
+        public void Validate()
+        {
+            if(!AncestorTypes.Any())
+                return;
+            if(!DescedantTypes.Any())
+                return;
+            var anc =  ConcreteType.GetLastCommonAncestor(AncestorTypes);
+            var des = ConcreteType.GetFirstCommonDescendantOrNull(DescedantTypes);
+            if(des==null)
+                throw new InvalidOperationException();
+            if(!des.CanBeImplicitlyConvertedTo(anc))
+                throw new InvalidOperationException();
+        }
     }
 
 

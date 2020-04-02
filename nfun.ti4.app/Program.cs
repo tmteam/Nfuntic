@@ -10,7 +10,6 @@ namespace nfun.ti4.app
     class Program
     {
         static void Main(string[] args) 
-
         {
             Trace3();
             Console.ReadLine();
@@ -47,7 +46,6 @@ namespace nfun.ti4.app
 
         private static void Trace3()
         {
-
             Console.WriteLine("x= 10i;   a = x*y + 10-x");
 
             var graph = new GraphBuilder();
@@ -64,11 +62,13 @@ namespace nfun.ti4.app
             graph.SetDef("a", 7);
             graph.PrintTrace();
             Console.WriteLine();
-            graph.Toposort();
+            var sorted = graph.Toposort();
             Console.WriteLine();
             graph.PrintTrace();
-
+            GraphBuilder.MergeUpwards(sorted);
+            Console.WriteLine();
+            Console.WriteLine("Merge up");
+            graph.PrintTrace();
         }
-
     }
 }

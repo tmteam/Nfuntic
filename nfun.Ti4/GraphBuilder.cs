@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace nfun.Ti4
 {
@@ -214,6 +215,74 @@ namespace nfun.Ti4
             }
         }
 
+        public static void MergeUpwards(SolvingNode[] toposortedNodes)
+        {
+            foreach (var node in toposortedNodes)
+            {
+                foreach (var ancestor in node.Ancestors)
+                {
+                    ancestor.NodeState = MergeUpwardsStates(node, ancestor);
+                }
+            }
+        }
+
+        private static object MergeUpwardsStates(SolvingNode descendant, SolvingNode ancestor)
+        {
+            if (ancestor.NodeState is ReferenceSolvingState referenceAnc)
+            {
+                referenceAnc.RefTo.NodeState = MergeUpwardsStates(descendant, referenceAnc.RefTo);
+                return referenceAnc;
+
+            }
+            if (descendant.NodeState is ConcreteType concreteDesc)
+            {
+                switch (ancestor.NodeState)
+                {
+                    case ConcreteType concreteAnc:
+                    {
+                        if (!concreteDesc.CanBeImplicitlyConvertedTo(concreteAnc))
+                            throw new InvalidOperationException();
+                        return ancestor.NodeState;
+                    }
+                    case ConstrainsSolvingState constrainsAnc:
+                    {
+                        var result = new ConstrainsSolvingState {PreferedType = constrainsAnc.PreferedType};
+                        result.AncestorTypes.AddRange(
+                            constrainsAnc.AncestorTypes);
+                        result.DescedantTypes.Add(
+                            ConcreteType.GetLastCommonAncestor(constrainsAnc.DescedantTypes.Append(concreteDesc)));
+                        result.Validate();
+                        return result;
+                    }
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            else if (descendant.NodeState is ConstrainsSolvingState constrainsDesc)
+            {
+                switch (ancestor.NodeState)
+                {
+                    case ConcreteType concreteAnc:
+                    {
+                        if(constrainsDesc.DescedantTypes.Any() 
+                           &&  ConcreteType.GetLastCommonAncestor(constrainsDesc.DescedantTypes)?.CanBeImplicitlyConvertedTo(concreteAnc) != true)
+                            throw new InvalidOperationException();
+                        return ancestor.NodeState;
+                    }
+                    case ConstrainsSolvingState constrainsAnc:
+                    {
+                        var result = new ConstrainsSolvingState { PreferedType = constrainsAnc.PreferedType };
+                        result.AncestorTypes.AddRange(constrainsAnc.AncestorTypes);
+                        result.DescedantTypes.Add(ConcreteType.GetLastCommonAncestor(constrainsAnc.DescedantTypes.Concat(constrainsDesc.DescedantTypes)));
+                        result.Validate();
+                        return result;
+                    }
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            throw new NotSupportedException();
+        }
 
 
         public void PrintTrace()
@@ -232,17 +301,17 @@ namespace nfun.Ti4
             }
         }
 
-        private static void MergeCycle(SolvingNode[] result)
+        private static void MergeCycle(SolvingNode[] cycleRoute)
         {
-            var main = result.FirstOrDefault(r => r.Type == SolvingNodeType.Variable) ?? result.First();
-            foreach (var current in result)
+            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Variable) ?? cycleRoute.First();
+            foreach (var current in cycleRoute)
             {
                 if(current==main)
                     continue;
                 
                 if (current.NodeState is ReferenceSolvingState refState)
                 {
-                    if (!result.Contains(refState.RefTo))
+                    if (!cycleRoute.Contains(refState.RefTo))
                         throw new NotImplementedException();
                 }
                 else
@@ -270,14 +339,16 @@ namespace nfun.Ti4
                 current.NodeState = new ReferenceSolvingState() { RefTo = main };
             }
 
-            var newAncestors = result
+            var newAncestors = cycleRoute
                 .SelectMany(r => r.Ancestors)
-                .Where(r => !result.Contains(r))
+                .Where(r => !cycleRoute.Contains(r))
                 .Distinct()
                 .ToList();
 
             main.Ancestors.Clear();
             main.Ancestors.AddRange(newAncestors);
         }
+
+
     }
 }
