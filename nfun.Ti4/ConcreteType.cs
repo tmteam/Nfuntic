@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace nfun.Ti4
 {
@@ -74,6 +72,28 @@ namespace nfun.Ti4
 
         private int Layer => (int)((int)Name >>5 & 0b1111);
 
+        public override string ToString() => Name.ToString();
+
+        public static ConcreteType Any { get; } = new ConcreteType(PrimitiveTypeName.Any);
+        public static ConcreteType Bool { get; } = new ConcreteType(PrimitiveTypeName.Bool);
+        public static ConcreteType Char { get; } = new ConcreteType(PrimitiveTypeName.Char);
+        public static ConcreteType Real { get; } = new ConcreteType(PrimitiveTypeName.Real);
+        public static ConcreteType I96 { get; } = new ConcreteType(PrimitiveTypeName.I96);
+        public static ConcreteType I64 { get; } = new ConcreteType(PrimitiveTypeName.I64);
+        public static ConcreteType I48 { get; } = new ConcreteType(PrimitiveTypeName.I48);
+        public static ConcreteType I32 { get; } = new ConcreteType(PrimitiveTypeName.I32);
+        public static ConcreteType I24 { get; } = new ConcreteType(PrimitiveTypeName.I24);
+        public static ConcreteType I16 { get; } = new ConcreteType(PrimitiveTypeName.I16);
+        public static ConcreteType U64 { get; } = new ConcreteType(PrimitiveTypeName.U64);
+        public static ConcreteType U48 { get; } = new ConcreteType(PrimitiveTypeName.U48);
+        public static ConcreteType U32 { get; } = new ConcreteType(PrimitiveTypeName.U32);
+        public static ConcreteType U24 { get; } = new ConcreteType(PrimitiveTypeName.U24);
+        public static ConcreteType U16 { get; } = new ConcreteType(PrimitiveTypeName.U16);
+        public static ConcreteType U12 { get; } = new ConcreteType(PrimitiveTypeName.U12);
+        public static ConcreteType U8 { get; } = new ConcreteType(PrimitiveTypeName.U8);
+
+       
+
         public bool CanBeImplicitlyConvertedTo(ConcreteType type)
         {
             if (type.Name == PrimitiveTypeName.Any)
@@ -91,32 +111,6 @@ namespace nfun.Ti4
                 return this.Name.HasFlag(PrimitiveTypeName._IsUint);
             return true;
         }
-
-        public override string ToString() => Name.ToString();
-
-        public static ConcreteType Any { get; } = new ConcreteType(PrimitiveTypeName.Any);
-        public static ConcreteType Bool { get; } = new ConcreteType(PrimitiveTypeName.Bool);
-        public static ConcreteType Char { get; } = new ConcreteType(PrimitiveTypeName.Char);
-        public static ConcreteType Real { get; } = new ConcreteType(PrimitiveTypeName.Real);
-
-        public static ConcreteType I96 { get; } = new ConcreteType(PrimitiveTypeName.I96);
-        public static ConcreteType I64 { get; } = new ConcreteType(PrimitiveTypeName.I64);
-        public static ConcreteType I48 { get; } = new ConcreteType(PrimitiveTypeName.I48);
-        public static ConcreteType I32 { get; } = new ConcreteType(PrimitiveTypeName.I32);
-        public static ConcreteType I24 { get; } = new ConcreteType(PrimitiveTypeName.I24);
-        public static ConcreteType I16 { get; } = new ConcreteType(PrimitiveTypeName.I16);
-        public static ConcreteType U64 { get; } = new ConcreteType(PrimitiveTypeName.U64);
-        public static ConcreteType U48 { get; } = new ConcreteType(PrimitiveTypeName.U48);
-        public static ConcreteType U32 { get; } = new ConcreteType(PrimitiveTypeName.U32);
-        public static ConcreteType U24 { get; } = new ConcreteType(PrimitiveTypeName.U24);
-        public static ConcreteType U16 { get; } = new ConcreteType(PrimitiveTypeName.U16);
-        public static ConcreteType U12 { get; } = new ConcreteType(PrimitiveTypeName.U12);
-        public static ConcreteType U8 { get; } = new ConcreteType(PrimitiveTypeName.U8);
-
-        public static ConcreteType GetLastCommonAncestor(IEnumerable<ConcreteType> types) 
-            => types.Aggregate((t1, t2) => t1.GetLastCommonAncestor(t2));
-        public static ConcreteType GetFirstCommonDescendantOrNull(IEnumerable<ConcreteType> types)
-            => types.Aggregate((t1, t2) => t1?.GetFirstCommonDescendantOrNull(t2));
 
         public ConcreteType GetFirstCommonDescendantOrNull(ConcreteType otherType)
         {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace nfun.Ti4
 {
@@ -35,7 +37,7 @@ namespace nfun.Ti4
         public object NodeState { get; set; }
 
         public string Name { get; }
-        public override string ToString() => Name + "." + NodeState?.GetType().Name;
+        public override string ToString() => Name + "." + NodeState;
 
         public void PrintToConsole()
         {
@@ -45,9 +47,9 @@ namespace nfun.Ti4
 
             if (NodeState is ConcreteType concrete)
                 Console.WriteLine($"{concrete.Name} ");
-            else if (NodeState is ReferenceSolvingState reference)
-                Console.WriteLine($"{reference.RefTo.Name} ");
-            else if (NodeState is ConstrainsSolvingState constrains)
+            else if (NodeState is RefTo reference)
+                Console.WriteLine($"{reference.Node.Name} ");
+            else if (NodeState is SolvingConstrains constrains)
             {
                 Console.Write($"[ ");
 
@@ -79,69 +81,45 @@ namespace nfun.Ti4
 
     }
 
-    public static class SolvingStateMergeFunctions
+    public class RefTo
     {
-        public static object Merge(ConcreteType a, ConcreteType b)
+        public RefTo(SolvingNode node)
         {
-            if (a.Name != b.Name)
-                throw new InvalidOperationException();
-            return a;
+            Node = node;
         }
-
-        public static object Merge(ConstrainsSolvingState limits, ConcreteType concrete)
-        {
-            if (!limits.AncestorTypes.TrueForAll(concrete.CanBeImplicitlyConvertedTo))
-                throw new InvalidOperationException();
-            if (!limits.DescedantTypes.TrueForAll(d => d.CanBeImplicitlyConvertedTo(concrete)))
-                throw new InvalidOperationException();
-            return concrete;
-        }
-
-        public static object Merge(ConstrainsSolvingState a, ConstrainsSolvingState b)
-        {
-            var result = new ConstrainsSolvingState();
-            ConcreteType ancestor = null;
-
-            if (a.AncestorTypes.Any() || b.AncestorTypes.Any())
-            {
-                ancestor = ConcreteType.GetLastCommonAncestor(a.AncestorTypes.Union(b.AncestorTypes));
-                result.AncestorTypes.Add(ancestor);
-            }
-
-            ConcreteType descendant = null;
-
-            if (a.DescedantTypes.Any() || b.DescedantTypes.Any())
-            {
-                descendant = ConcreteType.GetFirstCommonDescendantOrNull(a.DescedantTypes.Union(b.DescedantTypes));
-                if (descendant == null)
-                    throw new InvalidOperationException();
-                result.DescedantTypes.Add(descendant);
-            }
-
-            if (ancestor != null && descendant != null)
-                if (!descendant.CanBeImplicitlyConvertedTo(ancestor))
-                    throw new InvalidOperationException();
-            if (a.PreferedType != null)
-            {
-                if (b.PreferedType == null || a.PreferedType.Name == b.PreferedType.Name)
-                {
-                    result.PreferedType = a.PreferedType;
-                }
-            }
-            else
-                result.PreferedType = b.PreferedType;
-
-            return result;
-        }
+        public SolvingNode Node { get; }
+        public override string ToString() => "RefTo." + Node;
     }
 
-    public class ReferenceSolvingState
+    public class SolvingConstrains
     {
-        public SolvingNode RefTo { get; set; }
-    }
+        public bool Fits(ConcreteType concrete)
+        {
+            if (AncestorTypes.Any())
+            {
+                var anc = AncestorTypes.GetCommonDescendantOrNull();
+                if (anc == null)
+                    return false;
+                if (!concrete.CanBeImplicitlyConvertedTo(anc))
+                    return false;
+            }
 
-    public class ConstrainsSolvingState
-    {
+            if (DescedantTypes.Any())
+            {
+                var desc = DescedantTypes.GetCommonAncestor();
+                if (!desc.CanBeImplicitlyConvertedTo(concrete))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public ConcreteType CommonAncestor 
+            => AncestorTypes.Any() ? AncestorTypes.GetCommonDescendantOrNull() : null;
+
+        public ConcreteType CommonDescedant 
+            => DescedantTypes.Any() ? DescedantTypes.GetCommonAncestor() : null;
+
         public List<ConcreteType> AncestorTypes { get; } = new List<ConcreteType>();
         public List<ConcreteType> DescedantTypes { get; } = new List<ConcreteType>();
         public ConcreteType PreferedType { get; set; }
@@ -152,16 +130,13 @@ namespace nfun.Ti4
                 return;
             if(!DescedantTypes.Any())
                 return;
-            var anc =  ConcreteType.GetLastCommonAncestor(AncestorTypes);
-            var des = ConcreteType.GetFirstCommonDescendantOrNull(DescedantTypes);
-            if(des==null)
-                throw new InvalidOperationException();
-            if(!des.CanBeImplicitlyConvertedTo(anc))
+
+            var des = CommonDescedant?? throw new InvalidOperationException();
+            
+            if(!des.CanBeImplicitlyConvertedTo(CommonAncestor))
                 throw new InvalidOperationException();
         }
+
+        public override string ToString() => $"[{CommonDescedant}..{CommonAncestor}]";
     }
-
-
-
-
 }

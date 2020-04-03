@@ -11,7 +11,7 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
-            Trace3();
+            Trace2();
             Console.ReadLine();
         }
 
@@ -24,19 +24,8 @@ namespace nfun.ti4.app
             graph.SetIntConst(1, ConcreteType.U8);
             graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
-            graph.PrintTrace();
-            Console.WriteLine();
-            var sorted = graph.Toposort();
 
-            GraphBuilder.MergeUpwards(sorted);
-            Console.WriteLine();
-            Console.WriteLine("Merge up");
-            graph.PrintTrace();
-
-            GraphBuilder.MergeDownwards(sorted);
-            Console.WriteLine();
-            Console.WriteLine("Merge down");
-            graph.PrintTrace();
+            SolveTypes(graph);
         }
 
         private static void Trace2()
@@ -48,10 +37,8 @@ namespace nfun.ti4.app
             graph.SetIntConst(1, ConcreteType.U8);
             graph.SetArith(0, 1, 2);
             graph.SetDef("x", 2);
-            graph.PrintTrace();
-            graph.Toposort();
-            Console.WriteLine();
-            graph.PrintTrace();
+            SolveTypes(graph);
+
         }
 
         private static void Trace3()
@@ -70,6 +57,34 @@ namespace nfun.ti4.app
             graph.SetVar("x", 6);
             graph.SetArith(5,6,7);
             graph.SetDef("a", 7);
+          
+            SolveTypes(graph);
+
+        }
+
+        private static void Trace4()
+        {
+            Console.WriteLine("x= 10;   a = x*y + 10-x");
+
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetDef("x", 0);
+
+            graph.SetVar("x", 1);
+            graph.SetVar("y", 2);
+            graph.SetArith(1, 2, 3);
+            graph.SetIntConst(4, ConcreteType.U8);
+            graph.SetArith(3, 4, 5);
+            graph.SetVar("x", 6);
+            graph.SetArith(5, 6, 7);
+            graph.SetDef("a", 7);
+
+            SolveTypes(graph);
+
+        }
+
+        private static void SolveTypes(GraphBuilder graph)
+        {
             graph.PrintTrace();
             Console.WriteLine();
 
@@ -77,14 +92,20 @@ namespace nfun.ti4.app
             Console.WriteLine();
             graph.PrintTrace();
 
-            GraphBuilder.MergeUpwards(sorted);
+            SolvingFunctions.SetUpwardsLimits(sorted);
             Console.WriteLine();
-            Console.WriteLine("Merge up");
+            Console.WriteLine("Set up");
             graph.PrintTrace();
 
-            GraphBuilder.MergeDownwards(sorted);
+            SolvingFunctions.SetDownwardsLimits(sorted);
             Console.WriteLine();
-            Console.WriteLine("Merge down");
+            Console.WriteLine("Set down");
+            graph.PrintTrace();
+
+            SolvingFunctions.DestructiveMergeAll(sorted);
+
+            Console.WriteLine();
+            Console.WriteLine("DestructiveMerge");
             graph.PrintTrace();
         }
     }
