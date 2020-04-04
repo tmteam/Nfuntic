@@ -11,7 +11,7 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
-            Trace5();
+            Trace2_2();
             Console.ReadLine();
         }
 
@@ -28,6 +28,19 @@ namespace nfun.ti4.app
             SolveTypes(graph);
         }
 
+        private static void Trace1_2()
+        {
+            Console.WriteLine("y = x + 1");
+
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetArith2(0, 1, 2);
+            graph.SetDef("y", 2);
+
+            SolveTypes(graph);
+        }
+
         private static void Trace2()
         {
             Console.WriteLine("x = x + 1");
@@ -36,6 +49,19 @@ namespace nfun.ti4.app
             graph.SetVar("x", 0);
             graph.SetIntConst(1, ConcreteType.U8);
             graph.SetArith(0, 1, 2);
+            graph.SetDef("x", 2);
+            SolveTypes(graph);
+
+        }
+
+        private static void Trace2_2()
+        {
+            Console.WriteLine("x = x + 1");
+
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetArith2(0, 1, 2);
             graph.SetDef("x", 2);
             SolveTypes(graph);
 
@@ -62,6 +88,27 @@ namespace nfun.ti4.app
 
         }
 
+        private static void Trace3_2()
+        {
+            Console.WriteLine("x= 10i;   a = x*y + 10-x");
+
+            var graph = new GraphBuilder();
+            graph.SetConst(0, ConcreteType.I32);
+            graph.SetDef("x", 0);
+
+            graph.SetVar("x", 1);
+            graph.SetVar("y", 2);
+            graph.SetArith2(1, 2, 3);
+            graph.SetIntConst(4, ConcreteType.U8);
+            graph.SetArith2(3, 4, 5);
+            graph.SetVar("x", 6);
+            graph.SetArith2(5, 6, 7);
+            graph.SetDef("a", 7);
+
+            SolveTypes(graph);
+
+        }
+
         private static void Trace4()
         {
             Console.WriteLine("x= 10;   a = x*y + 10-x");
@@ -77,6 +124,27 @@ namespace nfun.ti4.app
             graph.SetArith(3, 4, 5);
             graph.SetVar("x", 6);
             graph.SetArith(5, 6, 7);
+            graph.SetDef("a", 7);
+
+            SolveTypes(graph);
+
+        }
+
+        private static void Trace4_2()
+        {
+            Console.WriteLine("x= 10;   a = x*y + 10-x");
+
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetDef("x", 0);
+
+            graph.SetVar("x", 1);
+            graph.SetVar("y", 2);
+            graph.SetArith2(1, 2, 3);
+            graph.SetIntConst(4, ConcreteType.U8);
+            graph.SetArith2(3, 4, 5);
+            graph.SetVar("x", 6);
+            graph.SetArith2(5, 6, 7);
             graph.SetDef("a", 7);
 
             SolveTypes(graph);
@@ -110,23 +178,52 @@ namespace nfun.ti4.app
             SolveTypes(graph);
 
         }
+
+        private static void Trace5_2()
+        {
+            Console.WriteLine("a = x*y + 10-x; b = r*x + 10-r");
+
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetVar("y", 1);
+            graph.SetArith2(0, 1, 2);
+            graph.SetIntConst(3, ConcreteType.U8);
+            graph.SetArith2(2, 3, 4);
+            graph.SetVar("x", 5);
+            graph.SetArith2(4, 5, 6);
+            graph.SetDef("a", 6);
+
+            graph.SetVar("r", 7);
+            graph.SetVar("x", 8);
+            graph.SetArith2(7, 8, 9);
+            graph.SetIntConst(10, ConcreteType.U8);
+            graph.SetArith2(9, 10, 11);
+            graph.SetVar("r", 12);
+            graph.SetArith2(11, 12, 13);
+            graph.SetDef("b", 13);
+
+            SolveTypes(graph);
+        }
         private static void SolveTypes(GraphBuilder graph)
         {
             graph.PrintTrace();
             Console.WriteLine();
 
             var sorted = graph.Toposort();
-            Console.WriteLine();
+
+            Console.WriteLine("Decycled:");
             graph.PrintTrace();
 
-            SolvingFunctions.SetUpwardsLimits(sorted);
             Console.WriteLine();
             Console.WriteLine("Set up");
+
+            SolvingFunctions.SetUpwardsLimits(sorted);
             graph.PrintTrace();
 
-            SolvingFunctions.SetDownwardsLimits(sorted);
             Console.WriteLine();
             Console.WriteLine("Set down");
+
+            SolvingFunctions.SetDownwardsLimits(sorted);
             graph.PrintTrace();
 
             SolvingFunctions.DestructiveMergeAll(sorted);

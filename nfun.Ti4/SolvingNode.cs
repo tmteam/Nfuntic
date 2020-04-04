@@ -18,7 +18,8 @@ namespace nfun.Ti4
     public enum SolvingNodeType
     {
         Named,
-        SyntaxNode
+        SyntaxNode,
+        TypeVariable
     }
 
     public class SolvingNode
@@ -48,7 +49,12 @@ namespace nfun.Ti4
             if (NodeState is ConcreteType concrete)
                 Console.WriteLine($"{concrete.Name} ");
             else if (NodeState is RefTo reference)
-                Console.WriteLine($"{reference.Node.Name} ");
+            {
+                if(Ancestors.Any())
+                    Console.WriteLine($"{reference.Node.Name} <={string.Join(",", Ancestors)}");
+                else
+                    Console.WriteLine($"{reference.Node.Name} ");
+            }
             else if (NodeState is SolvingConstrains constrains)
             {
                 Console.Write($"[ ");

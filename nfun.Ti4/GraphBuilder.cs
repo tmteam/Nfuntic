@@ -9,8 +9,10 @@ namespace nfun.Ti4
     public class GraphBuilder
     {
         private readonly Dictionary<string, SolvingNode> _variables = new Dictionary<string, SolvingNode>();
-        private readonly List<SolvingNode> _nodes = new List<SolvingNode>();
+        private readonly List<SolvingNode> _syntaxNodes = new List<SolvingNode>();
+        private readonly List<SolvingNode> typeVariables = new List<SolvingNode>();
 
+        private int varNodeId = 0;
         private SolvingNode GetNamedNode(string name)
         {
             if (_variables.TryGetValue(name, out var varnode))
@@ -29,17 +31,17 @@ namespace nfun.Ti4
 
         private SolvingNode GetOrCreateNode(int id)
         {
-            while (_nodes.Count <= id)
+            while (_syntaxNodes.Count <= id)
             {
-                _nodes.Add(null);
+                _syntaxNodes.Add(null);
             }
 
-            var alreadyExists = _nodes[id];
+            var alreadyExists = _syntaxNodes[id];
             if (alreadyExists != null)
                 return alreadyExists;
 
             var res = new SolvingNode("T" + id) {NodeState = new SolvingConstrains()};
-            _nodes[id] = res;
+            _syntaxNodes[id] = res;
             return res;
         }
 
@@ -129,6 +131,31 @@ namespace nfun.Ti4
             }
         }
 
+        public void SetArith2(int leftId, int rightId, int resultId)
+        {
+            var left   = GetOrCreateNode(leftId);
+            var right  = GetOrCreateNode(rightId);
+            var result = GetOrCreateNode(resultId);
+
+            var varNode = new SolvingNode("V" + varNodeId)
+            {
+                Type = SolvingNodeType.TypeVariable
+            };
+            var constrains = new SolvingConstrains();
+            varNode.NodeState = constrains;
+
+            constrains.DescedantTypes.Add(ConcreteType.U24);
+            constrains.AncestorTypes.Add(ConcreteType.Real);
+
+            varNode.BecomeReferenceFor(result);
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
+
+            typeVariables.Add(varNode);
+            
+            varNodeId++;
+        }
+
         public void SetIfElse( int[] conditions, int[] expressions, int elseId, int resultId)
         {
             var result = GetOrCreateNode(resultId);
@@ -182,15 +209,15 @@ namespace nfun.Ti4
 
         public void SetConst(int id, ConcreteType type)
         {
-            while (_nodes.Count <= id)
+            while (_syntaxNodes.Count <= id)
             {
-                _nodes.Add(null);
+                _syntaxNodes.Add(null);
             }
 
-            var alreadyExists = _nodes[id];
+            var alreadyExists = _syntaxNodes[id];
             if (alreadyExists != null)
                 throw new NotImplementedException();
-            _nodes[id] = new ConcreteTypeSolvingNode(type.Name, "T" + id);
+            _syntaxNodes[id] = new ConcreteTypeSolvingNode(type.Name, "T" + id);
         }
 
         public void SetIntConst(int id, ConcreteType desc)
@@ -227,7 +254,7 @@ namespace nfun.Ti4
             while (true)
             {
 
-                var allNodes = _nodes.Concat(_variables.Values).ToArray();
+                var allNodes = _syntaxNodes.Concat(_variables.Values).Concat(typeVariables).ToArray();
                 if (iteration > allNodes.Length * allNodes.Length)
                     throw new InvalidOperationException();
                 iteration++;
@@ -244,6 +271,8 @@ namespace nfun.Ti4
                     var edges = node.Ancestors.Select(a => a.GraphId);
                     if (node.NodeState is RefTo reference)
                     {
+                        //todo 2side reference
+                        todo
                         graph[i] = edges.Append(reference.Node.GraphId).ToArray();
                     }
                     else
@@ -300,22 +329,22 @@ namespace nfun.Ti4
             }
         }
 
-        
-
 
         public void PrintTrace()
         {
-            foreach (var solvingNode in _nodes)
+            foreach (var solvingNode in _syntaxNodes)
             {
-                if (solvingNode == null)
-                    continue;
-
-                solvingNode.PrintToConsole();
+                solvingNode?.PrintToConsole();
             }
 
             foreach (var solvingNode in _variables)
             {
                 solvingNode.Value.PrintToConsole();
+            }
+
+            foreach (var typeVariable in typeVariables)
+            {
+                typeVariable.PrintToConsole();
             }
         }
 

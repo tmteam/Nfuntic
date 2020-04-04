@@ -32,7 +32,10 @@ namespace nfun.Ti4
 
             if (a.AncestorTypes.Any() || b.AncestorTypes.Any())
             {
-                ancestor = a.AncestorTypes.Union(b.AncestorTypes).GetCommonAncestor();
+                ancestor = a.AncestorTypes.Union(b.AncestorTypes).GetCommonDescendantOrNull();
+                if (ancestor == null)
+                    throw new InvalidOperationException();
+
                 result.AncestorTypes.Add(ancestor);
             }
 
@@ -40,9 +43,7 @@ namespace nfun.Ti4
 
             if (a.DescedantTypes.Any() || b.DescedantTypes.Any())
             {
-                descendant = a.DescedantTypes.Union(b.DescedantTypes).GetCommonDescendantOrNull();
-                if (descendant == null)
-                    throw new InvalidOperationException();
+                descendant = a.DescedantTypes.Union(b.DescedantTypes).GetCommonAncestor();
                 result.DescedantTypes.Add(descendant);
             }
 
@@ -60,6 +61,7 @@ namespace nfun.Ti4
                 result.PreferedType = b.PreferedType;
 
             result.IsComparable = a.IsComparable || b.IsComparable;
+            result.Validate();
             return result;
         }
         public static ConcreteType GetCommonAncestor(this IEnumerable<ConcreteType> types)
@@ -377,6 +379,58 @@ namespace nfun.Ti4
                     return GetNonReference(result);
             }
             return result;
+        }
+
+        public static void BecomeAncestorFor(this SolvingNode ancestor, SolvingNode descendant)
+        {
+            descendant.Ancestors.Add(ancestor);
+        }
+        public static void BecomeReferenceFor(this SolvingNode referencedNode, SolvingNode otherNode)
+        {
+            if (otherNode.NodeState is RefTo refTo)
+            {
+                otherNode.NodeState = new RefTo(referencedNode);
+                BecomeReferenceFor(referencedNode, refTo.Node);
+                return;
+            }
+
+            if (referencedNode.NodeState is ConcreteType refConcrete)
+            {
+                switch (otherNode.NodeState)
+                {
+                    case ConcreteType c when !c.Equals(refConcrete):
+                        throw new InvalidOperationException();
+                    case ConcreteType _: 
+                        return;
+                    case SolvingConstrains constrains when constrains.Fits(refConcrete):
+                        otherNode.NodeState = refConcrete;
+                        return;
+                    case SolvingConstrains _: 
+                        throw new InvalidOperationException();
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+
+            if (referencedNode.NodeState is SolvingConstrains refConstrains)
+            {
+                switch (otherNode.NodeState)
+                {
+                    case ConcreteType concrete when refConstrains.Fits(concrete):
+                        referencedNode.NodeState = concrete;
+                        return;
+                    case ConcreteType _: 
+                        throw  new InvalidOperationException();
+                    case SolvingConstrains constrains:
+                        referencedNode.NodeState = Merge(constrains, refConstrains);
+                        otherNode.NodeState = new RefTo(referencedNode);
+                        return;
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+
+            throw new NotSupportedException();
         }
     }
 }
