@@ -91,8 +91,8 @@ namespace nfun.Ti4
         public static ConcreteType U16 { get; } = new ConcreteType(PrimitiveTypeName.U16);
         public static ConcreteType U12 { get; } = new ConcreteType(PrimitiveTypeName.U12);
         public static ConcreteType U8 { get; } = new ConcreteType(PrimitiveTypeName.U8);
+        public bool IsComparable => IsNumeric || Name == PrimitiveTypeName.Char;
 
-       
 
         public bool CanBeImplicitlyConvertedTo(ConcreteType type)
         {
@@ -156,6 +156,11 @@ namespace nfun.Ti4
             }
 
             throw new InvalidOperationException();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj as ConcreteType)?.Name == Name;
         }
     }
 }

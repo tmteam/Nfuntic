@@ -45,14 +45,12 @@ namespace nfun.Ti4
 
         public void SetVar(string name, int node)
         {
-            var varnode = GetNamedNode(name);
-            varnode.Type = SolvingNodeType.Named;
+            var namedNode = GetNamedNode(name);
+            namedNode.Type = SolvingNodeType.Named;
             var idNode = GetOrCreateNode(node);
             if (idNode.NodeState is SolvingConstrains constrains)
             {
-                varnode.Ancestors.Add(idNode);
-                //
-                //idNode.Ancestors.Add(varnode);
+                namedNode.Ancestors.Add(idNode);
             }
             else
             {
@@ -61,6 +59,38 @@ namespace nfun.Ti4
             }
         }
 
+        public void SetBitShift(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            var right = GetOrCreateNode(rightId);
+            var result = GetOrCreateNode(resultId);
+
+            if (right.NodeState is SolvingConstrains constrainsR)
+                right.NodeState = SolvingFunctions.Merge(constrainsR, ConcreteType.I32);
+
+            
+            if (result.NodeState is SolvingConstrains constrains)
+            {
+                left.Ancestors.Add(result);
+                right.Ancestors.Add(result);
+                constrains.DescedantTypes.Add(ConcreteType.U24);
+                constrains.AncestorTypes.Add(ConcreteType.Real);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            if (left.NodeState is SolvingConstrains lconstrains)
+            {
+                lconstrains.DescedantTypes.Add(ConcreteType.U24);
+                lconstrains.AncestorTypes.Add(ConcreteType.Real);
+            }
+            else if (!left.IsSolved)
+            {
+                throw new NotImplementedException();
+            }
+        }
         public void SetArith(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
@@ -97,6 +127,57 @@ namespace nfun.Ti4
             {
                 throw new NotImplementedException();
             }
+        }
+
+        public void SetIfElse( int[] conditions, int[] expressions, int elseId, int resultId)
+        {
+            var result = GetOrCreateNode(resultId);
+            throw new NotImplementedException();
+        }
+
+        public void SetEquality(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            var right = GetOrCreateNode(rightId);
+            var result = GetOrCreateNode(resultId);
+
+            result.NodeState = ConcreteType.Bool;
+            if(!SolvingFunctions.SetEqual(left, right))
+                throw new InvalidOperationException();
+        }
+
+        public void SetComparable(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            var right = GetOrCreateNode(rightId);
+            var result = GetOrCreateNode(resultId);
+
+            result.NodeState = ConcreteType.Bool;
+
+            var leftState = left.GetNonReference().NodeState;
+            if (leftState is SolvingConstrains constrains)
+            {
+                constrains.IsComparable = true;
+            }
+            else if (leftState is ConcreteType concrete)
+            {
+                if(!concrete.IsComparable)
+                    throw new InvalidOperationException();
+            }
+
+            var rightState = right.GetNonReference().NodeState;
+            if (rightState is SolvingConstrains constrainsR)
+            {
+                constrainsR.IsComparable = true;
+            }
+            else if (rightState is ConcreteType concreteR)
+            {
+                if (!concreteR.IsComparable)
+                    throw new InvalidOperationException();
+            }
+
+            if (!SolvingFunctions.SetEqual(left, right))
+                throw new InvalidOperationException();
         }
 
         public void SetConst(int id, ConcreteType type)

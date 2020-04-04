@@ -123,6 +123,7 @@ namespace nfun.Ti4
         public List<ConcreteType> AncestorTypes { get; } = new List<ConcreteType>();
         public List<ConcreteType> DescedantTypes { get; } = new List<ConcreteType>();
         public ConcreteType PreferedType { get; set; }
+        public bool IsComparable { get; set; }
 
         public void Validate()
         {

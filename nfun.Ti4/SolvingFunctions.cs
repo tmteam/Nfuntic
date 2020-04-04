@@ -19,6 +19,9 @@ namespace nfun.Ti4
                 throw new InvalidOperationException();
             if (!limits.DescedantTypes.TrueForAll(d => d.CanBeImplicitlyConvertedTo(concrete)))
                 throw new InvalidOperationException();
+            if(limits.IsComparable && !concrete.IsComparable)
+                throw new InvalidOperationException();
+
             return concrete;
         }
 
@@ -56,6 +59,7 @@ namespace nfun.Ti4
             else
                 result.PreferedType = b.PreferedType;
 
+            result.IsComparable = a.IsComparable || b.IsComparable;
             return result;
         }
         public static ConcreteType GetCommonAncestor(this IEnumerable<ConcreteType> types)
@@ -323,7 +327,47 @@ namespace nfun.Ti4
             return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
         }
 
-        private static SolvingNode GetNonReference(SolvingNode node)
+        public static bool SetEqual(SolvingNode a, SolvingNode b)
+        {
+            var aOrigin = GetNonReference(a);
+            var bOrigin = GetNonReference(b);
+            if (aOrigin != a || bOrigin != b)
+                return SetEqual(aOrigin, bOrigin);
+
+            if (a.NodeState is ConcreteType aConcrete)
+            {
+                if (b.NodeState is ConcreteType bConcrete)
+                    return aConcrete.Equals(bConcrete);
+                if (b.NodeState is SolvingConstrains solvingB)
+                    return SetEqual(b, solvingB, aConcrete);
+                throw  new InvalidOperationException();
+            }
+            if (a.NodeState is SolvingConstrains solvingA)
+            {
+                if (b.NodeState is ConcreteType bConcrete)
+                    return SetEqual(a, solvingA, bConcrete);
+                if (b.NodeState is SolvingConstrains solvingB)
+                {
+                    a.NodeState = Merge(solvingA, solvingB);
+                    b.NodeState = new RefTo(a);
+                    return true;
+                }
+                throw new InvalidOperationException();
+
+            }
+            throw new InvalidOperationException();
+
+        }
+
+        private static bool SetEqual(SolvingNode b, SolvingConstrains solvingB, ConcreteType aConcrete)
+        {
+            if (!solvingB.Fits(aConcrete))
+                return false;
+            b.NodeState = aConcrete;
+            return true;
+        }
+
+        public static SolvingNode GetNonReference(this SolvingNode node)
         {
             var result = node;
             if (result.NodeState is RefTo referenceA)
