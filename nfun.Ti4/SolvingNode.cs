@@ -17,8 +17,8 @@ namespace nfun.Ti4
 
     public enum SolvingNodeType
     {
-        Variable,
-        Node
+        Named,
+        SyntaxNode
     }
 
     public class SolvingNode
@@ -30,7 +30,7 @@ namespace nfun.Ti4
             Name = name;
         }
 
-        public SolvingNodeType Type { get; set; } = SolvingNodeType.Node;
+        public SolvingNodeType Type { get; set; } = SolvingNodeType.SyntaxNode;
         public List<SolvingNode> Ancestors { get; } = new List<SolvingNode>();
 
         public bool IsSolved => NodeState is ConcreteType;

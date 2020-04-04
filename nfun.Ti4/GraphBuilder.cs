@@ -8,17 +8,21 @@ namespace nfun.Ti4
 {
     public class GraphBuilder
     {
-        private Dictionary<string, SolvingNode> _variables = new Dictionary<string, SolvingNode>();
-        private List<SolvingNode> _nodes = new List<SolvingNode>();
+        private readonly Dictionary<string, SolvingNode> _variables = new Dictionary<string, SolvingNode>();
+        private readonly List<SolvingNode> _nodes = new List<SolvingNode>();
 
-        private SolvingNode GetVarNode(string name)
+        private SolvingNode GetNamedNode(string name)
         {
             if (_variables.TryGetValue(name, out var varnode))
             {
                 return varnode;
             }
 
-            var ans = new SolvingNode("T" + name) {NodeState = new SolvingConstrains()};
+            var ans = new SolvingNode("T" + name)
+            {
+                NodeState = new SolvingConstrains(),
+                Type =  SolvingNodeType.Named,
+            };
             _variables.Add(name, ans);
             return ans;
         }
@@ -41,8 +45,8 @@ namespace nfun.Ti4
 
         public void SetVar(string name, int node)
         {
-            var varnode = GetVarNode(name);
-            varnode.Type = SolvingNodeType.Variable;
+            var varnode = GetNamedNode(name);
+            varnode.Type = SolvingNodeType.Named;
             var idNode = GetOrCreateNode(node);
             if (idNode.NodeState is SolvingConstrains constrains)
             {
@@ -126,7 +130,7 @@ namespace nfun.Ti4
         public void SetDef(string name, int rightNodeId)
         {
             var exprNode = GetOrCreateNode(rightNodeId);
-            var defNode = GetVarNode(name);
+            var defNode = GetNamedNode(name);
 
             if (exprNode.IsSolved)
                 defNode.NodeState = exprNode.NodeState;
@@ -236,7 +240,7 @@ namespace nfun.Ti4
 
         private static void MergeCycle(SolvingNode[] cycleRoute)
         {
-            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Variable) ?? cycleRoute.First();
+            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) ?? cycleRoute.First();
             foreach (var current in cycleRoute)
             {
                 if(current==main)

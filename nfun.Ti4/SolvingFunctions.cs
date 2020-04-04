@@ -70,7 +70,7 @@ namespace nfun.Ti4
                 var node = toposortedNodes[i];
                 foreach (var nodeAncestor in node.Ancestors)
                 {
-                    node.NodeState = SetDownwardsLimitis(node, nodeAncestor);
+                    node.NodeState = SetDownwardsLimits(node, nodeAncestor);
                 }
             }
         }
@@ -169,11 +169,11 @@ namespace nfun.Ti4
             throw new NotSupportedException();
         }
 
-        private static object SetDownwardsLimitis(SolvingNode descendant, SolvingNode ancestor)
+        private static object SetDownwardsLimits(SolvingNode descendant, SolvingNode ancestor)
         {
             if (descendant.NodeState is RefTo referenceDesc)
             {
-                referenceDesc.Node.NodeState = SetDownwardsLimitis(descendant, referenceDesc.Node);
+                referenceDesc.Node.NodeState = SetDownwardsLimits(descendant, referenceDesc.Node);
                 return referenceDesc;
             }
 
@@ -220,6 +220,7 @@ namespace nfun.Ti4
                 }
             }
         }
+
         public static bool TryMergeDestructive(SolvingNode ancestorNode, SolvingNode descendantNode)
         {
             Console.WriteLine($"-dm: {ancestorNode} -> {descendantNode}");
@@ -287,6 +288,41 @@ namespace nfun.Ti4
             throw new InvalidOperationException();
         }
 
+        public static FinalizationResults FinalizeUp(SolvingNode[] toposortedNodes)
+        {
+            var typeVariables = new List<SolvingNode>();
+            var syntaxNodes = new SolvingNode[toposortedNodes.Length];
+            var namedNodes = new List<SolvingNode>();
+            
+            foreach (var node in toposortedNodes)
+            {
+                //if(node.Ancestors.Any())
+                //    throw new InvalidOperationException();
+
+                if (node.NodeState is RefTo refTo)
+                {
+                    var originalOne = GetNonReference(node);
+                    node.NodeState = new RefTo(originalOne);
+
+                    if (originalOne.NodeState is ConcreteType concrete)
+                    {
+                        node.NodeState = concrete;
+                    }
+                }
+                else if (node.NodeState is SolvingConstrains constrains)
+                {
+                    typeVariables.Add(node);
+                }
+
+                if (node.Type == SolvingNodeType.Named)
+                    namedNodes.Add(node);
+                else if (node.Type == SolvingNodeType.SyntaxNode)
+                    syntaxNodes[int.Parse(node.Name.Substring(1))] = node;
+            }
+
+            return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
+        }
+
         private static SolvingNode GetNonReference(SolvingNode node)
         {
             var result = node;
@@ -294,7 +330,7 @@ namespace nfun.Ti4
             {
                 result = referenceA.Node;
                 if (result.NodeState is RefTo)
-                    throw new InvalidOperationException();
+                    return GetNonReference(result);
             }
             return result;
         }

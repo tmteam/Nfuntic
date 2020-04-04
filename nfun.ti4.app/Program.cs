@@ -11,7 +11,7 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
-            Trace3();
+            Trace5();
             Console.ReadLine();
         }
 
@@ -83,6 +83,33 @@ namespace nfun.ti4.app
 
         }
 
+        private static void Trace5()
+        {
+            Console.WriteLine("a = x*y + 10-x; b = r*x + 10-r");
+
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetVar("y", 1);
+            graph.SetArith(0, 1, 2);
+            graph.SetIntConst(3, ConcreteType.U8);
+            graph.SetArith(2, 3, 4);
+            graph.SetVar("x", 5);
+            graph.SetArith(4, 5, 6);
+            graph.SetDef("a", 6);
+
+            graph.SetVar("r", 7);
+            graph.SetVar("x", 8);
+            graph.SetArith(7, 8, 9);
+            graph.SetIntConst(10, ConcreteType.U8);
+            graph.SetArith(9, 10, 11);
+            graph.SetVar("r", 12);
+            graph.SetArith(11, 12, 13);
+            graph.SetDef("b", 13);
+
+
+            SolveTypes(graph);
+
+        }
         private static void SolveTypes(GraphBuilder graph)
         {
             graph.PrintTrace();
@@ -102,11 +129,27 @@ namespace nfun.ti4.app
             Console.WriteLine("Set down");
             graph.PrintTrace();
 
-            SolvingFunctions.DestructiveMergeAll(sorted.ToArray());
+            SolvingFunctions.DestructiveMergeAll(sorted);
 
             Console.WriteLine();
-            Console.WriteLine("DestructiveMerge");
+            Console.WriteLine("Destruct Down");
             graph.PrintTrace();
+
+            Console.WriteLine("Finalize");
+            var results = SolvingFunctions.FinalizeUp(sorted);
+            
+            Console.WriteLine($"Type variables: {results.TypeVariables.Length}");
+            foreach (var typeVariable in results.TypeVariables)
+                Console.WriteLine("    "+ typeVariable);
+
+            Console.WriteLine($"Syntax node types: ");
+            foreach (var syntaxNode in results.SyntaxNodes.Where(s=>s!=null))
+                Console.WriteLine("    " + syntaxNode);
+
+            Console.WriteLine($"Named node types: ");
+            foreach (var namedNode in results.NamedNodes)
+                Console.WriteLine("    " + namedNode);
+
         }
     }
 }
