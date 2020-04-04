@@ -11,7 +11,7 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
-            Trace2();
+            Trace3();
             Console.ReadLine();
         }
 
@@ -102,7 +102,7 @@ namespace nfun.ti4.app
             Console.WriteLine("Set down");
             graph.PrintTrace();
 
-            SolvingFunctions.DestructiveMergeAll(sorted);
+            SolvingFunctions.DestructiveMergeAll(sorted.ToArray());
 
             Console.WriteLine();
             Console.WriteLine("DestructiveMerge");

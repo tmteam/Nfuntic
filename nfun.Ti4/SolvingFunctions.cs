@@ -89,6 +89,7 @@ namespace nfun.Ti4
 
         private static object SetUpwardsLimits(SolvingNode descendant, SolvingNode ancestor)
         {
+            #region handle refto cases. 
             if (ancestor == descendant)
                 return ancestor.NodeState;
 
@@ -115,6 +116,7 @@ namespace nfun.Ti4
                 ancestor.NodeState = SetUpwardsLimits(referenceDesc.Node, ancestor);
                 return ancestor.NodeState;
             }
+            #endregion
 
             if (descendant.NodeState is ConcreteType concreteDesc)
             {
@@ -212,7 +214,7 @@ namespace nfun.Ti4
             for (int i = toposorteNodes.Length - 1; i >= 0; i--)
             {
                 var node = toposorteNodes[i];
-                foreach (var ancestor in node.Ancestors)
+                foreach (var ancestor in node.Ancestors.ToArray())
                 {
                     TryMergeDestructive(ancestor, node);
                 }
@@ -261,8 +263,12 @@ namespace nfun.Ti4
                         result.AncestorTypes.Add(ancestorType);
                     }
                     Console.WriteLine($"    {nonRefAncestor} + {nonRefDescendant} = {result}.   {nonRefDescendant.Name}={nonRefAncestor.Name}");
+                    
                     nonRefAncestor.NodeState = result;
                     nonRefDescendant.NodeState = descendantNode.NodeState= new RefTo(nonRefAncestor);
+                    nonRefDescendant.Ancestors.Remove(nonRefAncestor);
+                    descendantNode.Ancestors.Remove(nonRefAncestor);
+
                     return true;
                 }
                 else if (nonRefDescendant.NodeState is ConcreteType concreteDesc)
