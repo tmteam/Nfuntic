@@ -79,8 +79,9 @@ namespace nfun.Ti4
         {
             foreach (var node in toposortedNodes)
             {
-                foreach (var ancestor in node.Ancestors)
+                for (var index = 0; index < node.Ancestors.Count; index++)
                 {
+                    var ancestor = node.Ancestors[index];
                     ancestor.NodeState = SetUpwardsLimits(node, ancestor);
                 }
             }
@@ -88,12 +89,33 @@ namespace nfun.Ti4
 
         private static object SetUpwardsLimits(SolvingNode descendant, SolvingNode ancestor)
         {
+            if (ancestor == descendant)
+                return ancestor.NodeState;
+
             if (ancestor.NodeState is RefTo referenceAnc)
             {
+                if (descendant.Ancestors.Contains(ancestor))
+                {
+                    descendant.Ancestors.Remove(ancestor);
+                    if(descendant!= referenceAnc.Node)
+                        descendant.Ancestors.Add(referenceAnc.Node);
+                }
                 referenceAnc.Node.NodeState = SetUpwardsLimits(descendant, referenceAnc.Node);
                 return referenceAnc;
-
             }
+
+            if (descendant.NodeState is RefTo referenceDesc)
+            {
+                if (descendant.Ancestors.Contains(ancestor))
+                {
+                    descendant.Ancestors.Remove(ancestor);
+                    if(referenceDesc.Node!= ancestor)
+                        referenceDesc.Node.Ancestors.Add(ancestor);
+                }
+                ancestor.NodeState = SetUpwardsLimits(referenceDesc.Node, ancestor);
+                return ancestor.NodeState;
+            }
+
             if (descendant.NodeState is ConcreteType concreteDesc)
             {
                 switch (ancestor.NodeState)
@@ -118,7 +140,8 @@ namespace nfun.Ti4
                         throw new NotSupportedException();
                 }
             }
-            else if (descendant.NodeState is SolvingConstrains constrainsDesc)
+
+            if (descendant.NodeState is SolvingConstrains constrainsDesc)
             {
                 switch (ancestor.NodeState)
                 {
