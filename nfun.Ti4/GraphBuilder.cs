@@ -386,5 +386,52 @@ namespace nfun.Ti4
             main.Ancestors.Clear();
             main.Ancestors.AddRange(newAncestors);
         }
+
+
+        public FinalizationResults SolveTypes()
+        {
+            PrintTrace();
+            Console.WriteLine();
+
+            var sorted = Toposort();
+
+            Console.WriteLine("Decycled:");
+            PrintTrace();
+
+            Console.WriteLine();
+            Console.WriteLine("Set up");
+
+            SolvingFunctions.SetUpwardsLimits(sorted);
+            PrintTrace();
+
+            Console.WriteLine();
+            Console.WriteLine("Set down");
+
+            SolvingFunctions.SetDownwardsLimits(sorted);
+            PrintTrace();
+
+            SolvingFunctions.Destruction(sorted);
+
+            Console.WriteLine();
+            Console.WriteLine("Destruct Down");
+            PrintTrace();
+
+            Console.WriteLine("Finalize");
+            var results = SolvingFunctions.FinalizeUp(sorted);
+
+            Console.WriteLine($"Type variables: {results.TypeVariables.Length}");
+            foreach (var typeVariable in results.TypeVariables)
+                Console.WriteLine("    " + typeVariable);
+
+            Console.WriteLine($"Syntax node types: ");
+            foreach (var syntaxNode in results.SyntaxNodes.Where(s => s != null))
+                Console.WriteLine("    " + syntaxNode);
+
+            Console.WriteLine($"Named node types: ");
+            foreach (var namedNode in results.NamedNodes)
+                Console.WriteLine("    " + namedNode);
+
+            return results;
+        }
     }
 }
