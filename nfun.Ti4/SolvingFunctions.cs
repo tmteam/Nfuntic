@@ -164,7 +164,8 @@ namespace nfun.Ti4
                     {
                         var result = new SolvingConstrains { PreferedType = constrainsAnc.PreferedType };
                         result.AncestorTypes.AddRange(constrainsAnc.AncestorTypes);
-                        result.DescedantTypes.Add(constrainsAnc.DescedantTypes.Concat(constrainsDesc.DescedantTypes).GetCommonAncestor());
+                        if(constrainsAnc.DescedantTypes.Any() || constrainsDesc.DescedantTypes.Any())
+                            result.DescedantTypes.Add(constrainsAnc.DescedantTypes.Concat(constrainsDesc.DescedantTypes).GetCommonAncestor());
                         result.Validate();
                         return result;
                     }
@@ -215,7 +216,7 @@ namespace nfun.Ti4
 
         }
 
-        public static void DestructiveMergeAll(SolvingNode[] toposorteNodes)
+        public static void Destruction(SolvingNode[] toposorteNodes)
         {
             for (int i = toposorteNodes.Length - 1; i >= 0; i--)
             {
@@ -237,7 +238,7 @@ namespace nfun.Ti4
                 Console.WriteLine($"Same deref. Skip");
                 return false;
             }
-        
+            
             if (nonRefAncestor.NodeState is ConcreteType concreteAnc)
             {
                 if (nonRefDescendant.NodeState is SolvingConstrains constrainsDesc)

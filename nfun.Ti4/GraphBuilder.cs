@@ -29,6 +29,41 @@ namespace nfun.Ti4
             return ans;
         }
 
+        private SolvingNode GetOrCreateConcrete(int id, ConcreteType type)
+        {
+            while (_syntaxNodes.Count <= id)
+            {
+                _syntaxNodes.Add(null);
+            }
+
+            var alreadyExists = _syntaxNodes[id];
+            if (alreadyExists != null)
+            {
+                if (alreadyExists.NodeState is ConcreteType concrete)
+                {
+                    if(concrete!=type)
+                        throw new InvalidOperationException();
+                    return alreadyExists;
+                }
+                /*
+            Может быть это не нужно     
+            else if (alreadyExists.NodeState is SolvingConstrains constrains)
+                {
+                    if(!constrains.Fits(concrete))
+                        throw new InvalidOperationException();
+                    constrains
+                }
+                return alreadyExists;*/
+                throw new NotImplementedException();
+
+            }
+            else
+            {
+                var res = new SolvingNode(id.ToString()) { NodeState = type};
+                _syntaxNodes[id] = res;
+                return res;
+            }
+        }
         private SolvingNode GetOrCreateNode(int id)
         {
             while (_syntaxNodes.Count <= id)
@@ -64,35 +99,15 @@ namespace nfun.Ti4
         public void SetBitShift(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
+            var right = GetOrCreateConcrete(rightId, ConcreteType.I32);
             var result = GetOrCreateNode(resultId);
 
-            if (right.NodeState is SolvingConstrains constrainsR)
-                right.NodeState = SolvingFunctions.Merge(constrainsR, ConcreteType.I32);
+            var typeVar = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.I96));
 
-            
-            if (result.NodeState is SolvingConstrains constrains)
-            {
-                left.Ancestors.Add(result);
-                right.Ancestors.Add(result);
-                constrains.DescedantTypes.Add(ConcreteType.U24);
-                constrains.AncestorTypes.Add(ConcreteType.Real);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-
-            if (left.NodeState is SolvingConstrains lconstrains)
-            {
-                lconstrains.DescedantTypes.Add(ConcreteType.U24);
-                lconstrains.AncestorTypes.Add(ConcreteType.Real);
-            }
-            else if (!left.IsSolved)
-            {
-                throw new NotImplementedException();
-            }
+            typeVar.BecomeReferenceFor(result);
+            typeVar.BecomeAncestorFor(left);
         }
+
         public void SetArith(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
@@ -137,88 +152,55 @@ namespace nfun.Ti4
             var right  = GetOrCreateNode(rightId);
             var result = GetOrCreateNode(resultId);
 
-            var varNode = new SolvingNode("V" + varNodeId)
-            {
-                Type = SolvingNodeType.TypeVariable
-            };
-            var constrains = new SolvingConstrains();
-            varNode.NodeState = constrains;
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.Real));    
 
-            constrains.DescedantTypes.Add(ConcreteType.U24);
-            constrains.AncestorTypes.Add(ConcreteType.Real);
+            result.BecomeReferenceFor(varNode);
 
-            varNode.BecomeReferenceFor(result);
             varNode.BecomeAncestorFor(left);
             varNode.BecomeAncestorFor(right);
 
-            typeVariables.Add(varNode);
-            
-            varNodeId++;
         }
 
-        public void SetIfElse( int[] conditions, int[] expressions, int elseId, int resultId)
+        
+        public void SetIfElse( int[] conditions, int[] expressions, int resultId)
         {
             var result = GetOrCreateNode(resultId);
-            throw new NotImplementedException();
+            foreach (var exprId in expressions)
+            {
+                var expr = GetOrCreateNode(exprId);
+                result.BecomeReferenceFor(expr);
+            }
+
+            foreach (var condId in conditions)
+            {
+                GetOrCreateConcrete(condId, ConcreteType.Bool);
+            }
         }
 
         public void SetEquality(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
             var right = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
+            GetOrCreateConcrete(resultId, ConcreteType.Bool);
 
-            result.NodeState = ConcreteType.Bool;
-            if(!SolvingFunctions.SetEqual(left, right))
-                throw new InvalidOperationException();
+            var varNode = CreateVarType();
+            varNode.BecomeReferenceFor(left);
+            varNode.BecomeReferenceFor(right);
         }
 
         public void SetComparable(int leftId, int rightId, int resultId)
         {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
+            var left   = GetOrCreateNode(leftId);
+            var right  = GetOrCreateNode(rightId);
+            GetOrCreateConcrete(resultId, ConcreteType.Bool);
 
-            result.NodeState = ConcreteType.Bool;
-
-            var leftState = left.GetNonReference().NodeState;
-            if (leftState is SolvingConstrains constrains)
-            {
-                constrains.IsComparable = true;
-            }
-            else if (leftState is ConcreteType concrete)
-            {
-                if(!concrete.IsComparable)
-                    throw new InvalidOperationException();
-            }
-
-            var rightState = right.GetNonReference().NodeState;
-            if (rightState is SolvingConstrains constrainsR)
-            {
-                constrainsR.IsComparable = true;
-            }
-            else if (rightState is ConcreteType concreteR)
-            {
-                if (!concreteR.IsComparable)
-                    throw new InvalidOperationException();
-            }
-
-            if (!SolvingFunctions.SetEqual(left, right))
-                throw new InvalidOperationException();
+            var varNode = CreateVarType(new SolvingConstrains(){ IsComparable = true});
+            varNode.BecomeReferenceFor(left);
+            varNode.BecomeReferenceFor(right);
         }
 
-        public void SetConst(int id, ConcreteType type)
-        {
-            while (_syntaxNodes.Count <= id)
-            {
-                _syntaxNodes.Add(null);
-            }
-
-            var alreadyExists = _syntaxNodes[id];
-            if (alreadyExists != null)
-                throw new NotImplementedException();
-            _syntaxNodes[id] = new ConcreteTypeSolvingNode(type.Name, "T" + id);
-        }
+        public void SetConst(int id, ConcreteType type) 
+            => GetOrCreateConcrete(id, ConcreteType.Bool);
 
         public void SetIntConst(int id, ConcreteType desc)
         {
@@ -239,13 +221,11 @@ namespace nfun.Ti4
         {
             var exprNode = GetOrCreateNode(rightNodeId);
             var defNode = GetNamedNode(name);
-
+                
             if (exprNode.IsSolved)
-                defNode.NodeState = exprNode.NodeState;
-            else if (defNode.NodeState is SolvingConstrains constrains)
-                exprNode.Ancestors.Add(defNode);
+                defNode.BecomeReferenceFor(exprNode);
             else
-                throw new NotImplementedException();
+                defNode.BecomeAncestorFor(exprNode);
         }
 
         public SolvingNode[] Toposort()
@@ -272,7 +252,6 @@ namespace nfun.Ti4
                     if (node.NodeState is RefTo reference)
                     {
                         //todo 2side reference
-                        todo
                         graph[i] = edges.Append(reference.Node.GraphId).ToArray();
                     }
                     else
@@ -347,7 +326,18 @@ namespace nfun.Ti4
                 typeVariable.PrintToConsole();
             }
         }
+        private SolvingNode CreateVarType(object state = null)
+        {
+            var varNode = new SolvingNode("V" + varNodeId)
+            {
+                Type = SolvingNodeType.TypeVariable
+            };
+            varNode.NodeState = state ?? new SolvingConstrains();
+            varNodeId++;
+            typeVariables.Add(varNode);
 
+            return varNode;
+        }
         private static void MergeCycle(SolvingNode[] cycleRoute)
         {
             var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) ?? cycleRoute.First();

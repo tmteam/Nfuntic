@@ -11,7 +11,7 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
-            Trace2_2();
+            Trace1_2();
             Console.ReadLine();
         }
 

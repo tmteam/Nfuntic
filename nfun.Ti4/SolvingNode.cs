@@ -99,6 +99,13 @@ namespace nfun.Ti4
 
     public class SolvingConstrains
     {
+        public SolvingConstrains(ConcreteType desc = null, ConcreteType anc = null)
+        {
+            if(desc!=null)
+                DescedantTypes.Add(desc);
+            if(anc!=null)
+                AncestorTypes.Add(anc);
+        }
         public bool Fits(ConcreteType concrete)
         {
             if (AncestorTypes.Any())
@@ -117,6 +124,8 @@ namespace nfun.Ti4
                     return false;
             }
 
+            if (IsComparable && !concrete.IsComparable)
+                return false;
             return true;
         }
 
