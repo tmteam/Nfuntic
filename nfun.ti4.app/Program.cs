@@ -11,7 +11,7 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
-            Trace1_2();
+            Trace5_2();
             Console.ReadLine();
         }
 
@@ -226,7 +226,7 @@ namespace nfun.ti4.app
             SolvingFunctions.SetDownwardsLimits(sorted);
             graph.PrintTrace();
 
-            SolvingFunctions.DestructiveMergeAll(sorted);
+            SolvingFunctions.Destruction(sorted);
 
             Console.WriteLine();
             Console.WriteLine("Destruct Down");
@@ -246,7 +246,6 @@ namespace nfun.ti4.app
             Console.WriteLine($"Named node types: ");
             foreach (var namedNode in results.NamedNodes)
                 Console.WriteLine("    " + namedNode);
-
         }
     }
 }

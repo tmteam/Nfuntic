@@ -91,6 +91,10 @@ namespace nfun.Ti4
     {
         public RefTo(SolvingNode node)
         {
+            if (node.Type != SolvingNodeType.TypeVariable)
+            {
+
+            }
             Node = node;
         }
         public SolvingNode Node { get; }
@@ -140,6 +144,43 @@ namespace nfun.Ti4
         public ConcreteType PreferedType { get; set; }
         public bool IsComparable { get; set; }
 
+        public object MergeOrNull(SolvingConstrains constrains)
+        {
+            var result = new SolvingConstrains()
+            {
+                IsComparable = this.IsComparable || constrains.IsComparable
+            };
+            if (DescedantTypes.Any() || constrains.DescedantTypes.Any())
+            {
+                var descendantType = DescedantTypes.Union(constrains.DescedantTypes)
+                    .GetCommonAncestor();
+                result.DescedantTypes.Add(descendantType);
+            }
+
+            if (AncestorTypes.Any() || constrains.AncestorTypes.Any())
+            {
+                var ancestorType = AncestorTypes.Union(constrains.AncestorTypes)
+                    .GetCommonDescendantOrNull();
+                if (ancestorType == null)
+                    return null;
+                result.AncestorTypes.Add(ancestorType);
+            }
+
+            if (result.AncestorTypes.Any() && result.DescedantTypes.Any())
+            {
+                var anc = result.AncestorTypes[0];
+                var des = result.DescedantTypes[0];
+                if (anc.Equals(des))
+                {
+                    if (result.IsComparable && !anc.IsComparable)
+                        return null;
+                    return anc;
+                }
+                if (!des.CanBeImplicitlyConvertedTo(anc))
+                    return null;
+            }
+            return result;
+        }
         public void Validate()
         {
             if(!AncestorTypes.Any())

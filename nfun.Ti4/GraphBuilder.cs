@@ -75,7 +75,7 @@ namespace nfun.Ti4
             if (alreadyExists != null)
                 return alreadyExists;
 
-            var res = new SolvingNode("T" + id) {NodeState = new SolvingConstrains()};
+            var res = new SolvingNode(id.ToString()) {NodeState = new SolvingConstrains()};
             _syntaxNodes[id] = res;
             return res;
         }
@@ -152,9 +152,10 @@ namespace nfun.Ti4
             var right  = GetOrCreateNode(rightId);
             var result = GetOrCreateNode(resultId);
 
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.Real));    
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.Real));
 
-            result.BecomeReferenceFor(varNode);
+            varNode.BecomeReferenceFor(result);
+                //result.BecomeReferenceFor();
 
             varNode.BecomeAncestorFor(left);
             varNode.BecomeAncestorFor(right);
@@ -200,7 +201,7 @@ namespace nfun.Ti4
         }
 
         public void SetConst(int id, ConcreteType type) 
-            => GetOrCreateConcrete(id, ConcreteType.Bool);
+            => GetOrCreateConcrete(id, type);
 
         public void SetIntConst(int id, ConcreteType desc)
         {
