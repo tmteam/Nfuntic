@@ -388,7 +388,7 @@ namespace nfun.Ti4
         }
 
 
-        public FinalizationResults SolveTypes()
+        public FinalizationResults Solve()
         {
             PrintTrace();
             Console.WriteLine();
@@ -432,6 +432,28 @@ namespace nfun.Ti4
                 Console.WriteLine("    " + namedNode);
 
             return results;
+        }
+
+        public void SetVarType(string s, ConcreteType u64)
+        {
+            var node = GetNamedNode(s);
+            if(!node.BecomeConcrete(u64))
+                throw new InvalidOperationException();
+        }
+
+        public void SetCall(ConcreteType typesOfTheCall, params int[] argumentsThenResult)
+        {
+            for (int i = 0; i < argumentsThenResult.Length-1; i++)
+            {
+                var argId = argumentsThenResult[i];
+                var node = GetOrCreateNode(argId);
+                node.SetAncestor(typesOfTheCall);
+            }
+
+            var resultId = argumentsThenResult[argumentsThenResult.Length - 1];
+            var resultNode = GetOrCreateNode(resultId);
+            resultNode.BecomeConcrete(typesOfTheCall);
+
         }
     }
 }

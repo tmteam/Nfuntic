@@ -85,6 +85,47 @@ namespace nfun.Ti4
         }
 
 
+        public bool BecomeConcrete(ConcreteType concrete)
+        {
+            if (this.NodeState is ConcreteType oldConcrete)
+            {
+                return oldConcrete == concrete;
+            }
+            else if (this.NodeState is SolvingConstrains constrains)
+            {
+                if (!constrains.Fits(concrete))
+                    return false;
+                this.NodeState = concrete;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void SetAncestor(ConcreteType anc)
+        {
+            var node = this;
+            if (node.NodeState is RefTo refTo)
+                node = node.GetNonReference();
+
+            if(node.NodeState is ConcreteType oldConcrete)
+            {
+                if(!oldConcrete.CanBeImplicitlyConvertedTo(anc))
+                    throw new InvalidOperationException();
+            }
+            else if (node.NodeState is SolvingConstrains constrains)
+            {
+                constrains.AncestorTypes.Add(anc);
+                if (constrains.AncestorTypes.Count > 1)
+                {
+                    var newAnc = constrains.AncestorTypes.GetCommonDescendantOrNull();
+                    constrains.AncestorTypes.Clear();
+                    constrains.AncestorTypes.Add(newAnc);
+                }
+
+                constrains.Validate();
+            };
+        }
     }
 
     public class RefTo

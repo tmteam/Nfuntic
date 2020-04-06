@@ -7,28 +7,6 @@ namespace nfun.ti4.tests
 {
     public class PrimitiveSolvingTests
     {
-        [Test(Description = "y = 1 + 2 * x")]
-        public void SolvingIntWithSingleVar()
-        {
-            //node |5   0 4 1 3 2
-            //expr |y = 1 + 2 * x;
-
-            _ti.SetStrict(0, TiType.Int32);
-            _ti.SetStrict(1, TiType.Int32);
-            _ti.SetVar(2, "x");
-            _ti.SetStrict(2, TiType.Int32);
-            _ti.SetStrict(3, TiType.Int32);
-            _ti.SetStrict(4, TiType.Int32);
-            _ti.Unite(5, 4);
-            _ti.SetVar(5, "y");
-
-            var result = _ti.Solve();
-
-            Assert.AreEqual(0, result.GenericsCount);
-            Assert.AreEqual(TiType.Int32, result.GetVarType("x"));
-            Assert.AreEqual(TiType.Int32, result.GetVarType("y"));
-        }
-
         [Test(Description = "y = if a: 1 else 0")]
         public void SolvingSimpleCaseWithIfs()
         {
@@ -105,122 +83,8 @@ namespace nfun.ti4.tests
             Assert.AreEqual(TiType.Generic(0), result.GetVarType("z"));
             Assert.AreEqual(TiType.Generic(0), result.GetVarType("y"));
         }
+        
 
-        [Test]
-        public void OutputEqualsInput_simpleGeneric()
-        {
-            //node |1   0
-            //expr |y = x 
-
-            _ti.SetVar(0, "x");
-            _ti.Unite(1, 0);
-            _ti.SetVar(1, "y");
-
-            var result = _ti.Solve();
-
-            Assert.AreEqual(1, result.GenericsCount);
-            Assert.AreEqual(TiType.Generic(0), result.GetVarType("x"));
-            Assert.AreEqual(TiType.Generic(0), result.GetVarType("y"));
-        }
-        [Test]
-        public void SimpleArithmeticalOp()
-        {
-            //3   0 2 1
-            //y = x + 1
-
-            solver.SetVar(0, "x");
-            solver.SetArithmeticalOp(2, 0, 1).AssertSuccesfully();
-            solver.SetDefenition("y", 3, 2);
-
-            var res = solver.Solve();
-            Assert.AreEqual(0, res.GenericsCount);
-            Assert.AreEqual(TiType.Real, res.GetVarType("x"));
-            Assert.AreEqual(TiType.Real, res.GetVarType("y"));
-        }
-
-        [Test]
-        public void ComplexArithmeticalOp()
-        {
-            //5   0 4 1 3 2 
-            //y = a + 1 * b
-
-            solver.SetVar(0, "a");
-            solver.SetConst(1, TiType.Int32);
-            solver.SetVar(2, "b");
-            solver.SetArithmeticalOp(3, 1, 2).AssertSuccesfully();
-            solver.SetArithmeticalOp(4, 0, 3).AssertSuccesfully();
-            solver.SetDefenition("y", 5, 4);
-
-            var res = solver.Solve();
-            Assert.AreEqual(0, res.GenericsCount);
-            Assert.AreEqual(TiType.Real, res.GetVarType("a"));
-            Assert.AreEqual(TiType.Real, res.GetVarType("b"));
-            Assert.AreEqual(TiType.Real, res.GetVarType("y"));
-        }
-        [Test]
-        public void InputRepeats_simpleGeneric()
-        {
-            //node |3   0 2 1 
-            //expr |y = x + x 
-            _ti.SetVar(0, "x");
-            _ti.SetVar(1, "x");
-
-            _ti.SetCall(new CallDefinition(
-                new[] { TiType.Int32, TiType.Int32, TiType.Int32 },
-                new[] { 2, 0, 1 }));
-
-            _ti.SetVar(3, "y");
-            _ti.Unite(3, 2);
-
-            var result = _ti.Solve();
-
-            Assert.AreEqual(0, result.GenericsCount);
-            Assert.AreEqual(TiType.Int32, result.GetVarType("x"));
-            Assert.AreEqual(TiType.Int32, result.GetVarType("y"));
-        }
-
-        [Test(Description = "y = x; | y2 = x2")]
-        public void TwoSimpleGenerics()
-        {
-            //node |1   0  | 3    2
-            //expr |y = x; | y2 = x2
-
-            _ti.SetVar(0, "x");
-            _ti.Unite(1, 0);
-            _ti.SetVar(1, "y");
-
-            _ti.SetVar(2, "x2");
-            _ti.Unite(3, 2);
-            _ti.SetVar(3, "y2");
-
-            var result = _ti.Solve();
-
-            Assert.AreEqual(2, result.GenericsCount);
-
-            Assert.AreEqual(TiType.Generic(0), result.GetVarType("x"));
-            Assert.AreEqual(TiType.Generic(0), result.GetVarType("y"));
-
-            Assert.AreEqual(TiType.Generic(1), result.GetVarType("x2"));
-            Assert.AreEqual(TiType.Generic(1), result.GetVarType("y2"));
-
-        }
-        [Test]
-        public void LimitCall_UpcastArgType_EquationSolved()
-        {
-            // 3   0 2 1   5   4 
-            // y = a / b;  a = 1:int
-            solver.SetVar(0, "a");
-            solver.SetVar(1, "b");
-            solver.SetCall(new CallDefinition(TiType.Real, new[] { 2, 0, 1 }));
-            solver.SetDefenition("y", 3, 2);
-            solver.SetConst(4, TiType.Int32);
-            solver.SetDefenition("a", 5, 4).AssertSuccesfully();
-
-            var solvation = solver.Solve();
-            Assert.AreEqual(TiType.Real, solvation.GetVarType("y"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("a"));
-            Assert.AreEqual(0, solvation.GenericsCount);
-        }
 
         [Test]
         public void LimitCall_ComplexEquations_TypesSolved()
@@ -300,43 +164,8 @@ namespace nfun.ti4.tests
             Assert.AreEqual(TiType.Int32, solvation.GetVarType("y"));
         }
 
-        [Test]
-        public void TwoTypesAreLong_ItsSumIsLong()
-        {
-            //1   0   3    2  7   4 6 5
-            //a = 1l; b = 1l; x = a + b
-            solver.SetConst(0, TiType.Int64);
-            solver.SetDefenition("a", 1, 0);
-            solver.SetConst(2, TiType.Int64);
-            solver.SetDefenition("b", 3, 2);
+       
 
-            solver.SetVar(4, "a");
-            solver.SetVar(5, "b");
-            solver.SetArithmeticalOp(6, 4, 5);
-            solver.SetDefenition("x", 7, 6);
-
-            var solvation = solver.Solve();
-
-            Assert.AreEqual(TiType.Int64, solvation.GetVarType("x"));
-        }
-
-        [Test]
-        public void UpcastArgTypeThatIsAfter_EquationSolved()
-        {
-            // 3      2    0,1    5   4 
-            // y = sumReal(a,b);  a = 1:int
-            solver.SetVar(0, "a");
-            solver.SetVar(1, "b");
-            solver.SetCall(new CallDefinition(TiType.Real, new[] { 2, 0, 1 }));
-            solver.SetDefenition("y", 3, 2);
-            solver.SetConst(4, TiType.Int32);
-            solver.SetDefenition("a", 5, 4).AssertSuccesfully();
-
-            var solvation = solver.Solve();
-            Assert.AreEqual(TiType.Real, solvation.GetVarType("y"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("a"));
-            Assert.AreEqual(0, solvation.GenericsCount);
-        }
 
         [Test]
         public void UpcastArgTypes_BothTypesLimitedAfter_EquationSolved()
@@ -361,49 +190,9 @@ namespace nfun.ti4.tests
             Assert.AreEqual(0, solvation.GenericsCount);
         }
 
-        [Test]
-        public void UpcastArgTypeThatIsBefore_EquationSolved()
-        {
-            // 1      0   5      4    2 3    
-            // a = 1:int; y = sumReal(a,b);   
-            solver.SetConst(0, TiType.Int32);
-            solver.SetDefenition("a", 1, 0);
+        
 
-            solver.SetVar(2, "a");
-            solver.SetVar(3, "b");
-
-            solver.SetCall(new CallDefinition(TiType.Real, new[] { 4, 2, 3 }));
-            solver.SetDefenition("y", 5, 4).AssertSuccesfully();
-
-            var solvation = solver.Solve();
-            Assert.AreEqual(TiType.Real, solvation.GetVarType("y"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("a"));
-            Assert.AreEqual(0, solvation.GenericsCount);
-        }
-
-        [Test]
-        public void UpcastArgType_ArithmOp_EquationSolved()
-        {
-            // 1    0        5   2 4 3   7   6 
-            // a = 1.0:real; y = a + b;  b = 1:int
-            solver.SetConst(0, TiType.Real);
-            solver.SetDefenition("a", 1, 0);
-
-            solver.SetVar(2, "a");
-            solver.SetVar(3, "b");
-            solver.SetArithmeticalOp(4, 2, 3).AssertSuccesfully();
-            solver.SetDefenition("y", 5, 4).AssertSuccesfully();
-
-            solver.SetConst(6, TiType.Int32);
-            solver.SetDefenition("b", 7, 6).AssertSuccesfully();
-
-            var solvation = solver.Solve();
-            Assert.AreEqual(TiType.Real, solvation.GetVarType("y"));
-            Assert.AreEqual(TiType.Real, solvation.GetVarType("a"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("b"));
-            Assert.AreEqual(0, solvation.GenericsCount);
-        }
-
+      
         [Test]
         public void ComplexEquations_TypesSolved()
         {
@@ -428,17 +217,6 @@ namespace nfun.ti4.tests
 
             Assert.AreEqual(TiType.Real, solvation.GetVarType("x"));
             Assert.AreEqual(TiType.Real, solvation.GetVarType("r"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("y"));
-        }
-        [Test]
-        public void Arithm_WithTwoInts_EqualsInt()
-        {
-            solver.SetConst(0, TiType.Int32);
-            solver.SetConst(1, TiType.Int32);
-            solver.SetArithmeticalOp(2, 0, 1);
-            solver.SetDefenition("y", 3, 2);
-            var solvation = solver.Solve();
-            Assert.IsTrue(solvation.IsSolved);
             Assert.AreEqual(TiType.Int32, solvation.GetVarType("y"));
         }
 
