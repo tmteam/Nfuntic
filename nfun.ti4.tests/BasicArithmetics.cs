@@ -11,7 +11,7 @@ namespace nfun.ti4.tests
         [Test(Description = "y = 1 + 2 * x")]
         public void SolvingGenericWithSingleVar()
         {
-            //node |5   0 4 1 3 2
+            //node |    0 4 1 3 2
             //expr |y = 1 + 2 * x;
 
             var graph = new GraphBuilder();
@@ -40,8 +40,7 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
 
-            Assert.AreEqual(0, result.GenericsCount);
-
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.I64, "x","y");
         }
 
@@ -59,8 +58,7 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
 
-            Assert.AreEqual(0, result.GenericsCount);
-
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.U64, "x","y");
         }
         [TestCase]
@@ -77,8 +75,7 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
 
-            Assert.AreEqual(0, result.GenericsCount);
-
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.U32, "x","y");
         }
 
@@ -120,8 +117,8 @@ namespace nfun.ti4.tests
 
 
             var result = graph.Solve();
-            Assert.AreEqual(0, result.GenericsCount);
 
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.I32, "x","y","a");
         }
 
@@ -270,7 +267,7 @@ namespace nfun.ti4.tests
             graph.SetDef("b", 4);
 
             var result = graph.Solve();
-            Assert.AreEqual(0, result.GenericsCount);
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.Real, "a");
             result.AssertNamed(ConcreteType.Real, "y");
             result.AssertNamed(ConcreteType.I32, "b");
@@ -295,7 +292,7 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
 
-            Assert.AreEqual(0, result.GenericsCount);
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.I64, "x","a","b");
         }
 
@@ -318,7 +315,8 @@ namespace nfun.ti4.tests
             graph.SetDef("y3",4);
 
             var result = graph.Solve();
-            Assert.AreEqual(0,result.GenericsCount);
+
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.I32, "y0","y1","y2","y3");
         }
 
@@ -340,7 +338,8 @@ namespace nfun.ti4.tests
             graph.SetDef("y3", 4);
 
             var result = graph.Solve();
-            Assert.AreEqual(0, result.GenericsCount);
+
+            result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.I32, "y0", "y1", "y2", "y3");
         }
     }

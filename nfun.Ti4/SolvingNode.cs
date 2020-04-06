@@ -77,7 +77,8 @@ namespace nfun.Ti4
                 }
 
                 Console.Write(" ]");
-
+                if(constrains.IsComparable)
+                    Console.Write(" <>");
                 if (constrains.PreferedType != null)
                     Console.Write($" Pref: {constrains.PreferedType.Name}");
                 Console.WriteLine();

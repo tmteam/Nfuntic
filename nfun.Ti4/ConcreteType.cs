@@ -158,9 +158,6 @@ namespace nfun.Ti4
             throw new InvalidOperationException();
         }
 
-        public override bool Equals(object obj)
-        {
-            return (obj as ConcreteType)?.Name == Name;
-        }
+        public override bool Equals(object obj) => (obj as ConcreteType)?.Name == Name;
     }
 }

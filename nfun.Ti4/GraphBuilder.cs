@@ -185,8 +185,8 @@ namespace nfun.Ti4
             GetOrCreateConcrete(resultId, ConcreteType.Bool);
 
             var varNode = CreateVarType();
-            varNode.BecomeReferenceFor(left);
-            varNode.BecomeReferenceFor(right);
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
         }
 
         public void SetComparable(int leftId, int rightId, int resultId)
@@ -196,8 +196,8 @@ namespace nfun.Ti4
             GetOrCreateConcrete(resultId, ConcreteType.Bool);
 
             var varNode = CreateVarType(new SolvingConstrains(){ IsComparable = true});
-            varNode.BecomeReferenceFor(left);
-            varNode.BecomeReferenceFor(right);
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
         }
 
         public void SetConst(int id, ConcreteType type) 

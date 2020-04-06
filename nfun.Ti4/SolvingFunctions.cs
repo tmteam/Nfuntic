@@ -136,12 +136,17 @@ namespace nfun.Ti4
                     }
                     case SolvingConstrains constrainsAnc:
                     {
-                        var result = new SolvingConstrains { PreferedType = constrainsAnc.PreferedType };
+                        var result = new SolvingConstrains { 
+                            PreferedType = constrainsAnc.PreferedType, 
+                            IsComparable = constrainsAnc.IsComparable
+                        };
+                        
                         result.AncestorTypes.AddRange(
                             constrainsAnc.AncestorTypes);
                         result.DescedantTypes.Add(
                             constrainsAnc.DescedantTypes.Append(concreteDesc).GetCommonAncestor());
                         result.Validate();
+                        
                         return result;
                     }
                     default:
@@ -162,7 +167,11 @@ namespace nfun.Ti4
                     }
                     case SolvingConstrains constrainsAnc:
                     {
-                        var result = new SolvingConstrains { PreferedType = constrainsAnc.PreferedType };
+                        var result = new SolvingConstrains
+                        {
+                            PreferedType = constrainsAnc.PreferedType,
+                            IsComparable = constrainsAnc.IsComparable,
+                        };
                         result.AncestorTypes.AddRange(constrainsAnc.AncestorTypes);
                         if(constrainsAnc.DescedantTypes.Any() || constrainsDesc.DescedantTypes.Any())
                             result.DescedantTypes.Add(constrainsAnc.DescedantTypes.Concat(constrainsDesc.DescedantTypes).GetCommonAncestor());
@@ -296,75 +305,7 @@ namespace nfun.Ti4
             return false;
         }
 
-        public static bool TryMergeDestructive(SolvingNode ancestorNode, SolvingNode descendantNode)
-        {
-            Console.WriteLine($"-dm: {ancestorNode} -> {descendantNode}");
-            var nonRefAncestor   = GetNonReference(ancestorNode);
-            var nonRefDescendant = GetNonReference(descendantNode);
-            if (nonRefDescendant == nonRefAncestor)
-            {
-                Console.WriteLine($"Same deref. Skip");
-                return false;
-            }
-            
-
-            if (nonRefAncestor.NodeState is ConcreteType concreteAnc)
-            {
-
-                if (nonRefDescendant.NodeState is SolvingConstrains constrainsDesc)
-                {
-                    if (constrainsDesc.Fits(concreteAnc))
-                    {
-                        Console.WriteLine($"    {nonRefAncestor} + {nonRefDescendant} = {concreteAnc}");
-                        nonRefDescendant.NodeState = nonRefAncestor.NodeState;
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            if (nonRefAncestor.NodeState is SolvingConstrains constrainsAnc)
-            {
-                if (nonRefDescendant.NodeState is SolvingConstrains constrainsDesc)
-                {
-                    var result = new SolvingConstrains();
-                    if (constrainsAnc.DescedantTypes.Any() || constrainsDesc.DescedantTypes.Any())
-                    {
-                        var descendantType = constrainsAnc.DescedantTypes.Union(constrainsDesc.DescedantTypes).GetCommonAncestor();
-                        if (descendantType == null)
-                            throw new InvalidOperationException();
-                        result.DescedantTypes.Add(descendantType);
-                    }
-                    if (constrainsAnc.AncestorTypes.Any() || constrainsDesc.AncestorTypes.Any())
-                    {
-                        var ancestorType = constrainsAnc.AncestorTypes.Union(constrainsDesc.AncestorTypes).GetCommonDescendantOrNull();
-                        result.AncestorTypes.Add(ancestorType);
-                    }
-                    Console.WriteLine($"    {nonRefAncestor} + {nonRefDescendant} = {result}.   {nonRefDescendant.Name}={nonRefAncestor.Name}");
-                    
-                    nonRefAncestor.NodeState = result;
-                    nonRefDescendant.NodeState = descendantNode.NodeState= new RefTo(nonRefAncestor);
-                    nonRefDescendant.Ancestors.Remove(nonRefAncestor);
-                    descendantNode.Ancestors.Remove(nonRefAncestor);
-
-                    return true;
-                }
-                else if (nonRefDescendant.NodeState is ConcreteType concreteDesc)
-                {
-                    if (constrainsAnc.Fits(concreteDesc))
-                    {
-                        Console.WriteLine($"    {nonRefAncestor} + {nonRefDescendant} = {concreteDesc}");
-
-                        nonRefAncestor.NodeState = concreteDesc;
-                        return true;
-                    }
-
-                    return false;
-                }
-            }
-            throw new InvalidOperationException();
-        }
-
+    
         public static FinalizationResults FinalizeUp(SolvingNode[] toposortedNodes)
         {
             var typeVariables = new List<SolvingNode>();

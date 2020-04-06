@@ -48,9 +48,13 @@ namespace nfun.ti4.tests
             else
                 Assert.AreEqual(anc, generic.CommonAncestor);
 
-            Assert.AreEqual(isComparable, generic.IsComparable);
+            Assert.AreEqual(isComparable, generic.IsComparable,"IsComparable claim missed");
         }
 
+        public static void AssertNoGenerics(this FinalizationResults results)
+        {
+            Assert.AreEqual(0, results.GenericsCount);
+        }
         public static void AssertNamed(this FinalizationResults results, ConcreteType type, params string[] varNames)
         {
             foreach (var varName in varNames)
