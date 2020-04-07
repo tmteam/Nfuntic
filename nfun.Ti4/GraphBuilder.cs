@@ -10,9 +10,8 @@ namespace nfun.Ti4
     {
         private readonly Dictionary<string, SolvingNode> _variables = new Dictionary<string, SolvingNode>();
         private readonly List<SolvingNode> _syntaxNodes = new List<SolvingNode>();
-        private readonly List<SolvingNode> typeVariables = new List<SolvingNode>();
-
-        private int varNodeId = 0;
+        private readonly List<SolvingNode> _typeVariables = new List<SolvingNode>();
+        private int _varNodeId = 0;
         private SolvingNode GetNamedNode(string name)
         {
             if (_variables.TryGetValue(name, out var varnode))
@@ -68,17 +67,29 @@ namespace nfun.Ti4
             }
         }
 
+        public void SetBitwise(int leftId, int rightId, int resultId)
+        {
+            var left    = GetOrCreateNode(leftId);
+            var right   = GetOrCreateNode(rightId);
+            var result  = GetOrCreateNode(resultId);
+            
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
+
+            varNode.BecomeReferenceFor(result);
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
+        }
+
         public void SetBitShift(int leftId, int rightId, int resultId)
         {
-            var left = GetOrCreateNode(leftId);
+            var left    = GetOrCreateNode(leftId);
+            SetOrCreateConcrete(rightId, ConcreteType.I48);
+            var result  = GetOrCreateNode(resultId);
 
-            var right = SetOrCreateConcrete(rightId, ConcreteType.I48);
-            var result = GetOrCreateNode(resultId);
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.I96));
 
-            var typeVar = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.I96));
-
-            typeVar.BecomeReferenceFor(result);
-            typeVar.BecomeAncestorFor(left);
+            varNode.BecomeReferenceFor(result);
+            varNode.BecomeAncestorFor(left);
         }
 
         public void SetArith(int leftId, int rightId, int resultId)
@@ -90,13 +101,10 @@ namespace nfun.Ti4
             var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.Real));
 
             varNode.BecomeReferenceFor(result);
-                //result.BecomeReferenceFor();
 
             varNode.BecomeAncestorFor(left);
             varNode.BecomeAncestorFor(right);
-
         }
-
         
         public void SetIfElse( int[] conditions, int[] expressions, int resultId)
         {
@@ -168,7 +176,7 @@ namespace nfun.Ti4
             while (true)
             {
 
-                var allNodes = _syntaxNodes.Concat(_variables.Values).Concat(typeVariables).ToArray();
+                var allNodes = _syntaxNodes.Concat(_variables.Values).Concat(_typeVariables).ToArray();
                 if (iteration > allNodes.Length * allNodes.Length)
                     throw new InvalidOperationException();
                 iteration++;
@@ -250,19 +258,19 @@ namespace nfun.Ti4
             foreach (var solvingNode in _variables) 
                 solvingNode.Value.PrintToConsole();
 
-            foreach (var typeVariable in typeVariables) 
+            foreach (var typeVariable in _typeVariables) 
                 typeVariable.PrintToConsole();
         }
 
         private SolvingNode CreateVarType(object state = null)
         {
-            var varNode = new SolvingNode("V" + varNodeId)
+            var varNode = new SolvingNode("V" + _varNodeId)
             {
                 Type = SolvingNodeType.TypeVariable
             };
             varNode.NodeState = state ?? new SolvingConstrains();
-            varNodeId++;
-            typeVariables.Add(varNode);
+            _varNodeId++;
+            _typeVariables.Add(varNode);
 
             return varNode;
         }
