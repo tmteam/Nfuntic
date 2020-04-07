@@ -76,6 +76,5 @@ namespace nfun.ti4.tests
             result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.Bool, "y");
         }
-
     }
 }

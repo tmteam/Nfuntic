@@ -7,84 +7,6 @@ namespace nfun.ti4.tests
 {
     public class PrimitiveSolvingTests
     {
-        [Test(Description = "y = if a: 1 else 0")]
-        public void SolvingSimpleCaseWithIfs()
-        {
-            //node |6 5  2 1  0  4   3 
-            //expr |y = if a: 1 else 0;
-
-            _ti.SetStrict(0, TiType.Int32);
-            _ti.SetVar(1, "a");
-            _ti.SetStrict(1, TiType.Bool);
-            _ti.Unite(2, 0);
-            _ti.SetStrict(3, TiType.Int32);
-            _ti.Unite(4, 2);
-            _ti.Unite(5, 2);
-            _ti.Unite(6, 5);
-            _ti.SetVar(6, "y");
-            var result = _ti.Solve();
-
-            Assert.AreEqual(0, result.GenericsCount);
-            Assert.AreEqual(TiType.Bool, result.GetVarType("a"));
-            Assert.AreEqual(TiType.Int32, result.GetVarType("y"));
-
-        }
-
-
-        [Test(Description = "y=if a:x; else z+1;")]
-        public void SolvingCaseWithIfs()
-        {
-            //node |5  6    1  0        2 4 3
-            //expr |y = if (a) x; else (z + 1);
-
-            _ti.SetVar(0, "x");
-            _ti.SetVar(1, "a");
-            _ti.SetStrict(1, TiType.Bool);
-            _ti.SetVar(2, "z");
-            _ti.SetStrict(2, TiType.Int32);
-            _ti.SetStrict(3, TiType.Int32);
-            _ti.SetStrict(4, TiType.Int32);
-            _ti.Unite(0, 4);
-            _ti.Unite(0, 6);
-            _ti.SetVar(5, "y");
-            _ti.Unite(5, 6);
-
-            var result = _ti.Solve();
-            Assert.Multiple(() =>
-            {
-                Assert.AreEqual(0, result.GenericsCount);
-                Assert.AreEqual(TiType.Bool, result.GetVarType("a"), "a");
-                Assert.AreEqual(TiType.Int32, result.GetVarType("x"), "x");
-                Assert.AreEqual(TiType.Int32, result.GetVarType("z"), "z");
-                Assert.AreEqual(TiType.Int32, result.GetVarType("y"), "y");
-            });
-        }
-
-        [Test(Description = "y = if (a) x else z ")]
-        public void CleanGenericOnIfs()
-        {
-            //node |6 5  2    1   0  4   3 
-            //expr |y = if (true) x else z 
-
-            _ti.SetVar(0, "x");
-            _ti.SetStrict(1, TiType.Bool);
-            _ti.Unite(2, 0);
-            _ti.SetVar(3, "z");
-            _ti.Unite(4, 3);
-            _ti.Unite(4, 2);
-            _ti.Unite(5, 4);
-            _ti.Unite(6, 5);
-            _ti.SetVar(6, "y");
-
-            var result = _ti.Solve();
-
-            Assert.AreEqual(1, result.GenericsCount);
-            Assert.AreEqual(TiType.Generic(0), result.GetVarType("x"));
-            Assert.AreEqual(TiType.Generic(0), result.GetVarType("z"));
-            Assert.AreEqual(TiType.Generic(0), result.GetVarType("y"));
-        }
-        
-
 
         [Test]
         public void LimitCall_ComplexEquations_TypesSolved()
@@ -108,8 +30,8 @@ namespace nfun.ti4.tests
 
             var solvation = solver.Solve();
 
-            Assert.AreEqual(TiType.Real, solvation.GetVarType("x"));
-            Assert.AreEqual(TiType.Real, solvation.GetVarType("r"));
+            Assert.AreqEual(TiType.Real, solvation.GetVarType("x"));
+            Assert.AreEqual(TiType.Reanl, solvation.GetVarType("r"));
             Assert.AreEqual(TiType.Int32, solvation.GetVarType("y"));
         }
 
@@ -268,55 +190,9 @@ namespace nfun.ti4.tests
             Assert.AreEqual(TiType.Int32, solvation.GetVarType("x"));
         }
 
-        [Test]
-        public void MultipleAncestors_EquationSolved()
-        {
-            //1     0     3    2   7    4 6 5
-            //y1  = y0;  y2 = y1; y3 = y2 * 2
-            solver.SetVar(0, "y0");
-            solver.SetDefenition("y1", 1, 0);
+       
 
-            solver.SetVar(2, "y1");
-            solver.SetDefenition("y2", 3, 2);
-
-            solver.SetVar(4, "y2");
-            solver.SetConst(6, TiType.Int32);
-            solver.SetArithmeticalOp(6, 4, 5);
-            solver.SetDefenition("y3", 7, 6);
-
-            var solvation = solver.Solve();
-            Assert.IsTrue(solvation.IsSolved);
-
-            Assert.AreEqual(0, solvation.GenericsCount);
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("y1"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("y2"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("y3"));
-        }
-
-        [Test]
-        public void ReverseMultipleAncestors_EquationSolved()
-        {
-            //1     0     3    2   7    4 6 5
-            //y1  = y0;  y2 = y1; y3 = y0 * 2
-            solver.SetVar(0, "y0");
-            solver.SetDefenition("y1", 1, 0);
-
-            solver.SetVar(2, "y1");
-            solver.SetDefenition("y2", 3, 2);
-
-            solver.SetVar(4, "y0");
-            solver.SetConst(6, TiType.Int32);
-            solver.SetArithmeticalOp(6, 4, 5);
-            solver.SetDefenition("y3", 7, 6);
-
-            var solvation = solver.Solve();
-            Assert.IsTrue(solvation.IsSolved);
-
-            Assert.AreEqual(0, solvation.GenericsCount);
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("y1"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("y2"));
-            Assert.AreEqual(TiType.Int32, solvation.GetVarType("y3"));
-        }
+       
         [Test]
         public void TypeSpecified_PutHighterType_EquationSOlved()
         {
@@ -510,22 +386,5 @@ namespace nfun.ti4.tests
             Assert.AreEqual(TiType.Generic(0), res.GetVarType("b"));
             Assert.AreEqual(TiType.Generic(0), res.GetVarType("c"));
         }
-
-        [Test]
-        public void OutDependsOnItself_Resolved()
-        {
-            //3   0 2 1
-            //y = y + 2
-            solver.SetVar(0, "y");
-            solver.SetConst(1, TiType.Int32);
-            solver.SetArithmeticalOp(2, 0, 1);
-
-            solver.SetDefenition("y", 3, 2);
-
-            var res = solver.Solve();
-            Assert.AreEqual(0, res.GenericsCount);
-            Assert.AreEqual(TiType.Real, res.GetVarType("y"));
-        }
-
     }
 }
