@@ -175,9 +175,9 @@ namespace nfun.Ti4
             var exprNode = GetOrCreateNode(rightNodeId);
             var defNode = GetNamedNode(name);
                 
-            if (exprNode.IsSolved)
-                defNode.BecomeReferenceFor(exprNode);
-            else
+           // if (exprNode.IsSolved)
+           //    defNode.BecomeReferenceFor(exprNode);
+           //else
                 defNode.BecomeAncestorFor(exprNode);
         }
 
@@ -389,16 +389,11 @@ namespace nfun.Ti4
 
         public void SetCall(ConcreteType typesOfTheCall, params int[] argumentsThenResult)
         {
-            for (int i = 0; i < argumentsThenResult.Length-1; i++)
+            for (int i = 0; i < argumentsThenResult.Length; i++)
             {
                 var argId = argumentsThenResult[i];
-                var node = GetOrCreateNode(argId);
-                node.SetAncestor(typesOfTheCall);
+                SetOrCreateConcrete(argId, typesOfTheCall);
             }
-
-            var resultId = argumentsThenResult[argumentsThenResult.Length - 1];
-            var resultNode = GetOrCreateNode(resultId);
-            resultNode.BecomeConcrete(typesOfTheCall);
         }
     }
 }

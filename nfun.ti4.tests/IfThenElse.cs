@@ -132,5 +132,32 @@ namespace nfun.ti4.tests
             result.AssertNamed(ConcreteType.Bool,"x","y");
         }
 
+        [Test]
+        public void If_withMultipleAncestorRules_EquationSolved()
+        {
+            //      3     0   1      2       4        5 7 6
+            //y1  = if (true) 1 else x; y2 = y1; y3 = y1 * 2
+
+            var graph = new GraphBuilder();
+
+            graph.SetConst(0, ConcreteType.Bool);
+            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetVar("x", 2);
+            graph.SetIfElse(new []{0}, new []{1,2}, 3);
+            graph.SetDef("y1", 3);
+
+            graph.SetVar("y1", 4);
+            graph.SetDef("y2", 4);
+
+            graph.SetVar("y1", 5);
+            graph.SetIntConst(6, ConcreteType.U8);
+            graph.SetArith(5,6,7);
+            graph.SetDef("y3", 7);
+
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleArithGeneric();
+            result.AssertAreGenerics(generic,"y1","y2","y3");
+        }
+
     }
 }

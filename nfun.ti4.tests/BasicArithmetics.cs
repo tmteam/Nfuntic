@@ -8,6 +8,21 @@ namespace nfun.ti4.tests
 {
     class BasicArithmetics
     {
+
+        [Test(Description = "x = 3 / 2")]
+        public void SimpleDivideComputation()
+        {
+            //x = 3 / 2
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetCall(ConcreteType.Real, 0,1,2);
+            graph.SetDef("x",2);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ConcreteType.Real, "x");
+        }
+
         [Test(Description = "y = 1 + 2 * x")]
         public void SolvingGenericWithSingleVar()
         {
@@ -195,9 +210,12 @@ namespace nfun.ti4.tests
         }
 
         [Test]
+        [Ignore("Не определено поведение дженериков и конкретных указаний типов")]
         //Есть два пути решения. С одной стороны мы можем обосновано сказать что b это дженерик
         //Но по логике - так как этот дженерик не участвует в выходе - нам нету смысла его держать дженериком
         //и мы можем сказать что это чистый риал. Нипонятно
+
+        //Еще одна проблема - что есть "а"? Это Real или int?
         // ToDo
         public void UpcastArgTypeThatIsAfter_EquationSolved()
         {
@@ -223,6 +241,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
+        [Ignore("Не определено поведение а. Какого она должна быть типа?")]
         //todo
         public void UpcastArgTypeThatIsBefore_EquationSolved()
         {
@@ -248,6 +267,8 @@ namespace nfun.ti4.tests
             result.AssertNamed(ConcreteType.Real, "y");
         }
         [Test]
+        [Ignore("Не определено поведение для b")]
+        //todo
         public void UpcastArgType_ArithmOp_EquationSolved()
         {
             //        0        1 3 2       4
@@ -342,5 +363,29 @@ namespace nfun.ti4.tests
             result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.I32, "y0", "y1", "y2", "y3");
         }
+
+
+        [Test]
+        public void CircularDependenciesWithEquation_SingleGenericFound()
+        {
+            //    021      354   
+            //a = b*c; b = c*a; 
+
+            var graph = new GraphBuilder();
+            graph.SetVar("b", 0);
+            graph.SetVar("c", 1);
+            graph.SetArith(0,1,2);
+            graph.SetDef("a", 2);
+
+            graph.SetVar("c", 3);
+            graph.SetVar("a", 4);
+            graph.SetArith(3, 4, 5);
+            graph.SetDef("b", 5);
+
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleArithGeneric();
+            result.AssertAreGenerics(generic, "a", "b","c");
+        }
+
     }
 }
