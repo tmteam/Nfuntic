@@ -22,7 +22,8 @@ namespace nfun.ti4.tests
             var result = graph.Solve();
             
             result.AssertNamed(ConcreteType.Bool,"y");
-            //todo - должно ли это быть дженериками?
+            var generic = result.AssertAndGetSingleGeneric(null, null);
+            result.AssertAreGenerics(generic, "a", "b");
         }
 
         [Test]

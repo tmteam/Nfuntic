@@ -136,18 +136,9 @@ namespace nfun.Ti4
                     }
                     case SolvingConstrains constrainsAnc:
                     {
-                        var result = new SolvingConstrains { 
-                            PreferedType = constrainsAnc.PreferedType, 
-                            IsComparable = constrainsAnc.IsComparable
-                        };
-                        
-                        result.AncestorTypes.AddRange(
-                            constrainsAnc.AncestorTypes);
-                        result.DescedantTypes.Add(
-                            constrainsAnc.DescedantTypes.Append(concreteDesc).GetCommonAncestor());
-                        result.Validate();
-                        
-                        return result;
+                        var result = constrainsAnc.GetCopy();
+                        result.DescedantTypes.Add(concreteDesc);
+                        return result.GetOptimizedOrThrow();
                     }
                     default:
                         throw new NotSupportedException();
@@ -167,16 +158,9 @@ namespace nfun.Ti4
                     }
                     case SolvingConstrains constrainsAnc:
                     {
-                        var result = new SolvingConstrains
-                        {
-                            PreferedType = constrainsAnc.PreferedType,
-                            IsComparable = constrainsAnc.IsComparable,
-                        };
-                        result.AncestorTypes.AddRange(constrainsAnc.AncestorTypes);
-                        if(constrainsAnc.DescedantTypes.Any() || constrainsDesc.DescedantTypes.Any())
-                            result.DescedantTypes.Add(constrainsAnc.DescedantTypes.Concat(constrainsDesc.DescedantTypes).GetCommonAncestor());
-                        result.Validate();
-                        return result;
+                        var result = constrainsAnc.GetCopy();
+                        result.DescedantTypes.AddRange(constrainsDesc.DescedantTypes);
+                        return result.GetOptimizedOrThrow();
                     }
                     default:
                         throw new NotSupportedException();

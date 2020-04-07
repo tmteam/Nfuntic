@@ -83,7 +83,6 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        [Ignore("Generic comparation not implemented yet")]
         public void CompareTwoDifferentUncomparableConstants()
         {
             //      0   2  1
@@ -92,6 +91,25 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetConst(0, ConcreteType.Real);
             graph.SetConst(1, ConcreteType.Char);
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                graph.SetComparable(0, 1, 2);
+                graph.SetDef("y", 2);
+
+                graph.Solve();
+            });
+        }
+
+        [Test]
+        public void CompareTwoDifferentUncomparableConstants_Reversed()
+        {
+            //      0   2  1
+            // y = 'v'  >  2
+
+            var graph = new GraphBuilder();
+            graph.SetConst(0, ConcreteType.Char);
+            graph.SetConst(1, ConcreteType.Real);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
