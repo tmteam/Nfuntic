@@ -16,8 +16,7 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
 
-            graph.SetConst(0, ConcreteType.Bool);
-            graph.SetVar("a",0);
+            graph.SetVar("a", 0);
             graph.SetIntConst(1, ConcreteType.U8);
             graph.SetIntConst(2, ConcreteType.U8);
             graph.SetIfElse(new []{0},new []{1,2},3);
@@ -57,12 +56,11 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
 
-            graph.SetConst(0, ConcreteType.Bool);
             graph.SetVar("a", 0);
             graph.SetVar("x",1);
             graph.SetVar("z",2);
             graph.SetIntConst(3, ConcreteType.U8);
-            graph.SetArith2(2,3,4);
+            graph.SetArith(2,3,4);
 
             graph.SetIfElse(new[] { 0 }, new[] { 1, 4 }, 5);
             graph.SetDef("y", 5);
@@ -117,12 +115,11 @@ namespace nfun.ti4.tests
         [Test(Description = "y = if (x) x else x ")]
         public void IfXxx()
         {
-            //node |     3    0   1      2
+            //node |     3  0  1      2
             //expr |y = if (x) x else x 
 
             var graph = new GraphBuilder();
 
-            graph.SetConst(0, ConcreteType.Bool);
             graph.SetVar("x", 0);
             graph.SetVar("x", 1);
             graph.SetVar("x", 2);

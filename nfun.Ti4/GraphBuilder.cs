@@ -29,40 +29,12 @@ namespace nfun.Ti4
             return ans;
         }
 
-        private SolvingNode GetOrCreateConcrete(int id, ConcreteType type)
+        private SolvingNode SetOrCreateConcrete(int id, ConcreteType type)
         {
-            while (_syntaxNodes.Count <= id)
-            {
-                _syntaxNodes.Add(null);
-            }
-
-            var alreadyExists = _syntaxNodes[id];
-            if (alreadyExists != null)
-            {
-                if (alreadyExists.NodeState is ConcreteType concrete)
-                {
-                    if(concrete!=type)
-                        throw new InvalidOperationException();
-                    return alreadyExists;
-                }
-                /*
-            Может быть это не нужно     
-            else if (alreadyExists.NodeState is SolvingConstrains constrains)
-                {
-                    if(!constrains.Fits(concrete))
-                        throw new InvalidOperationException();
-                    constrains
-                }
-                return alreadyExists;*/
-                throw new NotImplementedException();
-
-            }
-            else
-            {
-                var res = new SolvingNode(id.ToString()) { NodeState = type};
-                _syntaxNodes[id] = res;
-                return res;
-            }
+            var node = GetOrCreateNode(id);
+            if(!node.BecomeConcrete(type))
+                throw new InvalidOperationException();
+            return node;
         }
         private SolvingNode GetOrCreateNode(int id)
         {
@@ -99,7 +71,8 @@ namespace nfun.Ti4
         public void SetBitShift(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateConcrete(rightId, ConcreteType.I32);
+
+            var right = SetOrCreateConcrete(rightId, ConcreteType.I48);
             var result = GetOrCreateNode(resultId);
 
             var typeVar = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.I96));
@@ -109,44 +82,6 @@ namespace nfun.Ti4
         }
 
         public void SetArith(int leftId, int rightId, int resultId)
-        {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
-            if (result.NodeState is SolvingConstrains constrains)
-            {
-                left.Ancestors.Add(result);
-                right.Ancestors.Add(result);
-                constrains.DescedantTypes.Add(ConcreteType.U24);
-                constrains.AncestorTypes.Add(ConcreteType.Real);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-
-            if (left.NodeState is SolvingConstrains lconstrains)
-            {
-                lconstrains.DescedantTypes.Add(ConcreteType.U24);
-                lconstrains.AncestorTypes.Add(ConcreteType.Real);
-            }
-            else if (!left.IsSolved)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (right.NodeState is SolvingConstrains rconstrains)
-            {
-                rconstrains.DescedantTypes.Add(ConcreteType.U24);
-                rconstrains.AncestorTypes.Add(ConcreteType.Real);
-            }
-            else if (!right.IsSolved)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public void SetArith2(int leftId, int rightId, int resultId)
         {
             var left   = GetOrCreateNode(leftId);
             var right  = GetOrCreateNode(rightId);
@@ -173,16 +108,14 @@ namespace nfun.Ti4
             }
 
             foreach (var condId in conditions)
-            {
-                GetOrCreateConcrete(condId, ConcreteType.Bool);
-            }
+                SetOrCreateConcrete(condId, ConcreteType.Bool);
         }
 
         public void SetEquality(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
             var right = GetOrCreateNode(rightId);
-            GetOrCreateConcrete(resultId, ConcreteType.Bool);
+            SetOrCreateConcrete(resultId, ConcreteType.Bool);
 
             var varNode = CreateVarType();
             varNode.BecomeAncestorFor(left);
@@ -193,7 +126,7 @@ namespace nfun.Ti4
         {
             var left   = GetOrCreateNode(leftId);
             var right  = GetOrCreateNode(rightId);
-            GetOrCreateConcrete(resultId, ConcreteType.Bool);
+            SetOrCreateConcrete(resultId, ConcreteType.Bool);
 
             var varNode = CreateVarType(new SolvingConstrains(){ IsComparable = true});
             varNode.BecomeAncestorFor(left);
@@ -201,7 +134,7 @@ namespace nfun.Ti4
         }
 
         public void SetConst(int id, ConcreteType type) 
-            => GetOrCreateConcrete(id, type);
+            => SetOrCreateConcrete(id, type);
 
         public void SetIntConst(int id, ConcreteType desc)
         {
@@ -309,24 +242,18 @@ namespace nfun.Ti4
             }
         }
 
-
         public void PrintTrace()
         {
-            foreach (var solvingNode in _syntaxNodes)
-            {
+            foreach (var solvingNode in _syntaxNodes) 
                 solvingNode?.PrintToConsole();
-            }
 
-            foreach (var solvingNode in _variables)
-            {
+            foreach (var solvingNode in _variables) 
                 solvingNode.Value.PrintToConsole();
-            }
 
-            foreach (var typeVariable in typeVariables)
-            {
+            foreach (var typeVariable in typeVariables) 
                 typeVariable.PrintToConsole();
-            }
         }
+
         private SolvingNode CreateVarType(object state = null)
         {
             var varNode = new SolvingNode("V" + varNodeId)
@@ -453,7 +380,6 @@ namespace nfun.Ti4
             var resultId = argumentsThenResult[argumentsThenResult.Length - 1];
             var resultNode = GetOrCreateNode(resultId);
             resultNode.BecomeConcrete(typesOfTheCall);
-
         }
     }
 }

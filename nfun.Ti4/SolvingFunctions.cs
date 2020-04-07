@@ -171,11 +171,20 @@ namespace nfun.Ti4
 
         private static object SetDownwardsLimits(SolvingNode descendant, SolvingNode ancestor)
         {
+            #region todo проверить случаи ссылок
+            if (descendant == ancestor)
+                return descendant.NodeState;
+
             if (descendant.NodeState is RefTo referenceDesc)
             {
                 referenceDesc.Node.NodeState = SetDownwardsLimits(descendant, referenceDesc.Node);
                 return referenceDesc;
             }
+            if (ancestor.NodeState is RefTo referenceAnc)
+            {
+                return SetDownwardsLimits(referenceAnc.Node, descendant);
+            }
+            #endregion
 
             ConcreteType upType = null;
             if (ancestor.NodeState is ConcreteType concreteAnc)

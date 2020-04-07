@@ -18,8 +18,8 @@ namespace nfun.ti4.tests
             graph.SetIntConst(0, ConcreteType.U8);
             graph.SetIntConst(1, ConcreteType.U8);
             graph.SetVar("x", 2);
-            graph.SetArith2(1,2,3);
-            graph.SetArith2(0,3,4);
+            graph.SetArith(1,2,3);
+            graph.SetArith(0,3,4);
             graph.SetDef("y", 4);
 
             var result = graph.Solve();
@@ -35,7 +35,7 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
             graph.SetConst(1, ConcreteType.I64);
-            graph.SetArith2(0, 1, 2);
+            graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
@@ -53,7 +53,7 @@ namespace nfun.ti4.tests
             graph.SetVarType("x", ConcreteType.U64);
             graph.SetVar("x", 0);
             graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetArith2(0, 1, 2);
+            graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
@@ -69,7 +69,7 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
             graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetArith2(0, 1, 2);
+            graph.SetArith(0, 1, 2);
             graph.SetVarType("y", ConcreteType.U32);
             graph.SetDef("y", 2);
 
@@ -87,7 +87,7 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
             graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetArith2(0, 1, 2);
+            graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
@@ -108,11 +108,11 @@ namespace nfun.ti4.tests
 
             graph.SetVar("x", 1);
             graph.SetVar("y", 2);
-            graph.SetArith2(1, 2, 3);
+            graph.SetArith(1, 2, 3);
             graph.SetIntConst(4, ConcreteType.U8);
-            graph.SetArith2(3, 4, 5);
+            graph.SetArith(3, 4, 5);
             graph.SetVar("x", 6);
-            graph.SetArith2(5, 6, 7);
+            graph.SetArith(5, 6, 7);
             graph.SetDef("a", 7);
 
 
@@ -133,11 +133,11 @@ namespace nfun.ti4.tests
 
             graph.SetVar("x", 1);
             graph.SetVar("y", 2);
-            graph.SetArith2(1, 2, 3);
+            graph.SetArith(1, 2, 3);
             graph.SetIntConst(4, ConcreteType.U8);
-            graph.SetArith2(3, 4, 5);
+            graph.SetArith(3, 4, 5);
             graph.SetVar("x", 6);
-            graph.SetArith2(5, 6, 7);
+            graph.SetArith(5, 6, 7);
             graph.SetDef("a", 7);
 
             var result = graph.Solve();
@@ -155,20 +155,20 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
             graph.SetVar("y", 1);
-            graph.SetArith2(0, 1, 2);
+            graph.SetArith(0, 1, 2);
             graph.SetIntConst(3, ConcreteType.U8);
-            graph.SetArith2(2, 3, 4);
+            graph.SetArith(2, 3, 4);
             graph.SetVar("x", 5);
-            graph.SetArith2(4, 5, 6);
+            graph.SetArith(4, 5, 6);
             graph.SetDef("a", 6);
 
             graph.SetVar("r", 7);
             graph.SetVar("x", 8);
-            graph.SetArith2(7, 8, 9);
+            graph.SetArith(7, 8, 9);
             graph.SetIntConst(10, ConcreteType.U8);
-            graph.SetArith2(9, 10, 11);
+            graph.SetArith(9, 10, 11);
             graph.SetVar("r", 12);
-            graph.SetArith2(11, 12, 13);
+            graph.SetArith(11, 12, 13);
             graph.SetDef("b", 13);
 
             var result = graph.Solve();
@@ -186,7 +186,7 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
             graph.SetVar("x", 1);
-            graph.SetArith2(0,1,2);
+            graph.SetArith(0,1,2);
             graph.SetDef("y", 2);
             var result = graph.Solve();
 
@@ -259,7 +259,7 @@ namespace nfun.ti4.tests
 
             graph.SetVar("a", 1);
             graph.SetVar("b", 2);
-            graph.SetArith2(1, 2, 3);
+            graph.SetArith(1, 2, 3);
             graph.SetDef("y", 3);
 
 
@@ -287,7 +287,7 @@ namespace nfun.ti4.tests
 
             graph.SetVar("a", 2);
             graph.SetDef("b", 3);
-            graph.SetArith2(2,3,4);
+            graph.SetArith(2,3,4);
             graph.SetDef("x", 4);
 
             var result = graph.Solve();
@@ -311,7 +311,7 @@ namespace nfun.ti4.tests
 
             graph.SetVar("y2", 2);
             graph.SetConst(3, ConcreteType.I32);
-            graph.SetArith2(2,3,4);
+            graph.SetArith(2,3,4);
             graph.SetDef("y3",4);
 
             var result = graph.Solve();
@@ -334,7 +334,7 @@ namespace nfun.ti4.tests
 
             graph.SetVar("y0", 2);
             graph.SetConst(3, ConcreteType.I32);
-            graph.SetArith2(2, 3, 4);
+            graph.SetArith(2, 3, 4);
             graph.SetDef("y3", 4);
 
             var result = graph.Solve();
