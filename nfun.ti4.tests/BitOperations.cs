@@ -6,8 +6,47 @@ using NUnit.Framework;
 
 namespace nfun.ti4.tests
 {
-    class BitwiseOperations
+    //& | ~ << >>
+    class BitOperations
     {
+        [Test]
+        public void InvertConstants()
+        {
+            //y = ~1u 
+            var graph = new GraphBuilder();
+            graph.SetConst(0, ConcreteType.U32);
+            graph.SetBitwiseInvert(0, 1);
+            graph.SetDef("y", 1);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ConcreteType.U32, "y");
+        }
+
+        [Test]
+        public void InvertGenericConstants()
+        {
+            //y = ~1 
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetBitwiseInvert(0, 1);
+            graph.SetDef("y", 1);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(ConcreteType.U8, ConcreteType.I96);
+            result.AssertAreGenerics(generic, "y");
+        }
+        [Test]
+        public void InvertGenericNamed()
+        {
+            //y = ~x
+            var graph = new GraphBuilder();
+            graph.SetVar("x",0);
+            graph.SetBitwiseInvert(0, 1);
+            graph.SetDef("y", 1);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(ConcreteType.U8, ConcreteType.I96);
+            result.AssertAreGenerics(generic, "x", "y");
+        }
+
         [Test]
         public void BitwiseConstants()
         {
@@ -22,7 +61,9 @@ namespace nfun.ti4.tests
             result.AssertNoGenerics();
             result.AssertNamed(ConcreteType.U32, "y");
         }
-       
+
+        
+
         [Test]
         [Ignore("Todo - сделать оптимизацию для поиска подходящего типа")]
         public void BitwiseDifferentConstants()
@@ -39,21 +80,6 @@ namespace nfun.ti4.tests
             result.AssertNamed(ConcreteType.I64, "y");
         }
 
-
-        [Test]
-        public void BitwiseGenericConstants()
-        {
-            //    0 2 1
-            //y = 1 & 2
-            var graph = new GraphBuilder();
-            graph.SetIntConst(0, ConcreteType.U8);
-            graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetBitwise(0, 1, 2);
-            graph.SetDef("y", 2);
-            var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(ConcreteType.U8, ConcreteType.I96);
-            result.AssertAreGenerics(generic, "y");
-        }
         [Test]
         public void BitwiseGenericAndConstant()
         {
@@ -121,5 +147,51 @@ namespace nfun.ti4.tests
             var generic = result.AssertAndGetSingleGeneric(ConcreteType.I16, ConcreteType.I96);
             result.AssertAreGenerics(generic, "a", "x", "y");
         }
+
+        [Test]
+        public void BitwiseGenericConstants()
+        {
+            //    0 2 1
+            //y = 1 & 2
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetBitwise(0, 1, 2);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(ConcreteType.U8, ConcreteType.I96);
+            result.AssertAreGenerics(generic, "y");
+        }
+        [Test]
+        public void BitshiftGenericAndConstant()
+        {
+            //    0  2 1
+            //y = 1 << x
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetVar("x", 1);
+            graph.SetBitShift(0, 1, 2);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(ConcreteType.U24, ConcreteType.I96);
+            result.AssertNamed(ConcreteType.I48, "x");
+            result.AssertAreGenerics(generic, "y");
+        }
+
+        [Test]
+        public void BitshiftConstants()
+        {
+            //    0  2 1
+            //y = 1i << 2
+            var graph = new GraphBuilder();
+            graph.SetConst(0, ConcreteType.I32);
+            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetBitShift(0, 1, 2);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ConcreteType.I32, "y");
+        }
+
     }
 }

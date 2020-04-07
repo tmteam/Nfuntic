@@ -67,6 +67,17 @@ namespace nfun.Ti4
             }
         }
 
+        public void SetBitwiseInvert(int argId, int resultId)
+        {
+            var arg = GetOrCreateNode(argId);
+            var result = GetOrCreateNode(resultId);
+
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
+
+            varNode.BecomeReferenceFor(result);
+            varNode.BecomeAncestorFor(arg);
+        }
+
         public void SetBitwise(int leftId, int rightId, int resultId)
         {
             var left    = GetOrCreateNode(leftId);
