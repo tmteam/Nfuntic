@@ -28,29 +28,7 @@ namespace nfun.Ti4
             return ans;
         }
 
-        private SolvingNode SetOrCreateConcrete(int id, ConcreteType type)
-        {
-            var node = GetOrCreateNode(id);
-            if(!node.BecomeConcrete(type))
-                throw new InvalidOperationException();
-            return node;
-        }
-        private SolvingNode GetOrCreateNode(int id)
-        {
-            while (_syntaxNodes.Count <= id)
-            {
-                _syntaxNodes.Add(null);
-            }
-
-            var alreadyExists = _syntaxNodes[id];
-            if (alreadyExists != null)
-                return alreadyExists;
-
-            var res = new SolvingNode(id.ToString()) {NodeState = new SolvingConstrains()};
-            _syntaxNodes[id] = res;
-            return res;
-        }
-
+       
         public void SetVar(string name, int node)
         {
             var namedNode = GetNamedNode(name);
@@ -160,8 +138,8 @@ namespace nfun.Ti4
             var node = GetOrCreateNode(id);
             if (node.NodeState is SolvingConstrains constrains)
             {
-                constrains.AncestorTypes.Add(ConcreteType.Real);
-                constrains.DescedantTypes.Add(desc);
+                constrains.AddAncestor(ConcreteType.Real);
+                constrains.AddDescedant(desc);
                 constrains.PreferedType = ConcreteType.Real;
             }
             else
@@ -174,7 +152,7 @@ namespace nfun.Ti4
         {
             var exprNode = GetOrCreateNode(rightNodeId);
             var defNode = GetNamedNode(name);
-                
+                //todo use prefered type
            // if (exprNode.IsSolved)
            //    defNode.BecomeReferenceFor(exprNode);
            //else
@@ -223,7 +201,7 @@ namespace nfun.Ti4
                     Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
 
                     //main node. every other node has to reference on it
-                    MergeCycle(result);
+                    SolvingFunctions.MergeCycle(result);
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Cycle normalization results: ");
@@ -233,25 +211,6 @@ namespace nfun.Ti4
                 }
                 else
                 {
-                    foreach (var solvingNode in result)
-                    {
-                        if (solvingNode.NodeState is SolvingConstrains constrains)
-                        {
-                            if (constrains.AncestorTypes.Count > 1)
-                            {
-                                var ancestor = constrains.AncestorTypes.GetCommonAncestor();
-                                constrains.AncestorTypes.Clear();
-                                constrains.AncestorTypes.Add(ancestor);
-                            }
-
-                            if (constrains.DescedantTypes.Count>1)
-                            {
-                                var descedants = constrains.DescedantTypes.GetCommonDescendantOrNull();
-                                constrains.DescedantTypes.Clear();
-                                constrains.DescedantTypes.Add(descedants);
-                            }
-                        }
-                    }
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Toposort results: ");
                     Console.ResetColor();
@@ -272,67 +231,7 @@ namespace nfun.Ti4
             foreach (var typeVariable in _typeVariables) 
                 typeVariable.PrintToConsole();
         }
-
-        private SolvingNode CreateVarType(object state = null)
-        {
-            var varNode = new SolvingNode("V" + _varNodeId)
-            {
-                Type = SolvingNodeType.TypeVariable
-            };
-            varNode.NodeState = state ?? new SolvingConstrains();
-            _varNodeId++;
-            _typeVariables.Add(varNode);
-
-            return varNode;
-        }
-        private static void MergeCycle(SolvingNode[] cycleRoute)
-        {
-            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) ?? cycleRoute.First();
-            foreach (var current in cycleRoute)
-            {
-                if(current==main)
-                    continue;
-                
-                if (current.NodeState is RefTo refState)
-                {
-                    if (!cycleRoute.Contains(refState.Node))
-                        throw new NotImplementedException();
-                }
-                else
-                {
-                    //merge main and current
-                    main.Ancestors.AddRange(current.Ancestors);
-                    if (main.NodeState is ConcreteType concrete)
-                    {
-                        if (current.NodeState is ConcreteType concreteB)
-                            main.NodeState = SolvingFunctions.Merge(concrete, concreteB);
-                        else if (current.NodeState is SolvingConstrains constrainsB)
-                            main.NodeState = SolvingFunctions.Merge(constrainsB, concrete);
-                        else throw new NotImplementedException();
-                    }
-                    else if (main.NodeState is SolvingConstrains constrainsA)
-                    {
-                        if (current.NodeState is ConcreteType concreteB)
-                            main.NodeState = SolvingFunctions.Merge(constrainsA, concreteB);
-                        else if (current.NodeState is SolvingConstrains constrainsB)
-                            main.NodeState = SolvingFunctions.Merge(constrainsB, constrainsA);
-                        else throw new NotImplementedException();
-                    }
-                    else throw new NotImplementedException();
-                }
-                current.NodeState = new RefTo(main);
-            }
-
-            var newAncestors = cycleRoute
-                .SelectMany(r => r.Ancestors)
-                .Where(r => !cycleRoute.Contains(r))
-                .Distinct()
-                .ToList();
-
-            main.Ancestors.Clear();
-            main.Ancestors.AddRange(newAncestors);
-        }
-
+      
 
         public FinalizationResults Solve()
         {
@@ -395,5 +294,43 @@ namespace nfun.Ti4
                 SetOrCreateConcrete(argId, typesOfTheCall);
             }
         }
+
+        private SolvingNode SetOrCreateConcrete(int id, ConcreteType type)
+        {
+            var node = GetOrCreateNode(id);
+            if (!node.BecomeConcrete(type))
+                throw new InvalidOperationException();
+            return node;
+        }
+        private SolvingNode GetOrCreateNode(int id)
+        {
+            while (_syntaxNodes.Count <= id)
+            {
+                _syntaxNodes.Add(null);
+            }
+
+            var alreadyExists = _syntaxNodes[id];
+            if (alreadyExists != null)
+                return alreadyExists;
+
+            var res = new SolvingNode(id.ToString()) { NodeState = new SolvingConstrains() };
+            _syntaxNodes[id] = res;
+            return res;
+        }
+
+        private SolvingNode CreateVarType(object state = null)
+        {
+            var varNode = new SolvingNode("V" + _varNodeId)
+            {
+                Type = SolvingNodeType.TypeVariable
+            };
+            varNode.NodeState = state ?? new SolvingConstrains();
+            _varNodeId++;
+            _typeVariables.Add(varNode);
+
+            return varNode;
+        }
+      
+
     }
 }

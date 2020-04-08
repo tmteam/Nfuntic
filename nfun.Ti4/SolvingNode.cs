@@ -59,21 +59,17 @@ namespace nfun.Ti4
             {
                 Console.Write($"[ ");
 
-                if (constrains.DescedantTypes.Count == 1)
-                    Console.Write(constrains.DescedantTypes.First().Name);
-                else if (constrains.DescedantTypes.Any())
-                    Console.Write($"({string.Join(", ", constrains.DescedantTypes.Select(a => a.Name))})");
+                if (constrains.HasDescendant)
+                    Console.Write(constrains.Descedant);
 
                 Console.Write(" .. ");
 
-                if (constrains.AncestorTypes.Any() || Ancestors.Any())
+                if (constrains.HasAncestor || Ancestors.Any())
                 {
-                    var typeNames = constrains
-                        .AncestorTypes
-                        .Select(a => a.Name.ToString());
-                    var ancestorNames = Ancestors.Select(a => a.Name);
-
-                    Console.Write($"({(string.Join(", ", typeNames.Concat(ancestorNames)))})");
+                    if (constrains.HasAncestor)
+                        Console.Write($"{constrains.Ancestor}, ({(string.Join(", ", Ancestors))})");
+                    else
+                        Console.Write($"({(string.Join(", ", Ancestors))})");
                 }
 
                 Console.Write(" ]");
@@ -116,15 +112,7 @@ namespace nfun.Ti4
             }
             else if (node.NodeState is SolvingConstrains constrains)
             {
-                constrains.AncestorTypes.Add(anc);
-                if (constrains.AncestorTypes.Count > 1)
-                {
-                    var newAnc = constrains.AncestorTypes.GetCommonDescendantOrNull();
-                    constrains.AncestorTypes.Clear();
-                    constrains.AncestorTypes.Add(newAnc);
-                }
-
-                constrains.Validate();
+                constrains.AddAncestor(anc);
             };
         }
     }

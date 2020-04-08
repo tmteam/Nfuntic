@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace nfun.Ti4
 {
@@ -8,38 +6,30 @@ namespace nfun.Ti4
     {
         public SolvingConstrains(ConcreteType desc = null, ConcreteType anc = null)
         {
-            if(desc!=null)
-                DescedantTypes.Add(desc);
-            if(anc!=null)
-                AncestorTypes.Add(anc);
+            Descedant = desc;
+            Ancestor = anc;
         }
 
         public SolvingConstrains GetCopy()
         {
-            var result = new SolvingConstrains()
+            var result = new SolvingConstrains(Descedant, Ancestor)
             {
                 IsComparable = this.IsComparable,
                 PreferedType = this.PreferedType
             };
-            result.AncestorTypes.AddRange(AncestorTypes);
-            result.DescedantTypes.AddRange(DescedantTypes);
             return result;
         }
         public bool Fits(ConcreteType concrete)
         {
-            if (AncestorTypes.Any())
+            if (HasAncestor)
             {
-                var anc = AncestorTypes.GetCommonDescendantOrNull();
-                if (anc == null)
-                    return false;
-                if (!concrete.CanBeImplicitlyConvertedTo(anc))
+                if (!concrete.CanBeImplicitlyConvertedTo(Ancestor))
                     return false;
             }
 
-            if (DescedantTypes.Any())
+            if (HasDescendant)
             {
-                var desc = DescedantTypes.GetCommonAncestor();
-                if (!desc.CanBeImplicitlyConvertedTo(concrete))
+                if (!Descedant.CanBeImplicitlyConvertedTo(concrete))
                     return false;
             }
 
@@ -47,15 +37,45 @@ namespace nfun.Ti4
                 return false;
             return true;
         }
+        
+        public ConcreteType Ancestor { get; private set; }
 
-        public ConcreteType CommonAncestor 
-            => AncestorTypes.Any() ? AncestorTypes.GetCommonDescendantOrNull() : null;
+        public ConcreteType Descedant { get; private set; }
 
-        public ConcreteType CommonDescedant 
-            => DescedantTypes.Any() ? DescedantTypes.GetCommonAncestor() : null;
+        public bool HasAncestor => Ancestor!=null;
+        public bool HasDescendant => Descedant!=null;
 
-        public List<ConcreteType> AncestorTypes { get; } = new List<ConcreteType>();
-        public List<ConcreteType> DescedantTypes { get; } = new List<ConcreteType>();
+        public bool TryAddAncestor(ConcreteType type)
+        {
+            if (type == null)
+                return true;
+            if (Ancestor == null)
+                Ancestor = type;
+            else
+            {
+                var res = Ancestor.GetFirstCommonDescendantOrNull(type);
+                if (res == null)
+                    return false;
+                Ancestor = res;
+            }
+
+            return true;
+        }
+        public void AddAncestor(ConcreteType type)
+        {
+            if(!TryAddAncestor(type))
+                throw new InvalidOperationException();
+        }
+
+        public void AddDescedant(ConcreteType type)
+        {
+            if(type==null)
+                return;
+            if (Descedant == null)
+                Descedant = type;
+            else
+                Descedant = Descedant.GetLastCommonAncestor(type);
+        }
         public ConcreteType PreferedType { get; set; }
         public bool IsComparable { get; set; }
 
@@ -65,26 +85,16 @@ namespace nfun.Ti4
             {
                 IsComparable = this.IsComparable || constrains.IsComparable
             };
-            if (DescedantTypes.Any() || constrains.DescedantTypes.Any())
-            {
-                var descendantType = DescedantTypes.Union(constrains.DescedantTypes)
-                    .GetCommonAncestor();
-                result.DescedantTypes.Add(descendantType);
-            }
+            result.AddDescedant(Descedant);
+            result.AddDescedant(constrains.Descedant);
 
-            if (AncestorTypes.Any() || constrains.AncestorTypes.Any())
-            {
-                var ancestorType = AncestorTypes.Union(constrains.AncestorTypes)
-                    .GetCommonDescendantOrNull();
-                if (ancestorType == null)
-                    return null;
-                result.AncestorTypes.Add(ancestorType);
-            }
+            if (!result.TryAddAncestor(Ancestor) || !result.TryAddAncestor(constrains.Ancestor))
+                return null;
 
-            if (result.AncestorTypes.Any() && result.DescedantTypes.Any())
+            if (result.HasAncestor && result.HasDescendant)
             {
-                var anc = result.AncestorTypes[0];
-                var des = result.DescedantTypes[0];
+                var anc = result.Ancestor;
+                var des = result.Descedant;
                 if (anc.Equals(des))
                 {
                     if (result.IsComparable && !anc.IsComparable)
@@ -96,59 +106,38 @@ namespace nfun.Ti4
             }
             return result;
         }
-        public void Validate()
-        {
-            if(!AncestorTypes.Any())
-                return;
-            if(!DescedantTypes.Any())
-                return;
-
-            var des = CommonDescedant?? throw new InvalidOperationException();
-            
-            if(!des.CanBeImplicitlyConvertedTo(CommonAncestor))
-                throw new InvalidOperationException();
-        }
-
-        public override string ToString() => $"[{CommonDescedant}..{CommonAncestor}]";
+       
+        public override string ToString() => $"[{Descedant}..{Ancestor}]";
 
         public object GetOptimizedOrThrow()
         {
             if (IsComparable)
             {
-                if (CommonDescedant != null)
+                if (Descedant != null)
                 {
-                    if (CommonDescedant.Equals(ConcreteType.Char))
+                    if (Descedant.Equals(ConcreteType.Char))
                         return ConcreteType.Char;
-                    else if (CommonDescedant.IsNumeric)
-                        AncestorTypes.Add(ConcreteType.Real);
+                    
+                    if (Descedant.IsNumeric)
+                    {
+                        if(!TryAddAncestor(ConcreteType.Real))
+                            throw new InvalidOperationException();
+                    }
                     else
                         throw new InvalidOperationException("Types cannot be compared");
                 }
             }
 
-            if (AncestorTypes.Count > 1)
-            {
-                var commonAncestor = CommonAncestor;
-                AncestorTypes.Clear();
-                AncestorTypes.Add(commonAncestor);
-            }
 
-            if (DescedantTypes.Count > 1)
+            if (HasAncestor && HasDescendant)
             {
-                var commonDesc = CommonDescedant;
-                DescedantTypes.Clear();
-                DescedantTypes.Add(commonDesc);
-            }
-
-            if (CommonAncestor != null && CommonDescedant != null)
-            {
-                if(CommonAncestor.Equals(CommonDescedant))
-                    return CommonAncestor;
-                if (!CommonDescedant.CanBeImplicitlyConvertedTo(CommonAncestor))
+                if(Ancestor.Equals(Descedant))
+                    return Ancestor;
+                if (!Descedant.CanBeImplicitlyConvertedTo(Ancestor))
                     throw new InvalidOperationException();
             }
 
-            if (DescedantTypes.Any() && CommonDescedant.Equals(ConcreteType.Any))
+            if (Descedant?.Equals(ConcreteType.Any)==true)
                 return ConcreteType.Any;
 
             return this;

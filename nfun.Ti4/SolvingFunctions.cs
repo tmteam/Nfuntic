@@ -4,70 +4,62 @@ using System.Linq;
 
 namespace nfun.Ti4
 {
-    public static class SolvingFunctions
+    public static class SolvingFunctions 
     {
-        public static object Merge(ConcreteType a, ConcreteType b)
+        public static void MergeCycle(SolvingNode[] cycleRoute)
         {
-            if (a.Name != b.Name)
-                throw new InvalidOperationException();
-            return a;
-        }
-
-        public static object Merge(SolvingConstrains limits, ConcreteType concrete)
-        {
-            if (!limits.AncestorTypes.TrueForAll(concrete.CanBeImplicitlyConvertedTo))
-                throw new InvalidOperationException();
-            if (!limits.DescedantTypes.TrueForAll(d => d.CanBeImplicitlyConvertedTo(concrete)))
-                throw new InvalidOperationException();
-            if(limits.IsComparable && !concrete.IsComparable)
-                throw new InvalidOperationException();
-
-            return concrete;
-        }
-
-        public static object Merge(SolvingConstrains a, SolvingConstrains b)
-        {
-            var result = new SolvingConstrains();
-            ConcreteType ancestor = null;
-
-            if (a.AncestorTypes.Any() || b.AncestorTypes.Any())
+            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) ?? cycleRoute.First();
+            foreach (var current in cycleRoute)
             {
-                ancestor = a.AncestorTypes.Union(b.AncestorTypes).GetCommonDescendantOrNull();
-                if (ancestor == null)
-                    throw new InvalidOperationException();
+                if (current == main)
+                    continue;
 
-                result.AncestorTypes.Add(ancestor);
-            }
-
-            ConcreteType descendant = null;
-
-            if (a.DescedantTypes.Any() || b.DescedantTypes.Any())
-            {
-                descendant = a.DescedantTypes.Union(b.DescedantTypes).GetCommonAncestor();
-                result.DescedantTypes.Add(descendant);
-            }
-
-            if (ancestor != null && descendant != null)
-                if (!descendant.CanBeImplicitlyConvertedTo(ancestor))
-                    throw new InvalidOperationException();
-            if (a.PreferedType != null)
-            {
-                if (b.PreferedType == null || a.PreferedType.Name == b.PreferedType.Name)
+                if (current.NodeState is RefTo refState)
                 {
-                    result.PreferedType = a.PreferedType;
+                    if (!cycleRoute.Contains(refState.Node))
+                        throw new NotImplementedException();
                 }
+                else
+                {
+                    //merge main and current
+                    main.Ancestors.AddRange(current.Ancestors);
+                    if (main.NodeState is ConcreteType concrete)
+                    {
+                        if (current.NodeState is ConcreteType concreteB)
+                            if (concreteB != concrete) throw new InvalidOperationException();
+                            else if (current.NodeState is SolvingConstrains constrainsB)
+                            {
+                                if (!constrainsB.Fits(concrete))
+                                    throw new InvalidOperationException();
+                                main.NodeState = concrete;
+                            }
+                            else throw new NotImplementedException();
+                    }
+                    else if (main.NodeState is SolvingConstrains constrainsA)
+                    {
+                        if (current.NodeState is ConcreteType concreteB)
+                        {
+                            if (!constrainsA.Fits(concreteB)) throw new InvalidOperationException();
+                            main.NodeState = concreteB;
+                        }
+                        else if (current.NodeState is SolvingConstrains constrainsB)
+                            main.NodeState = constrainsB.MergeOrNull(constrainsA) ?? throw new InvalidOperationException();
+                        else throw new NotImplementedException();
+                    }
+                    else throw new NotImplementedException();
+                }
+                current.NodeState = new RefTo(main);
             }
-            else
-                result.PreferedType = b.PreferedType;
 
-            result.IsComparable = a.IsComparable || b.IsComparable;
-            result.Validate();
-            return result;
+            var newAncestors = cycleRoute
+                .SelectMany(r => r.Ancestors)
+                .Where(r => !cycleRoute.Contains(r))
+                .Distinct()
+                .ToList();
+
+            main.Ancestors.Clear();
+            main.Ancestors.AddRange(newAncestors);
         }
-        public static ConcreteType GetCommonAncestor(this IEnumerable<ConcreteType> types)
-            => types.Aggregate((t1, t2) => t1.GetLastCommonAncestor(t2));
-        public static ConcreteType GetCommonDescendantOrNull(this IEnumerable<ConcreteType> types)
-            => types.Aggregate((t1, t2) => t1?.GetFirstCommonDescendantOrNull(t2));
 
         public static void SetDownwardsLimits(SolvingNode[] toposortedNodes)
         {
@@ -137,7 +129,7 @@ namespace nfun.Ti4
                     case SolvingConstrains constrainsAnc:
                     {
                         var result = constrainsAnc.GetCopy();
-                        result.DescedantTypes.Add(concreteDesc);
+                        result.AddDescedant(concreteDesc);
                         return result.GetOptimizedOrThrow();
                     }
                     default:
@@ -151,15 +143,14 @@ namespace nfun.Ti4
                 {
                     case ConcreteType concreteAnc:
                     {
-                        if (constrainsDesc.DescedantTypes.Any()
-                            && constrainsDesc.DescedantTypes.GetCommonAncestor()?.CanBeImplicitlyConvertedTo(concreteAnc) != true)
+                        if (constrainsDesc.HasDescendant && constrainsDesc.Descedant?.CanBeImplicitlyConvertedTo(concreteAnc)!=true)
                             throw new InvalidOperationException();
                         return ancestor.NodeState;
                     }
                     case SolvingConstrains constrainsAnc:
                     {
                         var result = constrainsAnc.GetCopy();
-                        result.DescedantTypes.AddRange(constrainsDesc.DescedantTypes);
+                        result.AddDescedant(constrainsDesc.Descedant);
                         return result.GetOptimizedOrThrow();
                     }
                     default:
@@ -191,8 +182,9 @@ namespace nfun.Ti4
                 upType = concreteAnc;
             else if (ancestor.NodeState is SolvingConstrains constrainsAnc)
             {
-                if (constrainsAnc.AncestorTypes.Any())
-                    upType = constrainsAnc.AncestorTypes.GetCommonDescendantOrNull();
+
+                if (constrainsAnc.Ancestor!=null)
+                    upType = constrainsAnc.Ancestor;
                 else
                     return descendant.NodeState;
             }
@@ -207,11 +199,7 @@ namespace nfun.Ti4
             }
             if (descendant.NodeState is SolvingConstrains constrainsDesc)
             {
-                var newUpLimit = constrainsDesc.AncestorTypes.Append(upType).GetCommonDescendantOrNull();
-                if (newUpLimit == null)
-                    throw new InvalidOperationException();
-                constrainsDesc.AncestorTypes.Clear();
-                constrainsDesc.AncestorTypes.Add(newUpLimit);
+                constrainsDesc.AddAncestor(upType);
                 return descendant.NodeState;
             }
             throw new InvalidOperationException();
@@ -225,12 +213,12 @@ namespace nfun.Ti4
                 var node = toposorteNodes[i];
                 foreach (var ancestor in node.Ancestors.ToArray())
                 {
-                    TryMergeDestructive2(ancestor, node);
+                    TryMergeDestructive(ancestor, node);
                 }
             }
         }
 
-        public static bool TryMergeDestructive2(SolvingNode ancestorNode, SolvingNode descendantNode)
+        public static bool TryMergeDestructive(SolvingNode ancestorNode, SolvingNode descendantNode)
         {
             Console.WriteLine($"-dm: {ancestorNode} -> {descendantNode}");
             var nonRefAncestor = GetNonReference(ancestorNode);
@@ -307,9 +295,6 @@ namespace nfun.Ti4
             
             foreach (var node in toposortedNodes)
             {
-                //if(node.Ancestors.Any())
-                //    throw new InvalidOperationException();
-
                 if (node.NodeState is RefTo refTo)
                 {
                     var originalOne = GetNonReference(node);
@@ -334,47 +319,6 @@ namespace nfun.Ti4
 
             return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
         }
-
-        public static bool SetEqual(SolvingNode a, SolvingNode b)
-        {
-            var aOrigin = GetNonReference(a);
-            var bOrigin = GetNonReference(b);
-            if (aOrigin != a || bOrigin != b)
-                return SetEqual(aOrigin, bOrigin);
-
-            if (a.NodeState is ConcreteType aConcrete)
-            {
-                if (b.NodeState is ConcreteType bConcrete)
-                    return aConcrete.Equals(bConcrete);
-                if (b.NodeState is SolvingConstrains solvingB)
-                    return SetEqual(b, solvingB, aConcrete);
-                throw  new InvalidOperationException();
-            }
-            if (a.NodeState is SolvingConstrains solvingA)
-            {
-                if (b.NodeState is ConcreteType bConcrete)
-                    return SetEqual(a, solvingA, bConcrete);
-                if (b.NodeState is SolvingConstrains solvingB)
-                {
-                    a.NodeState = Merge(solvingA, solvingB);
-                    b.NodeState = new RefTo(a);
-                    return true;
-                }
-                throw new InvalidOperationException();
-
-            }
-            throw new InvalidOperationException();
-
-        }
-
-        private static bool SetEqual(SolvingNode b, SolvingConstrains solvingB, ConcreteType aConcrete)
-        {
-            if (!solvingB.Fits(aConcrete))
-                return false;
-            b.NodeState = aConcrete;
-            return true;
-        }
-
         public static SolvingNode GetNonReference(this SolvingNode node)
         {
             var result = node;
@@ -428,7 +372,7 @@ namespace nfun.Ti4
                     case ConcreteType _: 
                         throw  new InvalidOperationException();
                     case SolvingConstrains constrains:
-                        referencedNode.NodeState = Merge(constrains, refConstrains);
+                        referencedNode.NodeState = constrains.MergeOrNull(refConstrains)??throw new InvalidOperationException();
                         otherNode.NodeState = new RefTo(referencedNode);
                         return;
                     default:

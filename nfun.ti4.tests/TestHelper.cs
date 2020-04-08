@@ -39,14 +39,14 @@ namespace nfun.ti4.tests
             var generic = node.NodeState as SolvingConstrains;
             Assert.IsNotNull(generic);
             if (desc == null)
-                Assert.IsEmpty(generic.DescedantTypes);
+                Assert.IsFalse(generic.HasDescendant);
             else
-                Assert.AreEqual(desc, generic.CommonDescedant);
+                Assert.AreEqual(desc, generic.Descedant);
 
             if (anc == null)
-                Assert.IsEmpty(generic.AncestorTypes);
+                Assert.IsFalse(generic.HasAncestor);
             else
-                Assert.AreEqual(anc, generic.CommonAncestor);
+                Assert.AreEqual(anc, generic.Ancestor);
 
             Assert.AreEqual(isComparable, generic.IsComparable,"IsComparable claim missed");
         }
