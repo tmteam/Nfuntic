@@ -28,9 +28,21 @@ namespace nfun.Ti4
         U24  = _IsPrimitive | _IsNumber | _IsUint | 6 << 5 | _isAbstract,
         U16  = _IsPrimitive | _IsNumber | _IsUint | 7 << 5,
         U12  = _IsPrimitive | _IsNumber | _IsUint | 8 << 5 | _isAbstract,
-        U8   = _IsPrimitive | _IsNumber | _IsUint | 9 << 5
+        U8   = _IsPrimitive | _IsNumber | _IsUint | 9 << 5,
+        ArrayOf = 1<<5| 3 << 9
     }
 
+    public class ConcreteArrayType: ConcreteType
+    {
+        public ConcreteType ElementType { get; }
+
+        public ConcreteArrayType(ConcreteType elementType):base(PrimitiveTypeName.ArrayOf)
+        {
+            ElementType = elementType;
+        }
+
+        public override string ToString() => $"{ElementType}[]";
+    }
     public class ConcreteType
     {
         private static ConcreteType[] IntegerTypes;
@@ -67,13 +79,14 @@ namespace nfun.Ti4
         }
 
         public PrimitiveTypeName Name { get; }
-        public bool IsPrimitive => true;
+        public bool IsPrimitive => Name.HasFlag(PrimitiveTypeName._IsPrimitive);
         public bool IsNumeric => Name.HasFlag(PrimitiveTypeName._IsNumber);
 
         private int Layer => (int)((int)Name >>5 & 0b1111);
 
         public override string ToString() => Name.ToString();
 
+        public static ConcreteArrayType ArrayOf(ConcreteType type) => new ConcreteArrayType(type);
         public static ConcreteType Any { get; } = new ConcreteType(PrimitiveTypeName.Any);
         public static ConcreteType Bool { get; } = new ConcreteType(PrimitiveTypeName.Bool);
         public static ConcreteType Char { get; } = new ConcreteType(PrimitiveTypeName.Char);
@@ -98,8 +111,10 @@ namespace nfun.Ti4
         {
             if (type.Name == PrimitiveTypeName.Any)
                 return true;
-            if (this.Name == type.Name)
+            if (this.Equals(type))
                 return true;
+            if (this is ConcreteArrayType a1 && type is ConcreteArrayType a2)
+                return a1.ElementType.CanBeImplicitlyConvertedTo(a2.ElementType);
             if (!this.IsNumeric || !type.IsNumeric)
                 return false;
             //So both are numbers
@@ -114,13 +129,20 @@ namespace nfun.Ti4
 
         public ConcreteType GetFirstCommonDescendantOrNull(ConcreteType otherType)
         {
-            if (otherType.Name == this.Name)
+            if (this.Equals(otherType))
                 return this;
 
             if (otherType.CanBeImplicitlyConvertedTo(this))
                 return otherType;
             if (this.CanBeImplicitlyConvertedTo(otherType))
                 return this;
+            if (this is ConcreteArrayType a1 && otherType is ConcreteArrayType a2)
+            {
+                var elementType = a1.ElementType.GetFirstCommonDescendantOrNull(a2.ElementType);
+                if (elementType == null)
+                    return null;
+                return ArrayOf(elementType);
+            }
 
             if (!otherType.IsNumeric || !this.IsNumeric)
                 return null;
@@ -136,8 +158,14 @@ namespace nfun.Ti4
 
         public ConcreteType GetLastCommonAncestor(ConcreteType otherType)
         {
-            if (otherType.Name == this.Name)
+            if (this.Equals(otherType))
                 return this;
+            if (this is ConcreteArrayType a1 && otherType is ConcreteArrayType a2)
+            {
+                var elementType = a1.GetLastCommonAncestor(a2);
+                return ConcreteType.ArrayOf(elementType);
+            }
+
             if (!otherType.IsNumeric || !this.IsNumeric)
                 return Any;
             if (otherType.CanBeImplicitlyConvertedTo(this))
@@ -158,6 +186,15 @@ namespace nfun.Ti4
             throw new InvalidOperationException();
         }
 
-        public override bool Equals(object obj) => (obj as ConcreteType)?.Name == Name;
+        public override bool Equals(object obj)
+        {
+            if (obj is ConcreteArrayType a1)
+            {
+                if (!(this is ConcreteArrayType a2))
+                    return false;
+                return a1.Equals(a2);
+            }
+            return (obj as ConcreteType)?.Name == Name;
+        }
     }
 }
