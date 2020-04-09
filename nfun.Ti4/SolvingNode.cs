@@ -102,7 +102,7 @@ namespace nfun.Ti4
         public void SetAncestor(ConcreteType anc)
         {
             var node = this;
-            if (node.NodeState is RefTo refTo)
+            if (node.NodeState is RefTo)
                 node = node.GetNonReference();
 
             if(node.NodeState is ConcreteType oldConcrete)

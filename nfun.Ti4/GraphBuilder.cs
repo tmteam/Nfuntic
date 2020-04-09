@@ -28,7 +28,6 @@ namespace nfun.Ti4
             return ans;
         }
 
-       
         public void SetVar(string name, int node)
         {
             var namedNode = GetNamedNode(name);
@@ -148,6 +147,39 @@ namespace nfun.Ti4
             }
         }
 
+        public void SetVarType(string s, ConcreteType u64)
+        {
+            var node = GetNamedNode(s);
+            if (!node.BecomeConcrete(u64))
+                throw new InvalidOperationException();
+        }
+
+        public void SetCall(ConcreteType[] argThenReturnTypes, int[] argThenReturnIds)
+        {
+            for (int i = 0; i < argThenReturnIds.Length - 1; i++)
+            {
+                var node = GetOrCreateNode(argThenReturnIds[i]);
+                node.SetAncestor(argThenReturnTypes[i]);
+            }
+            SetOrCreateConcrete(
+                argThenReturnIds[argThenReturnIds.Length - 1],
+                argThenReturnTypes[argThenReturnIds.Length - 1]);
+        }
+        public void SetCall(ConcreteType typesOfTheCall, params int[] argumentsThenResult)
+        {
+            ConcreteType[] types = new ConcreteType[argumentsThenResult.Length];
+            for (int i = 0; i < types.Length; i++)
+            {
+                types[i] = typesOfTheCall;
+            };
+            SetCall(types, argumentsThenResult);
+            /*
+            for (int i = 0; i < argumentsThenResult.Length; i++)
+            {
+                var argId = argumentsThenResult[i];
+                SetOrCreateConcrete(argId, typesOfTheCall);
+            }*/
+        }
         public void SetDef(string name, int rightNodeId)
         {
             var exprNode = GetOrCreateNode(rightNodeId);
@@ -279,21 +311,7 @@ namespace nfun.Ti4
             return results;
         }
 
-        public void SetVarType(string s, ConcreteType u64)
-        {
-            var node = GetNamedNode(s);
-            if(!node.BecomeConcrete(u64))
-                throw new InvalidOperationException();
-        }
-
-        public void SetCall(ConcreteType typesOfTheCall, params int[] argumentsThenResult)
-        {
-            for (int i = 0; i < argumentsThenResult.Length; i++)
-            {
-                var argId = argumentsThenResult[i];
-                SetOrCreateConcrete(argId, typesOfTheCall);
-            }
-        }
+      
 
         private SolvingNode SetOrCreateConcrete(int id, ConcreteType type)
         {

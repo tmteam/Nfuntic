@@ -295,7 +295,7 @@ namespace nfun.Ti4
             
             foreach (var node in toposortedNodes)
             {
-                if (node.NodeState is RefTo refTo)
+                if (node.NodeState is RefTo)
                 {
                     var originalOne = GetNonReference(node);
                     node.NodeState = new RefTo(originalOne);

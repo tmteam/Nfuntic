@@ -10,6 +10,7 @@ namespace nfun.ti4.tests
     {
 
         [Test(Description = "x = 3 / 2")]
+        [Ignore("Обобщенная константа без выхода")]
         public void SimpleDivideComputation()
         {
             //x = 3 / 2

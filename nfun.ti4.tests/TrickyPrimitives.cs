@@ -9,6 +9,80 @@ namespace nfun.ti4.tests
 {
     class TrickyPrimitives
     {
+        [Test(Description = "y = isNan(1) ")]
+        [Ignore("Обобщенная входная константа")]
+        public void SimpleConcreteFunctionWithConstant()
+        {
+            //node |    1     0
+            //expr |y = isNan(1) 
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetCall(new []{ConcreteType.Real, ConcreteType.Bool}, new []{0,1});
+            graph.SetDef("y", 1);
+            var result = graph.Solve();
+
+            result.AssertNoGenerics();
+            result.AssertNamed(ConcreteType.Bool, "y");
+        }
+
+        [Test(Description = "y = isNan(x) ")]
+        [Ignore("Обобщенный вход без выхода")]
+        public void SimpleConcreteFunctionWithVariable()
+        {
+            //node |    1     0
+            //expr |y = isNan(x) 
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetCall(new[] { ConcreteType.Real, ConcreteType.Bool }, new[] { 0, 1 });
+            graph.SetDef("y", 1);
+            var result = graph.Solve();
+
+            result.AssertNoGenerics();
+            result.AssertNamed(ConcreteType.Real, "x");
+            result.AssertNamed(ConcreteType.Bool, "y");
+        }
+
+        [Test(Description = "x:int; y = isNan(x) ")]
+        [Ignore("Обобщенный вход без выхода")]
+
+        public void SimpleConcreteFunctionWithVariableOfConcreteType()
+        {
+            //node |           1     0
+            //expr |x:int; y = isNan(x) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("x", ConcreteType.I32);
+            graph.SetVar("x", 0);
+            graph.SetCall(new[] { ConcreteType.Real, ConcreteType.Bool }, new[] { 0, 1 });
+            graph.SetDef("y", 1);
+            var result = graph.Solve();
+
+            result.AssertNoGenerics();
+            result.AssertNamed(ConcreteType.Real, "x");
+            result.AssertNamed(ConcreteType.Bool, "y");
+        }
+        [Test(Description = "y = isNan(x); z = ~x")]
+        [Ignore("Обобщенный вход без выхода")]
+
+        public void SimpleConcreteFunctionWithVariableThatLimitisAfterwards()
+        {
+            //node |    1     0       3        2
+            //expr |y = isNan(x); z = isMaxInt(x) 
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetCall(new[] { ConcreteType.Real, ConcreteType.Bool }, new[] { 0, 1 });
+            graph.SetDef("y", 1);
+
+            graph.SetVar("x",2);
+            graph.SetCall(new []{ConcreteType.I32, ConcreteType.Bool}, new []{2,3});
+            graph.SetDef("z", 3);
+
+            var result = graph.Solve();
+
+            result.AssertNoGenerics();
+            result.AssertNamed(ConcreteType.I32, "x");
+            result.AssertNamed(ConcreteType.Bool, "y","z");
+        }
+
         [Test(Description = "y = x ")]
         public void OutputEqualsInput_simpleGeneric()
         {
@@ -56,6 +130,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
+        [Ignore("Обобщенная константа без выхода")]
         public void LimitCall_ComplexEquations_TypesSolved()
         {
             //     0 2 1      3 5  4      6 8 7
