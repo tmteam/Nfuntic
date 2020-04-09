@@ -7,14 +7,6 @@ using System.Text;
 namespace nfun.Ti4
 {
 
-    public class ConcreteTypeSolvingNode : SolvingNode
-    {
-        public ConcreteTypeSolvingNode(PrimitiveTypeName typeName, string nodeName) : base(nodeName)
-        {
-            this.NodeState = new ConcreteType(typeName);
-        }
-    }
-
     public enum SolvingNodeType
     {
         Named,
@@ -33,7 +25,7 @@ namespace nfun.Ti4
 
         public SolvingNodeType Type { get; set; } = SolvingNodeType.SyntaxNode;
         public List<SolvingNode> Ancestors { get; } = new List<SolvingNode>();
-
+        public List<SolvingNode> MemberOf { get; } = new List<SolvingNode>();
         public bool IsSolved => NodeState is ConcreteType;
         public object NodeState { get; set; }
 
@@ -98,22 +90,26 @@ namespace nfun.Ti4
 
             return false;
         }
-
-        public void SetAncestor(ConcreteType anc)
+        public bool TrySetAncestor(ConcreteType anc)
         {
             var node = this;
             if (node.NodeState is RefTo)
                 node = node.GetNonReference();
 
-            if(node.NodeState is ConcreteType oldConcrete)
+            if (node.NodeState is ConcreteType oldConcrete)
             {
-                if(!oldConcrete.CanBeImplicitlyConvertedTo(anc))
-                    throw new InvalidOperationException();
+                return oldConcrete.CanBeImplicitlyConvertedTo(anc);
             }
             else if (node.NodeState is SolvingConstrains constrains)
             {
-                constrains.AddAncestor(anc);
+                return constrains.TryAddAncestor(anc);
             };
+            return false;
+        }
+        public void SetAncestor(ConcreteType anc)
+        {
+            if(!TrySetAncestor(anc))
+                throw new InvalidOperationException();
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Win32.SafeHandles;
 
 namespace nfun.Ti4
 {
@@ -33,13 +34,48 @@ namespace nfun.Ti4
                     return false;
             }
 
+            if (IsArray && !(concrete is ConcreteArrayType))
+                return false;
+
             if (IsComparable && !concrete.IsComparable)
                 return false;
             return true;
         }
-        
-        public ConcreteType Ancestor { get; private set; }
 
+        public bool IsArray => ArrayElementState != null;
+        public SolvingNode ArrayElementState { get; private set; }
+
+        public void BecomeArray(SolvingNode elementNode)
+        {
+            if(IsComparable)
+                throw new InvalidOperationException();
+
+            ArrayElementState = elementNode;
+            if (HasAncestor)
+            {
+                if (Ancestor is ConcreteArrayType arrayAnc)
+                    elementNode.SetAncestor(arrayAnc.ElementType);
+                else
+                    throw new InvalidOperationException();
+                Ancestor = null;
+            }
+
+            if (HasDescendant)
+            {
+                if (Descedant is ConcreteArrayType arrayDes)
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                Descedant = null;
+            }
+        }
+
+        public ConcreteType Ancestor { get; private set; }
         public ConcreteType Descedant { get; private set; }
 
         public bool HasAncestor => Ancestor!=null;
@@ -49,6 +85,14 @@ namespace nfun.Ti4
         {
             if (type == null)
                 return true;
+            if (IsArray)
+            {
+                if (type is ConcreteArrayType array)
+                {
+                    return ArrayElementState.TrySetAncestor(array.ElementType);
+                }
+                return false;
+            }
             if (Ancestor == null)
                 Ancestor = type;
             else
@@ -71,6 +115,9 @@ namespace nfun.Ti4
         {
             if(type==null)
                 return;
+            if (IsArray)
+                throw new InvalidOperationException();
+
             if (Descedant == null)
                 Descedant = type;
             else
@@ -81,14 +128,13 @@ namespace nfun.Ti4
 
         public object MergeOrNull(SolvingConstrains constrains)
         {
-            var result = new SolvingConstrains()
+            var result = new SolvingConstrains(Descedant,Ancestor)
             {
                 IsComparable = this.IsComparable || constrains.IsComparable
             };
-            result.AddDescedant(Descedant);
             result.AddDescedant(constrains.Descedant);
 
-            if (!result.TryAddAncestor(Ancestor) || !result.TryAddAncestor(constrains.Ancestor))
+            if (!result.TryAddAncestor(constrains.Ancestor))
                 return null;
 
             if (result.HasAncestor && result.HasDescendant)
@@ -104,6 +150,16 @@ namespace nfun.Ti4
                 if (!des.CanBeImplicitlyConvertedTo(anc))
                     return null;
             }
+
+            if (IsArray && constrains.IsArray)
+            {
+                this.ArrayElementState.BecomeReferenceFor(constrains.ArrayElementState);
+                result.ArrayElementState = ArrayElementState;
+            }
+            else if (IsArray)
+                result.ArrayElementState = ArrayElementState;
+            else if (constrains.IsArray)
+                result.ArrayElementState = constrains.ArrayElementState;
             return result;
         }
        
@@ -128,7 +184,13 @@ namespace nfun.Ti4
                 }
             }
 
-
+            if (IsArray)
+            {
+                if(HasAncestor || HasDescendant || IsComparable)
+                    throw new InvalidOperationException();
+                if (ArrayElementState.GetNonReference().NodeState is ConcreteType concrete)
+                    return ConcreteType.ArrayOf(concrete);
+            }
             if (HasAncestor && HasDescendant)
             {
                 if(Ancestor.Equals(Descedant))

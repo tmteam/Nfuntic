@@ -154,6 +154,22 @@ namespace nfun.Ti4
                 throw new InvalidOperationException();
         }
 
+        public void SetArrayInit(int resultIds, params int[] elementIds)
+        {
+            var elementType = CreateVarType();
+            foreach (var id in elementIds)
+            {
+                elementType.BecomeReferenceFor(GetOrCreateNode(id));
+            }
+
+            var resultNode = GetOrCreateNode(resultIds);
+            elementType.MemberOf.Add(elementType);
+            if(resultNode.NodeState is SolvingConstrains constrains)
+                constrains.BecomeArray(elementType);
+            else
+                throw new InvalidOperationException();
+        }
+
         public void SetCall(ConcreteType[] argThenReturnTypes, int[] argThenReturnIds)
         {
             for (int i = 0; i < argThenReturnIds.Length - 1; i++)
@@ -211,7 +227,10 @@ namespace nfun.Ti4
                 for (int i = 0; i < allNodes.Length; i++)
                 {
                     var node = allNodes[i];
-                    var edges = node.Ancestors.Select(a => a.GraphId);
+                    var edges = node.Ancestors
+                        .Union(node.MemberOf)
+                        .Select(a => a.GraphId);
+                    
                     if (node.NodeState is RefTo reference)
                     {
                         //todo 2side reference
