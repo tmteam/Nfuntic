@@ -34,45 +34,9 @@ namespace nfun.Ti4
                     return false;
             }
 
-            if (IsArray && !(concrete is ConcreteArrayType))
-                return false;
-
             if (IsComparable && !concrete.IsComparable)
                 return false;
             return true;
-        }
-
-        public bool IsArray => ArrayElementState != null;
-        public SolvingNode ArrayElementState { get; private set; }
-
-        public void BecomeArray(SolvingNode elementNode)
-        {
-            if(IsComparable)
-                throw new InvalidOperationException();
-
-            ArrayElementState = elementNode;
-            if (HasAncestor)
-            {
-                if (Ancestor is ConcreteArrayType arrayAnc)
-                    elementNode.SetAncestor(arrayAnc.ElementType);
-                else
-                    throw new InvalidOperationException();
-                Ancestor = null;
-            }
-
-            if (HasDescendant)
-            {
-                if (Descedant is ConcreteArrayType arrayDes)
-                {
-                    throw new NotImplementedException();
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
-
-                Descedant = null;
-            }
         }
 
         public ConcreteType Ancestor { get; private set; }
@@ -85,14 +49,7 @@ namespace nfun.Ti4
         {
             if (type == null)
                 return true;
-            if (IsArray)
-            {
-                if (type is ConcreteArrayType array)
-                {
-                    return ArrayElementState.TrySetAncestor(array.ElementType);
-                }
-                return false;
-            }
+
             if (Ancestor == null)
                 Ancestor = type;
             else
@@ -115,8 +72,6 @@ namespace nfun.Ti4
         {
             if(type==null)
                 return;
-            if (IsArray)
-                throw new InvalidOperationException();
 
             if (Descedant == null)
                 Descedant = type;
@@ -151,15 +106,6 @@ namespace nfun.Ti4
                     return null;
             }
 
-            if (IsArray && constrains.IsArray)
-            {
-                this.ArrayElementState.BecomeReferenceFor(constrains.ArrayElementState);
-                result.ArrayElementState = ArrayElementState;
-            }
-            else if (IsArray)
-                result.ArrayElementState = ArrayElementState;
-            else if (constrains.IsArray)
-                result.ArrayElementState = constrains.ArrayElementState;
             return result;
         }
        
@@ -184,13 +130,6 @@ namespace nfun.Ti4
                 }
             }
 
-            if (IsArray)
-            {
-                if(HasAncestor || HasDescendant || IsComparable)
-                    throw new InvalidOperationException();
-                if (ArrayElementState.GetNonReference().NodeState is ConcreteType concrete)
-                    return ConcreteType.ArrayOf(concrete);
-            }
             if (HasAncestor && HasDescendant)
             {
                 if(Ancestor.Equals(Descedant))

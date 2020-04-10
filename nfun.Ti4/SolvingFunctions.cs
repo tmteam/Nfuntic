@@ -26,7 +26,7 @@ namespace nfun.Ti4
                     if (main.NodeState is ConcreteType concrete)
                     {
                         if (current.NodeState is ConcreteType concreteB)
-                            if (concreteB != concrete) throw new InvalidOperationException();
+                            if (!concreteB.Equals(concrete)) throw new InvalidOperationException();
                             else if (current.NodeState is SolvingConstrains constrainsB)
                             {
                                 if (!constrainsB.Fits(concrete))
@@ -71,6 +71,51 @@ namespace nfun.Ti4
                     node.NodeState = SetDownwardsLimits(node, nodeAncestor);
                 }
             }
+        }
+        private static object SetDownwardsLimits(SolvingNode descendant, SolvingNode ancestor)
+        {
+            #region todo проверить случаи ссылок
+            if (descendant == ancestor)
+                return descendant.NodeState;
+
+            if (descendant.NodeState is RefTo referenceDesc)
+            {
+                referenceDesc.Node.NodeState = SetDownwardsLimits(descendant, referenceDesc.Node);
+                return referenceDesc;
+            }
+            if (ancestor.NodeState is RefTo referenceAnc)
+            {
+                return SetDownwardsLimits(referenceAnc.Node, descendant);
+            }
+            #endregion
+
+            ConcreteType upType = null;
+            if (ancestor.NodeState is ConcreteType concreteAnc)
+                upType = concreteAnc;
+            else if (ancestor.NodeState is SolvingConstrains constrainsAnc)
+            {
+
+                if (constrainsAnc.Ancestor != null)
+                    upType = constrainsAnc.Ancestor;
+                else
+                    return descendant.NodeState;
+            }
+            if (upType == null)
+                throw new InvalidOperationException();
+
+            if (descendant.NodeState is ConcreteType concreteDesc)
+            {
+                if (concreteDesc.CanBeImplicitlyConvertedTo(upType))
+                    return descendant.NodeState;
+                throw new InvalidOperationException();
+            }
+            if (descendant.NodeState is SolvingConstrains constrainsDesc)
+            {
+                constrainsDesc.AddAncestor(upType);
+                return descendant.NodeState;
+            }
+            throw new InvalidOperationException();
+
         }
 
         public static void SetUpwardsLimits(SolvingNode[] toposortedNodes)
@@ -158,52 +203,6 @@ namespace nfun.Ti4
                 }
             }
             throw new NotSupportedException();
-        }
-
-        private static object SetDownwardsLimits(SolvingNode descendant, SolvingNode ancestor)
-        {
-            #region todo проверить случаи ссылок
-            if (descendant == ancestor)
-                return descendant.NodeState;
-
-            if (descendant.NodeState is RefTo referenceDesc)
-            {
-                referenceDesc.Node.NodeState = SetDownwardsLimits(descendant, referenceDesc.Node);
-                return referenceDesc;
-            }
-            if (ancestor.NodeState is RefTo referenceAnc)
-            {
-                return SetDownwardsLimits(referenceAnc.Node, descendant);
-            }
-            #endregion
-
-            ConcreteType upType = null;
-            if (ancestor.NodeState is ConcreteType concreteAnc)
-                upType = concreteAnc;
-            else if (ancestor.NodeState is SolvingConstrains constrainsAnc)
-            {
-
-                if (constrainsAnc.Ancestor!=null)
-                    upType = constrainsAnc.Ancestor;
-                else
-                    return descendant.NodeState;
-            }
-            if (upType == null)
-                throw new InvalidOperationException();
-
-            if (descendant.NodeState is ConcreteType concreteDesc)
-            {
-                if (concreteDesc.CanBeImplicitlyConvertedTo(upType))
-                    return descendant.NodeState;
-                throw new InvalidOperationException();
-            }
-            if (descendant.NodeState is SolvingConstrains constrainsDesc)
-            {
-                constrainsDesc.AddAncestor(upType);
-                return descendant.NodeState;
-            }
-            throw new InvalidOperationException();
-
         }
 
         public static void Destruction(SolvingNode[] toposorteNodes)

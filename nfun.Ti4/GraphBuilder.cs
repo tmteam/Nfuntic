@@ -163,11 +163,13 @@ namespace nfun.Ti4
             }
 
             var resultNode = GetOrCreateNode(resultIds);
-            elementType.MemberOf.Add(elementType);
+            /*elementType.MemberOf.Add(elementType);
             if(resultNode.NodeState is SolvingConstrains constrains)
                 constrains.BecomeArray(elementType);
             else
                 throw new InvalidOperationException();
+        */
+            throw new NotImplementedException();
         }
 
         public void SetCall(ConcreteType[] argThenReturnTypes, int[] argThenReturnIds)
