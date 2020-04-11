@@ -94,12 +94,14 @@ namespace nfun.Ti4
                 upType = concreteAnc;
             else if (ancestor.NodeState is SolvingConstrains constrainsAnc)
             {
-
                 if (constrainsAnc.Ancestor != null)
                     upType = constrainsAnc.Ancestor;
                 else
                     return descendant.NodeState;
             }
+            else if (ancestor.NodeState is ArrayOf)
+                return descendant.NodeState;
+
             if (upType == null)
                 throw new InvalidOperationException();
 
@@ -113,6 +115,13 @@ namespace nfun.Ti4
             {
                 constrainsDesc.AddAncestor(upType);
                 return descendant.NodeState;
+            }
+
+            if (descendant.NodeState is ArrayOf array)
+            {
+                if(!array.TrySetAncestor(upType))
+                    throw new InvalidOperationException();
+                return array;
             }
             throw new InvalidOperationException();
 
@@ -199,10 +208,36 @@ namespace nfun.Ti4
                         return result.GetOptimizedOrThrow();
                     }
                     default:
-                        throw new NotSupportedException();
+                        throw new NotSupportedException($"Ancestor type {ancestor.NodeState.GetType().Name} is not supported");
                 }
             }
-            throw new NotSupportedException();
+
+            if (descendant.NodeState is ArrayOf desArrayOf)
+            {
+                switch (ancestor.NodeState)
+                {
+                    case ConcreteArrayType concreteAnc:
+                    {
+                        var ancE = concreteAnc.ElementType;
+                        var desE = desArrayOf.ElementNode;
+                        SetUpwardsLimits(desE, new SolvingNode("") {NodeState = ancE});
+                        return ancestor.NodeState;
+                    }
+
+                    case ArrayOf ancArrayOf:
+                    {
+                        var ancE = ancArrayOf.ElementNode;
+                        var desE = desArrayOf.ElementNode;
+                        ancE.NodeState = SetUpwardsLimits(ancE, desE);
+                        return ancestor.NodeState;
+                    }
+                    case SolvingConstrains _: return ancestor.NodeState;
+                    default:
+                        throw new NotSupportedException($"Ancestor type {ancestor.NodeState.GetType().Name} is not supported");
+                }
+            }
+
+            throw new NotSupportedException($"Descendant type {descendant.NodeState.GetType().Name} is not supported");
         }
 
         public static void Destruction(SolvingNode[] toposorteNodes)
@@ -281,6 +316,16 @@ namespace nfun.Ti4
 
                     return true;
                 }
+                else if (nonRefDescendant.NodeState is ArrayOf arrayDes)
+                {
+                    if(constrainsAnc.HasDescendant && constrainsAnc.Descedant!= ConcreteType.Any)
+                        throw new InvalidOperationException();
+
+                    if (constrainsAnc.HasAncestor && !constrainsAnc.Ancestor.Equals(ConcreteType.Any))
+                        throw new InvalidOperationException();
+                    
+                    ancestorNode.NodeState = new RefTo(nonRefDescendant);
+                }
             }
             return false;
         }
@@ -329,11 +374,11 @@ namespace nfun.Ti4
             }
             return result;
         }
-
         public static void BecomeAncestorFor(this SolvingNode ancestor, SolvingNode descendant)
         {
             descendant.Ancestors.Add(ancestor);
         }
+
         public static void BecomeReferenceFor(this SolvingNode referencedNode, SolvingNode otherNode)
         {
             if (otherNode.NodeState is RefTo refTo)

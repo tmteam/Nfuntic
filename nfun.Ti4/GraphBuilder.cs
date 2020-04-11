@@ -33,7 +33,7 @@ namespace nfun.Ti4
             var namedNode = GetNamedNode(name);
             namedNode.Type = SolvingNodeType.Named;
             var idNode = GetOrCreateNode(node);
-            if (idNode.NodeState is SolvingConstrains constrains)
+            if (idNode.NodeState is SolvingConstrains)
             {
                 namedNode.Ancestors.Add(idNode);
             }
@@ -157,19 +157,13 @@ namespace nfun.Ti4
         public void SetArrayInit(int resultIds, params int[] elementIds)
         {
             var elementType = CreateVarType();
+            var resultNode = GetOrCreateArrayNode(resultIds, elementType);
+
             foreach (var id in elementIds)
             {
                 elementType.BecomeReferenceFor(GetOrCreateNode(id));
+                elementType.MemberOf.Add(resultNode);
             }
-
-            var resultNode = GetOrCreateNode(resultIds);
-            /*elementType.MemberOf.Add(elementType);
-            if(resultNode.NodeState is SolvingConstrains constrains)
-                constrains.BecomeArray(elementType);
-            else
-                throw new InvalidOperationException();
-        */
-            throw new NotImplementedException();
         }
 
         public void SetCall(ConcreteType[] argThenReturnTypes, int[] argThenReturnIds)
@@ -341,6 +335,22 @@ namespace nfun.Ti4
                 throw new InvalidOperationException();
             return node;
         }
+
+        private SolvingNode GetOrCreateArrayNode(int id, SolvingNode elementType)
+        {
+            while (_syntaxNodes.Count <= id)
+            {
+                _syntaxNodes.Add(null);
+            }
+
+            var alreadyExists = _syntaxNodes[id];
+            if (alreadyExists != null)
+                throw new InvalidOperationException();
+
+            var res = new SolvingNode(id.ToString()) { NodeState = new ArrayOf(elementType) };
+            _syntaxNodes[id] = res;
+            return res;
+        }
         private SolvingNode GetOrCreateNode(int id)
         {
             while (_syntaxNodes.Count <= id)
@@ -369,7 +379,15 @@ namespace nfun.Ti4
 
             return varNode;
         }
-      
 
+
+        public void SetNegate(int argId, int resultId)
+        {
+            var vartype = CreateVarType(new SolvingConstrains(ConcreteType.I16, ConcreteType.Real));
+            var arg = GetOrCreateNode(argId);
+            var res = GetOrCreateNode(resultId);
+            vartype.BecomeReferenceFor(res);
+            vartype.BecomeAncestorFor(arg);
+        }
     }
 }
