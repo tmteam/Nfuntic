@@ -80,6 +80,7 @@ namespace nfun.Ti4
         }
         public ConcreteType PreferedType { get; set; }
         public bool IsComparable { get; set; }
+        public bool NoConstrains => !HasDescendant && !HasAncestor && !IsComparable;
 
         public object MergeOrNull(SolvingConstrains constrains)
         {

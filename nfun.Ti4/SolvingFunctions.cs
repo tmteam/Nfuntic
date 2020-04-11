@@ -207,6 +207,10 @@ namespace nfun.Ti4
                         result.AddDescedant(constrainsDesc.Descedant);
                         return result.GetOptimizedOrThrow();
                     }
+                    case ArrayOf arrayAnc:
+                    {
+                        return ancestor.NodeState;
+                    }
                     default:
                         throw new NotSupportedException($"Ancestor type {ancestor.NodeState.GetType().Name} is not supported");
                 }
@@ -325,6 +329,13 @@ namespace nfun.Ti4
                         throw new InvalidOperationException();
                     
                     ancestorNode.NodeState = new RefTo(nonRefDescendant);
+                }
+            }
+            else if (nonRefAncestor.NodeState is ArrayOf arrayAnc)
+            {
+                if (nonRefDescendant.NodeState is SolvingConstrains constrainsDesc && constrainsDesc.NoConstrains)
+                {
+                    nonRefDescendant.NodeState = new RefTo(nonRefAncestor);
                 }
             }
             return false;

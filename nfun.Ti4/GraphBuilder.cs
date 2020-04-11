@@ -345,7 +345,17 @@ namespace nfun.Ti4
 
             var alreadyExists = _syntaxNodes[id];
             if (alreadyExists != null)
-                throw new InvalidOperationException();
+            {
+                if (alreadyExists.NodeState is SolvingConstrains constrains && constrains.NoConstrains)
+                {
+                    alreadyExists.NodeState = new ArrayOf(elementType);
+                    return alreadyExists;
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+            }
 
             var res = new SolvingNode(id.ToString()) { NodeState = new ArrayOf(elementType) };
             _syntaxNodes[id] = res;
@@ -388,6 +398,15 @@ namespace nfun.Ti4
             var res = GetOrCreateNode(resultId);
             vartype.BecomeReferenceFor(res);
             vartype.BecomeAncestorFor(arg);
+        }
+
+        public void SetArrGet(int arrArgId, int indexArgId, int resId)
+        {
+            var vartype = CreateVarType();
+            GetOrCreateArrayNode(arrArgId, vartype);
+            GetOrCreateNode(indexArgId).SetAncestor(ConcreteType.I32);
+            var result = GetOrCreateNode(resId);
+            vartype.BecomeReferenceFor(result);
         }
     }
 }
