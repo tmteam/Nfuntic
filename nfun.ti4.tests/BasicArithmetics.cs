@@ -15,13 +15,13 @@ namespace nfun.ti4.tests
         {
             //x = 3 / 2
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, ConcreteType.U8);
-            graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetCall(ConcreteType.Real, 0,1,2);
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetCall(PrimitiveType.Real, 0,1,2);
             graph.SetDef("x",2);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.Real, "x");
+            result.AssertNamed(PrimitiveType.Real, "x");
         }
 
         [Test(Description = "y = 1 + 2 * x")]
@@ -31,8 +31,8 @@ namespace nfun.ti4.tests
             //expr |y = 1 + 2 * x;
 
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, ConcreteType.U8);
-            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
             graph.SetVar("x", 2);
             graph.SetArith(1,2,3);
             graph.SetArith(0,3,4);
@@ -50,14 +50,14 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
-            graph.SetConst(1, ConcreteType.I64);
+            graph.SetConst(1, PrimitiveType.I64);
             graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.I64, "x","y");
+            result.AssertNamed(PrimitiveType.I64, "x","y");
         }
 
         [TestCase]
@@ -66,16 +66,16 @@ namespace nfun.ti4.tests
             Console.WriteLine("x:uint64; y = x + 1");
 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ConcreteType.U64);
+            graph.SetVarType("x", PrimitiveType.U64);
             graph.SetVar("x", 0);
-            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
             graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.U64, "x","y");
+            result.AssertNamed(PrimitiveType.U64, "x","y");
         }
         [TestCase]
         public void IncrementU32WithStrictOutputType()
@@ -84,15 +84,15 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
-            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
             graph.SetArith(0, 1, 2);
-            graph.SetVarType("y", ConcreteType.U32);
+            graph.SetVarType("y", PrimitiveType.U32);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.U32, "x","y");
+            result.AssertNamed(PrimitiveType.U32, "x","y");
         }
 
         [TestCase]
@@ -102,7 +102,7 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
-            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
             graph.SetArith(0, 1, 2);
             graph.SetDef("y", 2);
 
@@ -119,13 +119,13 @@ namespace nfun.ti4.tests
             Console.WriteLine("x= 10i;   a = x*y + 10-x");
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.I32);
+            graph.SetConst(0, PrimitiveType.I32);
             graph.SetDef("x", 0);
 
             graph.SetVar("x", 1);
             graph.SetVar("y", 2);
             graph.SetArith(1, 2, 3);
-            graph.SetIntConst(4, ConcreteType.U8);
+            graph.SetIntConst(4, PrimitiveType.U8);
             graph.SetArith(3, 4, 5);
             graph.SetVar("x", 6);
             graph.SetArith(5, 6, 7);
@@ -135,7 +135,7 @@ namespace nfun.ti4.tests
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.I32, "x","y","a");
+            result.AssertNamed(PrimitiveType.I32, "x","y","a");
         }
 
         [Test]
@@ -144,13 +144,13 @@ namespace nfun.ti4.tests
             Console.WriteLine("x= 10;   a = x*y + 10-x");
 
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, ConcreteType.U8);
+            graph.SetIntConst(0, PrimitiveType.U8);
             graph.SetDef("x", 0);
 
             graph.SetVar("x", 1);
             graph.SetVar("y", 2);
             graph.SetArith(1, 2, 3);
-            graph.SetIntConst(4, ConcreteType.U8);
+            graph.SetIntConst(4, PrimitiveType.U8);
             graph.SetArith(3, 4, 5);
             graph.SetVar("x", 6);
             graph.SetArith(5, 6, 7);
@@ -172,7 +172,7 @@ namespace nfun.ti4.tests
             graph.SetVar("x", 0);
             graph.SetVar("y", 1);
             graph.SetArith(0, 1, 2);
-            graph.SetIntConst(3, ConcreteType.U8);
+            graph.SetIntConst(3, PrimitiveType.U8);
             graph.SetArith(2, 3, 4);
             graph.SetVar("x", 5);
             graph.SetArith(4, 5, 6);
@@ -181,7 +181,7 @@ namespace nfun.ti4.tests
             graph.SetVar("r", 7);
             graph.SetVar("x", 8);
             graph.SetArith(7, 8, 9);
-            graph.SetIntConst(10, ConcreteType.U8);
+            graph.SetIntConst(10, PrimitiveType.U8);
             graph.SetArith(9, 10, 11);
             graph.SetVar("r", 12);
             graph.SetArith(11, 12, 13);
@@ -226,9 +226,9 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
-            graph.SetCall(ConcreteType.Real, 0, 1, 2);
+            graph.SetCall(PrimitiveType.Real, 0, 1, 2);
             graph.SetDef("y",2);
-            graph.SetConst(3, ConcreteType.I32);
+            graph.SetConst(3, PrimitiveType.I32);
             graph.SetDef("a", 3);
 
             
@@ -236,9 +236,9 @@ namespace nfun.ti4.tests
             var result = graph.Solve();
             
             //Assert.AreEqual(0,result.GenericsCount);
-            result.AssertNamed(ConcreteType.I32, "a");
+            result.AssertNamed(PrimitiveType.I32, "a");
             //Assert.AreEqual(ConcreteType.Real, result.GetVariable("b"));
-            result.AssertNamed(ConcreteType.Real, "y");
+            result.AssertNamed(PrimitiveType.Real, "y");
         }
 
         [Test]
@@ -251,21 +251,21 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
 
-            graph.SetConst(0, ConcreteType.I32);
+            graph.SetConst(0, PrimitiveType.I32);
             graph.SetDef("a", 0);
 
 
             graph.SetVar("a", 1);
             graph.SetVar("b", 2);
-            graph.SetCall(ConcreteType.Real, 1, 2, 3);
+            graph.SetCall(PrimitiveType.Real, 1, 2, 3);
             graph.SetDef("y", 3);
 
             var result = graph.Solve();
 
             //Assert.AreEqual(0,result.GenericsCount);
-            result.AssertNamed(ConcreteType.I32, "a");
+            result.AssertNamed(PrimitiveType.I32, "a");
             //Assert.AreEqual(ConcreteType.Real, result.GetVariable("b"));
-            result.AssertNamed(ConcreteType.Real, "y");
+            result.AssertNamed(PrimitiveType.Real, "y");
         }
         [Test]
         [Ignore("Не определено поведение для b")]
@@ -276,7 +276,7 @@ namespace nfun.ti4.tests
             // // a = 1.0; y = a + b;  b = 1i
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.Real);
+            graph.SetConst(0, PrimitiveType.Real);
             graph.SetDef("a", 0);
 
             graph.SetVar("a", 1);
@@ -285,14 +285,14 @@ namespace nfun.ti4.tests
             graph.SetDef("y", 3);
 
 
-            graph.SetConst(4, ConcreteType.I32);
+            graph.SetConst(4, PrimitiveType.I32);
             graph.SetDef("b", 4);
 
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.Real, "a");
-            result.AssertNamed(ConcreteType.Real, "y");
-            result.AssertNamed(ConcreteType.I32, "b");
+            result.AssertNamed(PrimitiveType.Real, "a");
+            result.AssertNamed(PrimitiveType.Real, "y");
+            result.AssertNamed(PrimitiveType.I32, "b");
         }
         [Test]
         public void TwoTypesAreLong_ItsSumIsLong()
@@ -301,10 +301,10 @@ namespace nfun.ti4.tests
             //a = 1l; b = 1l; x = a + b
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.I64);
+            graph.SetConst(0, PrimitiveType.I64);
             graph.SetDef("a",0);
 
-            graph.SetConst(1, ConcreteType.I64);
+            graph.SetConst(1, PrimitiveType.I64);
             graph.SetDef("b", 1);
 
             graph.SetVar("a", 2);
@@ -315,7 +315,7 @@ namespace nfun.ti4.tests
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.I64, "x","a","b");
+            result.AssertNamed(PrimitiveType.I64, "x","a","b");
         }
 
         [Test]
@@ -332,14 +332,14 @@ namespace nfun.ti4.tests
             graph.SetDef("y2", 1);
 
             graph.SetVar("y2", 2);
-            graph.SetConst(3, ConcreteType.I32);
+            graph.SetConst(3, PrimitiveType.I32);
             graph.SetArith(2,3,4);
             graph.SetDef("y3",4);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.I32, "y0","y1","y2","y3");
+            result.AssertNamed(PrimitiveType.I32, "y0","y1","y2","y3");
         }
 
         [Test]
@@ -355,14 +355,14 @@ namespace nfun.ti4.tests
             graph.SetDef("y2", 1);
 
             graph.SetVar("y0", 2);
-            graph.SetConst(3, ConcreteType.I32);
+            graph.SetConst(3, PrimitiveType.I32);
             graph.SetArith(2, 3, 4);
             graph.SetDef("y3", 4);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.I32, "y0", "y1", "y2", "y3");
+            result.AssertNamed(PrimitiveType.I32, "y0", "y1", "y2", "y3");
         }
 
 

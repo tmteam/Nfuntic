@@ -15,7 +15,7 @@ namespace nfun.ti4.tests.Arrays
             //y = get(x,0) 
             var graph = new GraphBuilder();
             graph.SetVar("x",0);
-            graph.SetConst(1, ConcreteType.I32);
+            graph.SetConst(1, PrimitiveType.I32);
             graph.SetArrGetCall(0, 1, 2);
             graph.SetDef("y",2);
             var result = graph.Solve();
@@ -46,12 +46,14 @@ namespace nfun.ti4.tests.Arrays
             //              2     0 1
             //a:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", ConcreteType.ArrayOf(ConcreteType.I32));
+            graph.SetVarType("a", ArrayOf.Create(PrimitiveType.I32));
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
             graph.SetDef("y", 2);
-            graph.Solve();
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamedEqualToArrayOf(ArrayOf.Create(PrimitiveType.I32),"y","a","b");
         }
     }
 }

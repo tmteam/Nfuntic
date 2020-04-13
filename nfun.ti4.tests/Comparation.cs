@@ -22,7 +22,7 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
             
-            result.AssertNamed(ConcreteType.Bool, "y");
+            result.AssertNamed(PrimitiveType.Bool, "y");
             var generic = result.AssertAndGetSingleGeneric(null, null, true);
             result.AssertAreGenerics(generic, "a", "b");
         }
@@ -35,15 +35,15 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
             graph.SetVar("a", 0);
-            graph.SetConst(1, ConcreteType.I32);
+            graph.SetConst(1, PrimitiveType.I32);
             graph.SetComparable(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
-            result.AssertNamed(ConcreteType.Bool, "y");
+            result.AssertNamed(PrimitiveType.Bool, "y");
             result.AssertNoGenerics();
-            result.AssertNamed(ConcreteType.I32, "a");
+            result.AssertNamed(PrimitiveType.I32, "a");
         }
 
         [Test]
@@ -53,14 +53,14 @@ namespace nfun.ti4.tests
             // y =  2i > 1i
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.I32);
-            graph.SetConst(1, ConcreteType.I32);
+            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetConst(1, PrimitiveType.I32);
             graph.SetComparable(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
-            result.AssertNamed(ConcreteType.Bool, "y");
+            result.AssertNamed(PrimitiveType.Bool, "y");
             result.AssertNoGenerics();
         }
 
@@ -71,14 +71,14 @@ namespace nfun.ti4.tests
             // y =  2.0 > 1i
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.Real);
-            graph.SetConst(1, ConcreteType.I32);
+            graph.SetConst(0, PrimitiveType.Real);
+            graph.SetConst(1, PrimitiveType.I32);
             graph.SetComparable(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
-            result.AssertNamed(ConcreteType.Bool, "y");
+            result.AssertNamed(PrimitiveType.Bool, "y");
             result.AssertNoGenerics();
         }
 
@@ -89,8 +89,8 @@ namespace nfun.ti4.tests
             // y =  2.0 > 'v'
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.Real);
-            graph.SetConst(1, ConcreteType.Char);
+            graph.SetConst(0, PrimitiveType.Real);
+            graph.SetConst(1, PrimitiveType.Char);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -108,8 +108,8 @@ namespace nfun.ti4.tests
             // y = 'v'  >  2
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.Char);
-            graph.SetConst(1, ConcreteType.Real);
+            graph.SetConst(0, PrimitiveType.Char);
+            graph.SetConst(1, PrimitiveType.Real);
 
             Assert.Throws<InvalidOperationException>(() =>
             {

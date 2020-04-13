@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using nfun.Ti4;
+﻿using nfun.Ti4;
 using NUnit.Framework;
 
-namespace nfun.ti4.tests
+namespace nfun.ti4.tests.Arrays
 {
     class ArrayInit
     {
@@ -14,15 +11,15 @@ namespace nfun.ti4.tests
             //           3 0  1  2 
             // y:int[] = [1i,2i,3i]
             var graph = new GraphBuilder();
-            graph.SetVarType("y", ConcreteType.ArrayOf(ConcreteType.I32));
-            graph.SetConst(0, ConcreteType.I32);
-            graph.SetConst(1, ConcreteType.I32);
-            graph.SetConst(2, ConcreteType.I32);
+            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(2, PrimitiveType.I32);
             graph.SetArrayInit(3, 0, 1, 2);
             graph.SetDef("y", 3);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamedEqualToArrayOf(ConcreteType.I32, "y");
+            result.AssertNamedEqualToArrayOf(PrimitiveType.I32, "y");
         }
         [Test]
         public void ArrayInitWithSpecifiedArrayTypeAndUpcast()
@@ -30,16 +27,16 @@ namespace nfun.ti4.tests
             //            3 0  1  2 
             // y:real[] = [1i,2i,3i]
             var graph = new GraphBuilder();
-            graph.SetVarType("y", ConcreteType.ArrayOf(ConcreteType.Real));
-            graph.SetConst(0, ConcreteType.I32);
-            graph.SetConst(1, ConcreteType.I32);
-            graph.SetConst(2, ConcreteType.I32);
+            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.Real));
+            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(2, PrimitiveType.I32);
             graph.SetArrayInit(3, 0, 1, 2);
             graph.SetDef("y", 3);
 
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamedEqualToArrayOf(ConcreteType.Real, "y");
+            result.AssertNamedEqualToArrayOf(PrimitiveType.Real, "y");
         }
 
         [Test]
@@ -50,10 +47,10 @@ namespace nfun.ti4.tests
                 //            3 0  1  2 
                 // y:byte[] = [1i,2i,3i]
                 var graph = new GraphBuilder();
-                graph.SetVarType("y", ConcreteType.ArrayOf(ConcreteType.U8));
-                graph.SetConst(0, ConcreteType.I32);
-                graph.SetConst(1, ConcreteType.I32);
-                graph.SetConst(2, ConcreteType.I32);
+                graph.SetVarType("y", ArrayOf.Create(PrimitiveType.U8));
+                graph.SetConst(0, PrimitiveType.I32);
+                graph.SetConst(1, PrimitiveType.I32);
+                graph.SetConst(2, PrimitiveType.I32);
                 graph.SetArrayInit(3, 0, 1, 2);
                 graph.SetDef("y", 3);
                 graph.Solve();
@@ -68,16 +65,16 @@ namespace nfun.ti4.tests
             //          3 0 1 2 
             // y:int[] = [1,2,3]
             var graph = new GraphBuilder();
-            graph.SetVarType("y", ConcreteType.ArrayOf(ConcreteType.I32));
-            graph.SetIntConst(0, ConcreteType.U8);
-            graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetIntConst(2, ConcreteType.U8);
+            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetIntConst(2, PrimitiveType.U8);
             graph.SetArrayInit(3, 0, 1, 2);
             graph.SetDef("y", 3);
 
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamedEqualToArrayOf(ConcreteType.I32, "y");
+            result.AssertNamedEqualToArrayOf(PrimitiveType.I32, "y");
         }
         [Test]
         public void GenericArrayInit()
@@ -85,14 +82,14 @@ namespace nfun.ti4.tests
             //    3 0 1 2 
             // y = [1,2,3]
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, ConcreteType.U8);
-            graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetIntConst(2, ConcreteType.U8);
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetIntConst(2, PrimitiveType.U8);
             graph.SetArrayInit(3, 0,1,2);
             graph.SetDef("y", 3);
 
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(ConcreteType.U8, ConcreteType.Real);
+            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.Real);
             result.AssertNamedEqualToArrayOf(generic, "y");
         }
 
@@ -102,14 +99,14 @@ namespace nfun.ti4.tests
             //    3 0 1 2 
             // y = [1,2,x]
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, ConcreteType.U8);
-            graph.SetIntConst(1, ConcreteType.U8);
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
             graph.SetVar("x",2);
             graph.SetArrayInit(3, 0, 1, 2);
             graph.SetDef("y",3);
 
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(ConcreteType.U8, ConcreteType.Real);
+            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.Real);
             result.AssertNamedEqualToArrayOf(generic, "y");
             result.AssertAreGenerics(generic, "x");
         }
@@ -135,7 +132,7 @@ namespace nfun.ti4.tests
             //       2 0 1  
             //a:int; y = [a,b]
             var graph = new GraphBuilder();
-            graph.SetVarType("a", ConcreteType.I32);
+            graph.SetVarType("a", PrimitiveType.I32);
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetArrayInit(2, 0, 1);
@@ -143,8 +140,8 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamedEqualToArrayOf(ConcreteType.I32, "y");
-            result.AssertNamed(ConcreteType.I32, "a", "b");
+            result.AssertNamedEqualToArrayOf(PrimitiveType.I32, "y");
+            result.AssertNamed(PrimitiveType.I32, "a", "b");
         }
         [Test]
         public void GenericArrayInitWithComplexVariables()
@@ -159,7 +156,7 @@ namespace nfun.ti4.tests
             graph.SetDef("y", 3);
 
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(ConcreteType.I16, ConcreteType.Real);
+            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.I16, PrimitiveType.Real);
             result.AssertNamedEqualToArrayOf(generic, "y");
             result.AssertAreGenerics(generic, "x");
         }
@@ -187,15 +184,15 @@ namespace nfun.ti4.tests
             //    3 0 1 2 
             // y = [1.0,2,3]
             var graph = new GraphBuilder();
-            graph.SetConst(0, ConcreteType.Real);
-            graph.SetIntConst(1, ConcreteType.U8);
-            graph.SetIntConst(2, ConcreteType.U8);
+            graph.SetConst(0, PrimitiveType.Real);
+            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetIntConst(2, PrimitiveType.U8);
             graph.SetArrayInit(3, 0, 1, 2);
             graph.SetDef("y", 3);
         
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamedEqualToArrayOf(ConcreteType.Real, "y");
+            result.AssertNamedEqualToArrayOf(PrimitiveType.Real, "y");
         }
     }
 }

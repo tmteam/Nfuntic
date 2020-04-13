@@ -19,11 +19,7 @@ namespace nfun.Ti4
                 return varnode;
             }
 
-            var ans = new SolvingNode("T" + name)
-            {
-                NodeState = new SolvingConstrains(),
-                Type =  SolvingNodeType.Named,
-            };
+            var ans = new SolvingNode("T" + name, new SolvingConstrains(), SolvingNodeType.Named);
             _variables.Add(name, ans);
             return ans;
         }
@@ -31,9 +27,8 @@ namespace nfun.Ti4
         public void SetVar(string name, int node)
         {
             var namedNode = GetNamedNode(name);
-            namedNode.Type = SolvingNodeType.Named;
             var idNode = GetOrCreateNode(node);
-            if (idNode.NodeState is SolvingConstrains)
+            if (idNode.State is SolvingConstrains)
             {
                 namedNode.Ancestors.Add(idNode);
             }
@@ -55,14 +50,14 @@ namespace nfun.Ti4
             }
 
             foreach (var condId in conditions)
-                SetOrCreateConcrete(condId, ConcreteType.Bool);
+                SetOrCreateConcrete(condId, PrimitiveType.Bool);
         }
 
         public void SetEquality(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
             var right = GetOrCreateNode(rightId);
-            SetOrCreateConcrete(resultId, ConcreteType.Bool);
+            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
 
             var varNode = CreateVarType();
             varNode.BecomeAncestorFor(left);
@@ -73,24 +68,24 @@ namespace nfun.Ti4
         {
             var left   = GetOrCreateNode(leftId);
             var right  = GetOrCreateNode(rightId);
-            SetOrCreateConcrete(resultId, ConcreteType.Bool);
+            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
 
             var varNode = CreateVarType(new SolvingConstrains(){ IsComparable = true});
             varNode.BecomeAncestorFor(left);
             varNode.BecomeAncestorFor(right);
         }
 
-        public void SetConst(int id, ConcreteType type) 
+        public void SetConst(int id, PrimitiveType type) 
             => SetOrCreateConcrete(id, type);
 
-        public void SetIntConst(int id, ConcreteType desc)
+        public void SetIntConst(int id, PrimitiveType desc)
         {
             var node = GetOrCreateNode(id);
-            if (node.NodeState is SolvingConstrains constrains)
+            if (node.State is SolvingConstrains constrains)
             {
-                constrains.AddAncestor(ConcreteType.Real);
+                constrains.AddAncestor(PrimitiveType.Real);
                 constrains.AddDescedant(desc);
-                constrains.PreferedType = ConcreteType.Real;
+                constrains.PreferedType = PrimitiveType.Real;
             }
             else
             {
@@ -98,7 +93,12 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetVarType(string s, ConcreteType u64)
+        public void SetVarType(string s, ArrayOf array)
+        {
+            var node = GetNamedNode(s);
+            node.State = array;
+        }
+        public void SetVarType(string s, PrimitiveType u64)
         {
             var node = GetNamedNode(s);
             if (!node.BecomeConcrete(u64))
@@ -117,7 +117,7 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetCall(ConcreteType[] argThenReturnTypes, int[] argThenReturnIds)
+        public void SetCall(PrimitiveType[] argThenReturnTypes, int[] argThenReturnIds)
         {
             for (int i = 0; i < argThenReturnIds.Length - 1; i++)
             {
@@ -128,9 +128,9 @@ namespace nfun.Ti4
                 argThenReturnIds[argThenReturnIds.Length - 1],
                 argThenReturnTypes[argThenReturnIds.Length - 1]);
         }
-        public void SetCall(ConcreteType typesOfTheCall, params int[] argumentsThenResult)
+        public void SetCall(PrimitiveType typesOfTheCall, params int[] argumentsThenResult)
         {
-            ConcreteType[] types = new ConcreteType[argumentsThenResult.Length];
+            PrimitiveType[] types = new PrimitiveType[argumentsThenResult.Length];
             for (int i = 0; i < types.Length; i++)
             {
                 types[i] = typesOfTheCall;
@@ -178,7 +178,7 @@ namespace nfun.Ti4
                         .Union(node.MemberOf)
                         .Select(a => a.GraphId);
                     
-                    if (node.NodeState is RefTo reference)
+                    if (node.State is RefTo reference)
                     {
                         //todo 2side reference
                         graph[i] = edges.Append(reference.Node.GraphId).ToArray();
@@ -224,7 +224,7 @@ namespace nfun.Ti4
             var arg = GetOrCreateNode(argId);
             var result = GetOrCreateNode(resultId);
 
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
+            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U8, PrimitiveType.I96));
 
             varNode.BecomeReferenceFor(result);
             varNode.BecomeAncestorFor(arg);
@@ -236,7 +236,7 @@ namespace nfun.Ti4
             var right = GetOrCreateNode(rightId);
             var result = GetOrCreateNode(resultId);
 
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
+            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U8, PrimitiveType.I96));
 
             varNode.BecomeReferenceFor(result);
             varNode.BecomeAncestorFor(left);
@@ -246,10 +246,10 @@ namespace nfun.Ti4
         public void SetBitShift(int leftId, int rightId, int resultId)
         {
             var left = GetOrCreateNode(leftId);
-            SetOrCreateConcrete(rightId, ConcreteType.I48);
+            SetOrCreateConcrete(rightId, PrimitiveType.I48);
             var result = GetOrCreateNode(resultId);
 
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.I96));
+            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.I96));
 
             varNode.BecomeReferenceFor(result);
             varNode.BecomeAncestorFor(left);
@@ -261,7 +261,7 @@ namespace nfun.Ti4
             var right = GetOrCreateNode(rightId);
             var result = GetOrCreateNode(resultId);
 
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.Real));
+            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.Real));
 
             varNode.BecomeReferenceFor(result);
 
@@ -272,7 +272,7 @@ namespace nfun.Ti4
 
         public void SetNegateCall(int argId, int resultId)
         {
-            var vartype = CreateVarType(new SolvingConstrains(ConcreteType.I16, ConcreteType.Real));
+            var vartype = CreateVarType(new SolvingConstrains(PrimitiveType.I16, PrimitiveType.Real));
             var arg = GetOrCreateNode(argId);
             var res = GetOrCreateNode(resultId);
             vartype.BecomeReferenceFor(res);
@@ -283,7 +283,7 @@ namespace nfun.Ti4
         {
             var vartype = CreateVarType();
             GetOrCreateArrayNode(arrArgId, vartype);
-            GetOrCreateNode(indexArgId).SetAncestor(ConcreteType.I32);
+            GetOrCreateNode(indexArgId).SetAncestor(PrimitiveType.I32);
             var result = GetOrCreateNode(resId);
             vartype.BecomeReferenceFor(result);
         }
@@ -298,7 +298,7 @@ namespace nfun.Ti4
             arrType.BecomeAncestorFor(second);
 
             var result = GetOrCreateNode(resultId);
-            result.NodeState = new RefTo(arrType);
+            result.State = new RefTo(arrType);
         }
         #endregion
 
@@ -363,7 +363,7 @@ namespace nfun.Ti4
 
       
 
-        private SolvingNode SetOrCreateConcrete(int id, ConcreteType type)
+        private SolvingNode SetOrCreateConcrete(int id, PrimitiveType type)
         {
             var node = GetOrCreateNode(id);
             if (!node.BecomeConcrete(type))
@@ -381,9 +381,9 @@ namespace nfun.Ti4
             var alreadyExists = _syntaxNodes[id];
             if (alreadyExists != null)
             {
-                if (alreadyExists.NodeState is SolvingConstrains constrains && constrains.NoConstrains)
+                if (alreadyExists.State is SolvingConstrains constrains && constrains.NoConstrains)
                 {
-                    alreadyExists.NodeState = new ArrayOf(elementType);
+                    alreadyExists.State = new ArrayOf(elementType);
                     return alreadyExists;
                 }
                 else
@@ -392,7 +392,7 @@ namespace nfun.Ti4
                 }
             }
 
-            var res = new SolvingNode(id.ToString()) { NodeState = new ArrayOf(elementType) };
+            var res = new SolvingNode(id.ToString(), new ArrayOf(elementType), SolvingNodeType.SyntaxNode);
             _syntaxNodes[id] = res;
             return res;
         }
@@ -407,21 +407,19 @@ namespace nfun.Ti4
             if (alreadyExists != null)
                 return alreadyExists;
 
-            var res = new SolvingNode(id.ToString()) { NodeState = new SolvingConstrains() };
+            var res = new SolvingNode(id.ToString(), new SolvingConstrains(), SolvingNodeType.SyntaxNode);
             _syntaxNodes[id] = res;
             return res;
         }
 
         private SolvingNode CreateVarType(object state = null)
         {
-            var varNode = new SolvingNode("V" + _varNodeId)
-            {
-                Type = SolvingNodeType.TypeVariable
-            };
-            varNode.NodeState = state ?? new SolvingConstrains();
+            var varNode = new SolvingNode(
+                name:  "V" + _varNodeId,
+                state: state ?? new SolvingConstrains(),
+                type:  SolvingNodeType.TypeVariable);
             _varNodeId++;
             _typeVariables.Add(varNode);
-
             return varNode;
         }
 

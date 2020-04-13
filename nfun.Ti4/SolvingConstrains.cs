@@ -5,7 +5,7 @@ namespace nfun.Ti4
 {
     public class SolvingConstrains
     {
-        public SolvingConstrains(ConcreteType desc = null, ConcreteType anc = null)
+        public SolvingConstrains(PrimitiveType desc = null, PrimitiveType anc = null)
         {
             Descedant = desc;
             Ancestor = anc;
@@ -20,37 +20,33 @@ namespace nfun.Ti4
             };
             return result;
         }
-        public bool Fits(ConcreteType concrete)
+        public bool Fits(PrimitiveType primitive)
         {
             if (HasAncestor)
             {
-                if (!concrete.CanBeImplicitlyConvertedTo(Ancestor))
+                if (!primitive.CanBeImplicitlyConvertedTo(Ancestor))
                     return false;
             }
 
             if (HasDescendant)
             {
-                if (!Descedant.CanBeImplicitlyConvertedTo(concrete))
+                if (!Descedant.CanBeImplicitlyConvertedTo(primitive))
                     return false;
             }
 
-            if (IsComparable && !concrete.IsComparable)
+            if (IsComparable && !primitive.IsComparable)
                 return false;
             return true;
         }
 
-        public ConcreteType Ancestor { get; private set; }
-        public ConcreteType Descedant { get; private set; }
+        public PrimitiveType Ancestor { get; private set; }
+        public PrimitiveType Descedant { get; private set; }
 
         public bool HasAncestor => Ancestor!=null;
         public bool HasDescendant => Descedant!=null;
 
-        public bool TryAddAncestor(ConcreteType type)
+        public bool TryAddAncestor(PrimitiveType type)
         {
-            if (type is ConcreteArrayType array)
-            {
-
-            }
             if (type == null)
                 return true;
 
@@ -66,13 +62,13 @@ namespace nfun.Ti4
 
             return true;
         }
-        public void AddAncestor(ConcreteType type)
+        public void AddAncestor(PrimitiveType type)
         {
             if(!TryAddAncestor(type))
                 throw new InvalidOperationException();
         }
 
-        public void AddDescedant(ConcreteType type)
+        public void AddDescedant(PrimitiveType type)
         {
             if(type==null)
                 return;
@@ -82,7 +78,7 @@ namespace nfun.Ti4
             else
                 Descedant = Descedant.GetLastCommonAncestor(type);
         }
-        public ConcreteType PreferedType { get; set; }
+        public PrimitiveType PreferedType { get; set; }
         public bool IsComparable { get; set; }
         public bool NoConstrains => !HasDescendant && !HasAncestor && !IsComparable;
 
@@ -122,12 +118,12 @@ namespace nfun.Ti4
             {
                 if (Descedant != null)
                 {
-                    if (Descedant.Equals(ConcreteType.Char))
-                        return ConcreteType.Char;
+                    if (Descedant.Equals(PrimitiveType.Char))
+                        return PrimitiveType.Char;
                     
                     if (Descedant.IsNumeric)
                     {
-                        if(!TryAddAncestor(ConcreteType.Real))
+                        if(!TryAddAncestor(PrimitiveType.Real))
                             throw new InvalidOperationException();
                     }
                     else
@@ -143,8 +139,8 @@ namespace nfun.Ti4
                     throw new InvalidOperationException();
             }
 
-            if (Descedant?.Equals(ConcreteType.Any)==true)
-                return ConcreteType.Any;
+            if (Descedant?.Equals(PrimitiveType.Any)==true)
+                return PrimitiveType.Any;
 
             return this;
         }

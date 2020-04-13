@@ -16,10 +16,10 @@ namespace nfun.ti4.tests
         }
 
         public static SolvingNode AssertAndGetSingleArithGeneric(this FinalizationResults result)
-            => AssertAndGetSingleGeneric(result, ConcreteType.U24, ConcreteType.Real, false);
+            => AssertAndGetSingleGeneric(result, PrimitiveType.U24, PrimitiveType.Real, false);
 
-        public static SolvingNode AssertAndGetSingleGeneric(this FinalizationResults result, ConcreteType desc,
-            ConcreteType anc, bool isComparable = false)
+        public static SolvingNode AssertAndGetSingleGeneric(this FinalizationResults result, PrimitiveType desc,
+            PrimitiveType anc, bool isComparable = false)
         {
             Assert.AreEqual(1, result.GenericsCount);
             var genericNode = result.Generics.Single();
@@ -30,13 +30,13 @@ namespace nfun.ti4.tests
 
         public static void AssertGenericTypeIsArith(this SolvingNode node)
         {
-            AssertGenericType(node, ConcreteType.U24, ConcreteType.Real, false);
+            AssertGenericType(node, PrimitiveType.U24, PrimitiveType.Real, false);
         }
 
-        public static void AssertGenericType(this SolvingNode node, ConcreteType desc, ConcreteType anc,
+        public static void AssertGenericType(this SolvingNode node, PrimitiveType desc, PrimitiveType anc,
             bool isComparable = false)
         {
-            var generic = node.NodeState as SolvingConstrains;
+            var generic = node.State as SolvingConstrains;
             Assert.IsNotNull(generic);
             if (desc == null)
                 Assert.IsFalse(generic.HasDescendant);
@@ -59,26 +59,26 @@ namespace nfun.ti4.tests
             foreach (var varName in varNames)
             {
                 var node = results.GetVariableNode(varName).GetNonReference();
-                if (node.NodeState is ArrayOf array)
+                if (node.State is ArrayOf array)
                 {
                     var element = array.ElementNode;
-                    if (typeOrNode is ConcreteType concrete)
-                        Assert.IsTrue(concrete.Equals(element.NodeState));
+                    if (typeOrNode is PrimitiveType concrete)
+                        Assert.IsTrue(concrete.Equals(element.State));
                     else
                         Assert.AreEqual(typeOrNode, array.ElementNode);
                 }
-                else if (node.NodeState is ConcreteArrayType arrayType)
+                else if (node.State is ArrayOf arrayType)
                 {
-                    var elementType = arrayType.ElementType;
+                    var elementType = arrayType.Element;
                     Assert.IsTrue(elementType.Equals(typeOrNode));
                 }
             }
         }
-        public static void AssertNamed(this FinalizationResults results, ConcreteType type, params string[] varNames)
+        public static void AssertNamed(this FinalizationResults results, PrimitiveType type, params string[] varNames)
         {
             foreach (var varName in varNames)
             {
-                Assert.AreEqual(type, results.GetVariableNode(varName).GetNonReference().NodeState);
+                Assert.AreEqual(type, results.GetVariableNode(varName).GetNonReference().State);
             }
         }
     }

@@ -15,13 +15,13 @@ namespace nfun.Ti4
         public SolvingNode GetVariableNode(string variableName) =>
             NamedNodes.First(n => n.Name == "T" + variableName);
         public object GetVariable(string variableName) =>
-            NamedNodes.First(n => n.Name == "T" + variableName).NodeState;
+            NamedNodes.First(n => n.Name == "T" + variableName).State;
         public object GetSyntaxNode(int syntaxNode) =>
-            NamedNodes.First(n => n.Name == syntaxNode.ToString()).NodeState;
+            NamedNodes.First(n => n.Name == syntaxNode.ToString()).State;
 
         private IEnumerable<SolvingNode> AllNodes => TypeVariables.Union(NamedNodes).Union(SyntaxNodes);
-        public IEnumerable<SolvingNode> Generics => AllNodes.Where(t => t?.NodeState is SolvingConstrains);
-        public int GenericsCount => AllNodes.Count(t => t?.NodeState is SolvingConstrains);
+        public IEnumerable<SolvingNode> Generics => AllNodes.Where(t => t?.State is SolvingConstrains);
+        public int GenericsCount => AllNodes.Count(t => t?.State is SolvingConstrains);
 
         public SolvingNode[] TypeVariables { get; }
         public SolvingNode[] NamedNodes { get; }
