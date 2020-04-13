@@ -44,55 +44,6 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetBitwiseInvert(int argId, int resultId)
-        {
-            var arg = GetOrCreateNode(argId);
-            var result = GetOrCreateNode(resultId);
-
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(arg);
-        }
-
-        public void SetBitwise(int leftId, int rightId, int resultId)
-        {
-            var left    = GetOrCreateNode(leftId);
-            var right   = GetOrCreateNode(rightId);
-            var result  = GetOrCreateNode(resultId);
-            
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }
-
-        public void SetBitShift(int leftId, int rightId, int resultId)
-        {
-            var left    = GetOrCreateNode(leftId);
-            SetOrCreateConcrete(rightId, ConcreteType.I48);
-            var result  = GetOrCreateNode(resultId);
-
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(left);
-        }
-
-        public void SetArith(int leftId, int rightId, int resultId)
-        {
-            var left   = GetOrCreateNode(leftId);
-            var right  = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
-
-            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.Real));
-
-            varNode.BecomeReferenceFor(result);
-
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }
         
         public void SetIfElse( int[] conditions, int[] expressions, int resultId)
         {
@@ -266,6 +217,90 @@ namespace nfun.Ti4
                 }
             }
         }
+        #region Calls
+
+        public void SetBitwiseInvert(int argId, int resultId)
+        {
+            var arg = GetOrCreateNode(argId);
+            var result = GetOrCreateNode(resultId);
+
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
+
+            varNode.BecomeReferenceFor(result);
+            varNode.BecomeAncestorFor(arg);
+        }
+
+        public void SetBitwise(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            var right = GetOrCreateNode(rightId);
+            var result = GetOrCreateNode(resultId);
+
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U8, ConcreteType.I96));
+
+            varNode.BecomeReferenceFor(result);
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
+        }
+
+        public void SetBitShift(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            SetOrCreateConcrete(rightId, ConcreteType.I48);
+            var result = GetOrCreateNode(resultId);
+
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.I96));
+
+            varNode.BecomeReferenceFor(result);
+            varNode.BecomeAncestorFor(left);
+        }
+
+        public void SetArith(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            var right = GetOrCreateNode(rightId);
+            var result = GetOrCreateNode(resultId);
+
+            var varNode = CreateVarType(new SolvingConstrains(ConcreteType.U24, ConcreteType.Real));
+
+            varNode.BecomeReferenceFor(result);
+
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
+        }
+
+
+        public void SetNegateCall(int argId, int resultId)
+        {
+            var vartype = CreateVarType(new SolvingConstrains(ConcreteType.I16, ConcreteType.Real));
+            var arg = GetOrCreateNode(argId);
+            var res = GetOrCreateNode(resultId);
+            vartype.BecomeReferenceFor(res);
+            vartype.BecomeAncestorFor(arg);
+        }
+
+        public void SetArrGetCall(int arrArgId, int indexArgId, int resId)
+        {
+            var vartype = CreateVarType();
+            GetOrCreateArrayNode(arrArgId, vartype);
+            GetOrCreateNode(indexArgId).SetAncestor(ConcreteType.I32);
+            var result = GetOrCreateNode(resId);
+            vartype.BecomeReferenceFor(result);
+        }
+
+        public void SetConcatCall(int firstId, int secondId, int resultId)
+        {
+            var vartype = CreateVarType();
+            var arrType = CreateVarType(new ArrayOf(vartype));
+            var first = GetOrCreateNode(firstId);
+            arrType.BecomeAncestorFor(first);
+            var second = GetOrCreateNode(secondId);
+            arrType.BecomeAncestorFor(second);
+
+            var result = GetOrCreateNode(resultId);
+            result.NodeState = new RefTo(arrType);
+        }
+        #endregion
 
         public void PrintTrace()
         {
@@ -391,22 +426,5 @@ namespace nfun.Ti4
         }
 
 
-        public void SetNegate(int argId, int resultId)
-        {
-            var vartype = CreateVarType(new SolvingConstrains(ConcreteType.I16, ConcreteType.Real));
-            var arg = GetOrCreateNode(argId);
-            var res = GetOrCreateNode(resultId);
-            vartype.BecomeReferenceFor(res);
-            vartype.BecomeAncestorFor(arg);
-        }
-
-        public void SetArrGet(int arrArgId, int indexArgId, int resId)
-        {
-            var vartype = CreateVarType();
-            GetOrCreateArrayNode(arrArgId, vartype);
-            GetOrCreateNode(indexArgId).SetAncestor(ConcreteType.I32);
-            var result = GetOrCreateNode(resId);
-            vartype.BecomeReferenceFor(result);
-        }
     }
 }

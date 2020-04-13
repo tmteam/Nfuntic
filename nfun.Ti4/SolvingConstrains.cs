@@ -47,6 +47,10 @@ namespace nfun.Ti4
 
         public bool TryAddAncestor(ConcreteType type)
         {
+            if (type is ConcreteArrayType array)
+            {
+
+            }
             if (type == null)
                 return true;
 

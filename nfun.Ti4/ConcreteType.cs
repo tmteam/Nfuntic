@@ -192,7 +192,7 @@ namespace nfun.Ti4
             {
                 if (!(this is ConcreteArrayType a2))
                     return false;
-                return a1.Equals(a2);
+                return a1.ElementType.Equals(a2.ElementType);
             }
             return (obj as ConcreteType)?.Name == Name;
         }

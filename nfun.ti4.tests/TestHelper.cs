@@ -54,6 +54,26 @@ namespace nfun.ti4.tests
         public static void AssertNoGenerics(this FinalizationResults results) 
             => Assert.AreEqual(0, results.GenericsCount,"Unexpected generic types");
 
+        public static void AssertNamedEqualToArrayOf(this FinalizationResults results, object typeOrNode, params string[] varNames)
+        {
+            foreach (var varName in varNames)
+            {
+                var node = results.GetVariableNode(varName).GetNonReference();
+                if (node.NodeState is ArrayOf array)
+                {
+                    var element = array.ElementNode;
+                    if (typeOrNode is ConcreteType concrete)
+                        Assert.IsTrue(concrete.Equals(element.NodeState));
+                    else
+                        Assert.AreEqual(typeOrNode, array.ElementNode);
+                }
+                else if (node.NodeState is ConcreteArrayType arrayType)
+                {
+                    var elementType = arrayType.ElementType;
+                    Assert.IsTrue(elementType.Equals(typeOrNode));
+                }
+            }
+        }
         public static void AssertNamed(this FinalizationResults results, ConcreteType type, params string[] varNames)
         {
             foreach (var varName in varNames)

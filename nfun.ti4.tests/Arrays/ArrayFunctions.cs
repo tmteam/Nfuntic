@@ -16,8 +16,41 @@ namespace nfun.ti4.tests.Arrays
             var graph = new GraphBuilder();
             graph.SetVar("x",0);
             graph.SetConst(1, ConcreteType.I32);
-            graph.SetArrGet(0, 1, 2);
+            graph.SetArrGetCall(0, 1, 2);
             graph.SetDef("y",2);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(null, null);
+            result.AssertNamedEqualToArrayOf(generic, "x");
+            result.AssertAreGenerics(generic, "y");
+
+        }
+
+        [Test(Description = "y = concat(a,b)")]
+        public void Concat()
+        {
+            //     2     0 1
+            //y = concat(a,b) 
+            var graph = new GraphBuilder();
+            graph.SetVar("a", 0);
+            graph.SetVar("b", 1);
+            graph.SetConcatCall(0, 1, 2);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(null, null);
+            result.AssertNamedEqualToArrayOf(generic, "a","b","y");
+        }
+
+        [Test(Description = "y = concat(a,b)")]
+        public void ConcatConcreteType()
+        {
+            //              2     0 1
+            //a:int[]; y = concat(a,b) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("a", ConcreteType.ArrayOf(ConcreteType.I32));
+            graph.SetVar("a", 0);
+            graph.SetVar("b", 1);
+            graph.SetConcatCall(0, 1, 2);
+            graph.SetDef("y", 2);
             graph.Solve();
         }
     }
