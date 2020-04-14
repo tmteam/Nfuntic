@@ -20,6 +20,43 @@ namespace nfun.Ti4
             };
             return result;
         }
+
+        public bool Fits(IType type)
+        {
+            if (HasAncestor)
+            {
+                if (!type.CanBeImplicitlyConvertedTo(Ancestor))
+                    return false;
+            }
+
+            if (type is PrimitiveType primitive)
+            {
+                if (HasDescendant)
+                {
+                    if (!Descedant.CanBeImplicitlyConvertedTo(primitive))
+                        return false;
+                }
+
+                if (IsComparable && !primitive.IsComparable)
+                    return false;
+                return true;
+            }
+            else if (type is ArrayOf array)
+            {
+                if (IsComparable)
+                    return false;
+                if (!HasDescendant)
+                    return true;
+                if (!(Descedant is ArrayOf descArray))
+                    return false;
+                if (array.Element.Equals(descArray.Element))
+                    return true;
+                if (!array.IsSolved || !descArray.IsSolved)
+                    return false;
+            }
+            throw new NotImplementedException();
+        }
+
         public bool Fits(PrimitiveType primitive)
         {
             if (HasAncestor)
