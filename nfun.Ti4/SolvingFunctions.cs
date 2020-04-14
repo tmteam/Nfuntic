@@ -66,14 +66,19 @@ namespace nfun.Ti4
 
         public static void SetUpwardsLimits(SolvingNode[] toposortedNodes)
         {
-            foreach (var node in toposortedNodes)
+            void HandleUpwardLimits(SolvingNode node)
             {
                 for (var index = 0; index < node.Ancestors.Count; index++)
                 {
                     var ancestor = node.Ancestors[index];
                     ancestor.State = SetUpwardsLimits(node, ancestor);
                 }
+                if (node.State is ArrayOf array) 
+                    HandleUpwardLimits(array.ElementNode);
             }
+
+            foreach (var node in toposortedNodes)
+                HandleUpwardLimits(node);
         }
 
         private static object SetUpwardsLimits(SolvingNode descendant, SolvingNode ancestor)
@@ -107,6 +112,36 @@ namespace nfun.Ti4
             }
             #endregion
 
+            if (descendant.State is IType typeDesc)
+            {
+                switch (ancestor.State)
+                {
+                    case PrimitiveType concreteAnc:
+                    {
+                        if (!typeDesc.CanBeImplicitlyConvertedTo(concreteAnc))
+                            throw new InvalidOperationException();
+                        return ancestor.State;
+                    }
+                    case SolvingConstrains constrainsAnc:
+                    {
+                        var result = constrainsAnc.GetCopy();
+                        result.AddDescedant(typeDesc);
+                        return result.GetOptimizedOrThrow();
+                    }
+                    case ArrayOf arrayAnc:
+                    {
+                        if (!(typeDesc is ArrayOf arrayDesc))
+                            throw new NotSupportedException();
+                        
+                        descendant.Ancestors.Remove(ancestor);
+                        arrayDesc.ElementNode.Ancestors.Add(arrayAnc.ElementNode);
+                        return ancestor.State;
+                    }
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            /*
             if (descendant.State is PrimitiveType concreteDesc)
             {
                 switch (ancestor.State)
@@ -126,7 +161,7 @@ namespace nfun.Ti4
                     default:
                         throw new NotSupportedException();
                 }
-            }
+            }*/
 
             if (descendant.State is SolvingConstrains constrainsDesc)
             {
@@ -145,14 +180,18 @@ namespace nfun.Ti4
                             return result.GetOptimizedOrThrow();
                         }
                     case ArrayOf arrayAnc:
-                        {
-                            return ancestor.State;
-                        }
+                    {
+                        var result = TransformToArrayOrNull(descendant.Name, constrainsDesc, arrayAnc);
+                        if(result==null)
+                            throw new InvalidOperationException();
+                        descendant.State = result;
+                        return ancestor.State;
+                    }
                     default:
                         throw new NotSupportedException($"Ancestor type {ancestor.State.GetType().Name} is not supported");
                 }
             }
-
+            /*
             if (descendant.State is ArrayOf desArrayOf)
             {
                 switch (ancestor.State)
@@ -168,9 +207,26 @@ namespace nfun.Ti4
                     default:
                         throw new NotSupportedException($"Ancestor type {ancestor.State.GetType().Name} is not supported");
                 }
-            }
+            }*/
 
             throw new NotSupportedException($"Descendant type {descendant.State.GetType().Name} is not supported");
+        }
+
+        /// <summary>
+        /// Превращает неопределенное ограничение в ограничение с массивом
+        /// </summary>
+        /// <param name="descNodeName"></param>
+        /// <param name="descendant"></param>
+        /// <param name="ancestor"></param>
+        /// <returns></returns>
+        public static object TransformToArrayOrNull(string descNodeName, SolvingConstrains descendant, ArrayOf ancestor)
+        {
+            if (!descendant.NoConstrains)
+                return null;
+            var constrains = new SolvingConstrains();
+            var node = new SolvingNode(descNodeName+"'", constrains, SolvingNodeType.TypeVariable);
+            node.Ancestors.Add(ancestor.ElementNode);
+            return new ArrayOf(node);
         }
 
         #endregion
