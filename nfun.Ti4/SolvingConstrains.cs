@@ -5,7 +5,7 @@ namespace nfun.Ti4
 {
     public class SolvingConstrains
     {
-        public SolvingConstrains(PrimitiveType desc = null, PrimitiveType anc = null)
+        public SolvingConstrains(IType desc = null, PrimitiveType anc = null)
         {
             Descedant = desc;
             Ancestor = anc;
@@ -40,7 +40,7 @@ namespace nfun.Ti4
         }
 
         public PrimitiveType Ancestor { get; private set; }
-        public PrimitiveType Descedant { get; private set; }
+        public IType Descedant { get; private set; }
 
         public bool HasAncestor => Ancestor!=null;
         public bool HasDescendant => Descedant!=null;
@@ -68,7 +68,7 @@ namespace nfun.Ti4
                 throw new InvalidOperationException();
         }
 
-        public void AddDescedant(PrimitiveType type)
+        public void AddDescedant(IType type)
         {
             if(type==null)
                 return;
@@ -77,9 +77,9 @@ namespace nfun.Ti4
                 Descedant = type;
             else
             {
-                var ancestor = Descedant.GetLastCommonPrimitiveAncestor(type);
+                var ancestor = Descedant.GetLastCommonAncestorOrNull(type);
                 if(ancestor!=null)
-                Descedant = ancestor;
+                    Descedant = ancestor;
             }
         }
         public PrimitiveType PreferedType { get; set; }
@@ -125,7 +125,7 @@ namespace nfun.Ti4
                     if (Descedant.Equals(PrimitiveType.Char))
                         return PrimitiveType.Char;
                     
-                    if (Descedant.IsNumeric)
+                    if (Descedant is PrimitiveType primitive && primitive.IsNumeric)
                     {
                         if(!TryAddAncestor(PrimitiveType.Real))
                             throw new InvalidOperationException();

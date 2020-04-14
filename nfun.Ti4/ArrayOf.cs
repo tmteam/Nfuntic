@@ -41,20 +41,7 @@
             return ArrayOf.Create(ancestor);
         }
 
-        public ConvertPossibilities CanBeImplicitlyConvertedTo(IType type)
-        {
-            if (type.Equals(PrimitiveType.Any))
-                return ConvertPossibilities.Convertable;
-            var arrayTypeTo = type as ArrayOf;
-            if (arrayTypeTo == null)
-                return ConvertPossibilities.NotConvertable;
-            var elementTypeFrom = Element as IType;
-            if (elementTypeFrom == null)
-                return ConvertPossibilities.NeedAdditionalInformation;
-            var elementTypeTo = arrayTypeTo.Element as IType;
-            if (elementTypeTo == null)
-                return ConvertPossibilities.NeedAdditionalInformation;
-            return elementTypeFrom.CanBeImplicitlyConvertedTo(elementTypeTo);
-        }
+        public bool CanBeImplicitlyConvertedTo(PrimitiveType type) 
+            => type.Equals(PrimitiveType.Any);
     }
 }
