@@ -79,7 +79,7 @@ namespace nfun.Ti4
             {
                 var ancestor = Descedant.GetLastCommonPrimitiveAncestor(type);
                 if(ancestor!=null)
-                    Descedant = ancestor;
+                Descedant = ancestor;
             }
         }
         public PrimitiveType PreferedType { get; set; }

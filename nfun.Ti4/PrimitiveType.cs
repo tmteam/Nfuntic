@@ -34,6 +34,14 @@ namespace nfun.Ti4
     public interface IType
     {
         IType GetLastCommonAncestorOrNull(IType otherType);
+        ConvertPossibilities CanBeImplicitlyConvertedTo(IType type);
+    }
+
+    public enum ConvertPossibilities
+    {
+        Convertable,
+        NotConvertable,
+        NeedAdditionalInformation
     }
     public class PrimitiveType: IType
     {
@@ -144,6 +152,18 @@ namespace nfun.Ti4
                 return Any;
             return GetLastCommonPrimitiveAncestor(primitive);
         }
+
+        public ConvertPossibilities CanBeImplicitlyConvertedTo(IType type)
+        {
+            var primitive = type as PrimitiveType;
+            if (primitive == null)
+                return ConvertPossibilities.NotConvertable;
+
+            return CanBeImplicitlyConvertedTo(primitive)
+                ? ConvertPossibilities.Convertable
+                : ConvertPossibilities.NotConvertable;
+        }
+
         public PrimitiveType GetLastCommonPrimitiveAncestor(PrimitiveType otherType)
         {
             if (this.Equals(otherType))
