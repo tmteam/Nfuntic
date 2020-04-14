@@ -16,9 +16,9 @@ namespace nfun.ti4.tests
         [TestCase(PrimitiveTypeName.U48, PrimitiveTypeName.Real, PrimitiveTypeName.Real)]
         public void GetLastCommonAncestor(PrimitiveTypeName a, PrimitiveTypeName b, PrimitiveTypeName expected)
         {
-            var result =  new PrimitiveType(a).GetLastCommonAncestor(new PrimitiveType(b)).Name;
+            var result =  new PrimitiveType(a).GetLastCommonPrimitiveAncestor(new PrimitiveType(b)).Name;
             Assert.AreEqual( expected, result);
-            var revresult = new PrimitiveType(b).GetLastCommonAncestor(new PrimitiveType(a)).Name;
+            var revresult = new PrimitiveType(b).GetLastCommonPrimitiveAncestor(new PrimitiveType(a)).Name;
             Assert.AreEqual(expected, revresult);
         }
 

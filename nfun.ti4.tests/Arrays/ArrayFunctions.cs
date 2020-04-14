@@ -40,6 +40,7 @@ namespace nfun.ti4.tests.Arrays
             result.AssertNamedEqualToArrayOf(generic, "a","b","y");
         }
 
+
         [Test(Description = "y = concat(a,b)")]
         public void ConcatConcreteType()
         {

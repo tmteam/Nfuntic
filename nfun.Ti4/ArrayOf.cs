@@ -24,5 +24,21 @@
             => ancestorType.Equals(PrimitiveType.Any);
 
         public override string ToString() => $"ArrayOf({ElementNode})";
+        public IType GetLastCommonAncestorOrNull(IType otherType)
+        {
+            var arrayType = otherType as ArrayOf;
+            if (arrayType == null)
+                return PrimitiveType.Any;
+            var elementTypeA = Element as IType;
+            if (elementTypeA == null)
+                return null;
+            var elementTypeB = arrayType.Element as IType;
+            if (elementTypeB == null)
+                return null;
+            var ancestor = elementTypeA.GetLastCommonAncestorOrNull(elementTypeB);
+            if (ancestor == null)
+                return null;
+            return ArrayOf.Create(ancestor);
+        }
     }
 }

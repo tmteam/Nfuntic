@@ -62,6 +62,118 @@ namespace nfun.Ti4
             main.Ancestors.AddRange(newAncestors);
         }
 
+        #region Upward 
+
+        public static void SetUpwardsLimits(SolvingNode[] toposortedNodes)
+        {
+            foreach (var node in toposortedNodes)
+            {
+                for (var index = 0; index < node.Ancestors.Count; index++)
+                {
+                    var ancestor = node.Ancestors[index];
+                    ancestor.State = SetUpwardsLimits(node, ancestor);
+                }
+            }
+        }
+
+        private static object SetUpwardsLimits(SolvingNode descendant, SolvingNode ancestor)
+        {
+            #region handle refto cases. 
+            if (ancestor == descendant)
+                return ancestor.State;
+
+            if (ancestor.State is RefTo referenceAnc)
+            {
+                if (descendant.Ancestors.Contains(ancestor))
+                {
+                    descendant.Ancestors.Remove(ancestor);
+                    if (descendant != referenceAnc.Node)
+                        descendant.Ancestors.Add(referenceAnc.Node);
+                }
+                referenceAnc.Node.State = SetUpwardsLimits(descendant, referenceAnc.Node);
+                return referenceAnc;
+            }
+
+            if (descendant.State is RefTo referenceDesc)
+            {
+                if (descendant.Ancestors.Contains(ancestor))
+                {
+                    descendant.Ancestors.Remove(ancestor);
+                    if (referenceDesc.Node != ancestor)
+                        referenceDesc.Node.Ancestors.Add(ancestor);
+                }
+                ancestor.State = SetUpwardsLimits(referenceDesc.Node, ancestor);
+                return ancestor.State;
+            }
+            #endregion
+
+            if (descendant.State is PrimitiveType concreteDesc)
+            {
+                switch (ancestor.State)
+                {
+                    case PrimitiveType concreteAnc:
+                        {
+                            if (!concreteDesc.CanBeImplicitlyConvertedTo(concreteAnc))
+                                throw new InvalidOperationException();
+                            return ancestor.State;
+                        }
+                    case SolvingConstrains constrainsAnc:
+                        {
+                            var result = constrainsAnc.GetCopy();
+                            result.AddDescedant(concreteDesc);
+                            return result.GetOptimizedOrThrow();
+                        }
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+
+            if (descendant.State is SolvingConstrains constrainsDesc)
+            {
+                switch (ancestor.State)
+                {
+                    case PrimitiveType concreteAnc:
+                        {
+                            if (constrainsDesc.HasDescendant && constrainsDesc.Descedant?.CanBeImplicitlyConvertedTo(concreteAnc) != true)
+                                throw new InvalidOperationException();
+                            return ancestor.State;
+                        }
+                    case SolvingConstrains constrainsAnc:
+                        {
+                            var result = constrainsAnc.GetCopy();
+                            result.AddDescedant(constrainsDesc.Descedant);
+                            return result.GetOptimizedOrThrow();
+                        }
+                    case ArrayOf arrayAnc:
+                        {
+                            return ancestor.State;
+                        }
+                    default:
+                        throw new NotSupportedException($"Ancestor type {ancestor.State.GetType().Name} is not supported");
+                }
+            }
+
+            if (descendant.State is ArrayOf desArrayOf)
+            {
+                switch (ancestor.State)
+                {
+                    case ArrayOf ancArrayOf:
+                        {
+                            var ancE = ancArrayOf.ElementNode;
+                            var desE = desArrayOf.ElementNode;
+                            ancE.State = SetUpwardsLimits(desE, ancE);
+                            return ancestor.State;
+                        }
+                    case SolvingConstrains _: return ancestor.State;
+                    default:
+                        throw new NotSupportedException($"Ancestor type {ancestor.State.GetType().Name} is not supported");
+                }
+            }
+
+            throw new NotSupportedException($"Descendant type {descendant.State.GetType().Name} is not supported");
+        }
+
+        #endregion
         public static void SetDownwardsLimits(SolvingNode[] toposortedNodes)
         {
             for (int i = toposortedNodes.Length - 1; i >= 0; i--)
@@ -87,6 +199,22 @@ namespace nfun.Ti4
                 return SetDownwardsLimits(referenceAnc.Node, descendant);
             }
             #endregion
+
+            if (ancestor.State is ArrayOf ancArray)
+            {
+                if (descendant.State is SolvingConstrains constr && constr.NoConstrains)
+                {
+                    descendant.State = new ArrayOf(
+                        new SolvingNode(descendant.Name + "`", new SolvingConstrains(), SolvingNodeType.TypeVariable));
+                }
+
+                if (descendant.State is ArrayOf desArray)
+                {
+                    desArray.ElementNode.State = SetDownwardsLimits(desArray.ElementNode, ancArray.ElementNode);
+                    return descendant.State;
+                }
+                throw new InvalidOperationException();
+            }
 
             PrimitiveType upType = null;
             if (ancestor.State is PrimitiveType concreteAnc) upType = concreteAnc;
@@ -122,114 +250,7 @@ namespace nfun.Ti4
 
         }
 
-        public static void SetUpwardsLimits(SolvingNode[] toposortedNodes)
-        {
-            foreach (var node in toposortedNodes)
-            {
-                for (var index = 0; index < node.Ancestors.Count; index++)
-                {
-                    var ancestor = node.Ancestors[index];
-                    ancestor.State = SetUpwardsLimits(node, ancestor);
-                }
-            }
-        }
-
-        private static object SetUpwardsLimits(SolvingNode descendant, SolvingNode ancestor)
-        {
-            #region handle refto cases. 
-            if (ancestor == descendant)
-                return ancestor.State;
-
-            if (ancestor.State is RefTo referenceAnc)
-            {
-                if (descendant.Ancestors.Contains(ancestor))
-                {
-                    descendant.Ancestors.Remove(ancestor);
-                    if(descendant!= referenceAnc.Node)
-                        descendant.Ancestors.Add(referenceAnc.Node);
-                }
-                referenceAnc.Node.State = SetUpwardsLimits(descendant, referenceAnc.Node);
-                return referenceAnc;
-            }
-
-            if (descendant.State is RefTo referenceDesc)
-            {
-                if (descendant.Ancestors.Contains(ancestor))
-                {
-                    descendant.Ancestors.Remove(ancestor);
-                    if(referenceDesc.Node!= ancestor)
-                        referenceDesc.Node.Ancestors.Add(ancestor);
-                }
-                ancestor.State = SetUpwardsLimits(referenceDesc.Node, ancestor);
-                return ancestor.State;
-            }
-            #endregion
-
-            if (descendant.State is PrimitiveType concreteDesc)
-            {
-                switch (ancestor.State)
-                {
-                    case PrimitiveType concreteAnc:
-                    {
-                        if (!concreteDesc.CanBeImplicitlyConvertedTo(concreteAnc))
-                            throw new InvalidOperationException();
-                        return ancestor.State;
-                    }
-                    case SolvingConstrains constrainsAnc:
-                    {
-                        var result = constrainsAnc.GetCopy();
-                        result.AddDescedant(concreteDesc);
-                        return result.GetOptimizedOrThrow();
-                    }
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-
-            if (descendant.State is SolvingConstrains constrainsDesc)
-            {
-                switch (ancestor.State)
-                {
-                    case PrimitiveType concreteAnc:
-                    {
-                        if (constrainsDesc.HasDescendant && constrainsDesc.Descedant?.CanBeImplicitlyConvertedTo(concreteAnc)!=true)
-                            throw new InvalidOperationException();
-                        return ancestor.State;
-                    }
-                    case SolvingConstrains constrainsAnc:
-                    {
-                        var result = constrainsAnc.GetCopy();
-                        result.AddDescedant(constrainsDesc.Descedant);
-                        return result.GetOptimizedOrThrow();
-                    }
-                    case ArrayOf arrayAnc:
-                    {
-                        return ancestor.State;
-                    }
-                    default:
-                        throw new NotSupportedException($"Ancestor type {ancestor.State.GetType().Name} is not supported");
-                }
-            }
-
-            if (descendant.State is ArrayOf desArrayOf)
-            {
-                switch (ancestor.State)
-                {
-                    case ArrayOf ancArrayOf:
-                    {
-                        var ancE = ancArrayOf.ElementNode;
-                        var desE = desArrayOf.ElementNode;
-                        ancE.State = SetUpwardsLimits(desE,ancE);
-                        return ancestor.State;
-                    }
-                    case SolvingConstrains _: return ancestor.State;
-                    default:
-                        throw new NotSupportedException($"Ancestor type {ancestor.State.GetType().Name} is not supported");
-                }
-            }
-
-            throw new NotSupportedException($"Descendant type {descendant.State.GetType().Name} is not supported");
-        }
+     
 
         public static void Destruction(SolvingNode[] toposorteNodes)
         {

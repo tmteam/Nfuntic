@@ -76,7 +76,11 @@ namespace nfun.Ti4
             if (Descedant == null)
                 Descedant = type;
             else
-                Descedant = Descedant.GetLastCommonAncestor(type);
+            {
+                var ancestor = Descedant.GetLastCommonPrimitiveAncestor(type);
+                if(ancestor!=null)
+                    Descedant = ancestor;
+            }
         }
         public PrimitiveType PreferedType { get; set; }
         public bool IsComparable { get; set; }

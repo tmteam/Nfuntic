@@ -33,7 +33,7 @@ namespace nfun.Ti4
 
     public interface IType
     {
-
+        IType GetLastCommonAncestorOrNull(IType otherType);
     }
     public class PrimitiveType: IType
     {
@@ -137,8 +137,14 @@ namespace nfun.Ti4
             var layer = intType.Layer + 1;
             return UintTypes[layer-3];
         }
-
-        public PrimitiveType GetLastCommonAncestor(PrimitiveType otherType)
+        public IType GetLastCommonAncestorOrNull(IType otherType)
+        {
+            var primitive = otherType as PrimitiveType;
+            if (primitive == null)
+                return Any;
+            return GetLastCommonPrimitiveAncestor(primitive);
+        }
+        public PrimitiveType GetLastCommonPrimitiveAncestor(PrimitiveType otherType)
         {
             if (this.Equals(otherType))
                 return this;
