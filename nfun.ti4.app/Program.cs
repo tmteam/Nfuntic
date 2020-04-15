@@ -11,10 +11,23 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
-           GetEx();
+            GetEx();
             Console.ReadLine();
         }
 
+        static void ConcreteGetEx()
+        {
+            //          2  0,1
+            //y:char = get(x,0) 
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetVarType("y", PrimitiveType.Char);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+
+        }
         static void ConcatEx()
         {
             //              2     0 1

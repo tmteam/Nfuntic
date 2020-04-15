@@ -81,7 +81,7 @@ namespace nfun.Ti4
         public PrimitiveTypeName Name { get; }
         
         public bool IsNumeric => Name.HasFlag(PrimitiveTypeName._IsNumber);
-
+        
         private int Layer => (int)((int)Name >>5 & 0b1111);
 
         public override string ToString() => Name.ToString();
@@ -104,7 +104,6 @@ namespace nfun.Ti4
         public static PrimitiveType U12 { get; } = new PrimitiveType(PrimitiveTypeName.U12);
         public static PrimitiveType U8 { get; } = new PrimitiveType(PrimitiveTypeName.U8);
         public bool IsComparable => IsNumeric || Name == PrimitiveTypeName.Char;
-
 
         public bool CanBeImplicitlyConvertedTo(PrimitiveType type)
         {

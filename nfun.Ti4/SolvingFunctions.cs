@@ -424,23 +424,39 @@ namespace nfun.Ti4
             var typeVariables = new List<SolvingNode>();
             var syntaxNodes = new SolvingNode[toposortedNodes.Length];
             var namedNodes = new List<SolvingNode>();
-            
-            foreach (var node in toposortedNodes)
+
+            void Finalize(SolvingNode node)
             {
                 if (node.State is RefTo)
                 {
                     var originalOne = node.GetNonReference();
-                    node.State = new RefTo(originalOne);
+                    if (originalOne != node)
+                    {
+                        Console.WriteLine($"\t{node.Name}->r");
+                        node.State = new RefTo(originalOne);
+                    }
 
-                    if (originalOne.IsSolved) 
+                    if (originalOne.IsSolved)
+                    {
                         node.State = originalOne.State;
+                        Console.WriteLine($"\t{node.Name}->s");
+                    }
                 }
                 else if (node.State is ArrayOf array)
                 {
-                    if (array.Element is RefTo) 
-                        node.State = new ArrayOf(array.ElementNode.GetNonReference());
+                    if (array.Element is RefTo reference)
+                    {
+                        node.State = new ArrayOf(reference.Node.GetNonReference());
+                        Console.WriteLine($"\t{node.Name}->ar");
+                    }
+                    Finalize((node.State as ArrayOf).ElementNode);
                 }
-                
+            }
+
+            foreach (var node in toposortedNodes)
+            {
+                Finalize(node);
+
                 if (node.Type== SolvingNodeType.TypeVariable)
                 {
                     typeVariables.Add(node);

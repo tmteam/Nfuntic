@@ -9,7 +9,7 @@ namespace nfun.ti4.tests.Arrays
     public class ArrayFunctions
     {
         [Test(Description = "y = x[0]")]
-        public void Get()
+        public void Get_Generic()
         {
             //     2  0,1
             //y = get(x,0) 
@@ -25,8 +25,84 @@ namespace nfun.ti4.tests.Arrays
 
         }
 
+        [Test(Description = "y:char = x[0]")]
+        public void Get_ConcreteDef()
+        {
+            //          2  0,1
+            //y:char = get(x,0) 
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetVarType("y", PrimitiveType.Char);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamedEqualToArrayOf(PrimitiveType.Char, "x");
+            result.AssertNamed(PrimitiveType.Char, "y");
+        }
+
+        [Test(Description = "x:int[]; y = x[0]")]
+        public void Get_ConcreteArg()
+        {
+            //          2  0,1
+            //x:int[]; y = get(x,0) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("x", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamedEqualToArrayOf(PrimitiveType.I32, "x");
+            result.AssertNamed(PrimitiveType.I32, "y");
+        }
+
+        [Test(Description = "x:int[]; y = x[0]")]
+        public void Get_ConcreteArgAndDef_Upcast()
+        {
+            //          2  0,1
+            //x:int[]; y:real = get(x,0) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("x", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetVarType("y", PrimitiveType.Real);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamedEqualToArrayOf(PrimitiveType.I32, "x");
+            result.AssertNamed(PrimitiveType.Real, "y");
+        }
+
+        [Test(Description = "x:int[]; y = x[0]")]
+        public void Get_ConcreteArgAndDef_Impossible()
+        {
+            try
+            {
+                //          2  0,1
+                //x:real[]; y:int = get(x,0) 
+                var graph = new GraphBuilder();
+                graph.SetVarType("x", ArrayOf.Create(PrimitiveType.Real));
+                graph.SetVar("x", 0);
+                graph.SetConst(1, PrimitiveType.I32);
+                graph.SetArrGetCall(0, 1, 2);
+                graph.SetVarType("y", PrimitiveType.I32);
+                graph.SetDef("y", 2);
+                var result = graph.Solve();
+                Assert.Fail("Impossible equation solved");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                
+            }
+        }
+
         [Test(Description = "y = concat(a,b)")]
-        public void Concat()
+        public void GenericConcat()
         {
             //     2     0 1
             //y = concat(a,b) 
@@ -42,7 +118,7 @@ namespace nfun.ti4.tests.Arrays
 
 
         [Test(Description = "y = concat(a,b)")]
-        public void ConcatConcreteType()
+        public void ConcreteConcat()
         {
             //              2     0 1
             //a:int[]; y = concat(a,b) 
