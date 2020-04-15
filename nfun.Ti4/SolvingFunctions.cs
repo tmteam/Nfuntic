@@ -436,7 +436,7 @@ namespace nfun.Ti4
                         node.State = new RefTo(originalOne);
                     }
 
-                    if (originalOne.IsSolved)
+                    if (originalOne.State is IType)
                     {
                         node.State = originalOne.State;
                         Console.WriteLine($"\t{node.Name}->s");
@@ -487,12 +487,14 @@ namespace nfun.Ti4
         {
             descendant.Ancestors.Add(ancestor);
         }
-        public static void BecomeReferenceFor(this SolvingNode referencedNode, SolvingNode otherNode)
+        public static void BecomeReferenceFor(this SolvingNode referencedNode, SolvingNode original)
         {
-            if (otherNode.State is RefTo refTo)
+            //todo рассмотреть все возможности (и невозможности) мержа
+            referencedNode = referencedNode.GetNonReference();
+            var otherNode = original.GetNonReference();
+            if (otherNode.State is SolvingConstrains con && con.NoConstrains)
             {
                 otherNode.State = new RefTo(referencedNode);
-                BecomeReferenceFor(referencedNode, refTo.Node);
                 return;
             }
 

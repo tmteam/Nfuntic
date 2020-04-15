@@ -290,8 +290,8 @@ namespace nfun.Ti4
 
         public void SetConcatCall(int firstId, int secondId, int resultId)
         {
-            var vartype = CreateVarType();
-            var arrType = CreateVarType(new ArrayOf(vartype));
+            var varElementType = CreateVarType();
+            var arrType = CreateVarType(new ArrayOf(varElementType));
             var first = GetOrCreateNode(firstId);
             arrType.BecomeAncestorFor(first);
             var second = GetOrCreateNode(secondId);
@@ -396,6 +396,12 @@ namespace nfun.Ti4
                     alreadyExists.State = new ArrayOf(elementType);
                     return alreadyExists;
                 }
+                else if (alreadyExists.State is ArrayOf && elementType.State is SolvingConstrains c2 && c2.NoConstrains )
+                {
+                    elementType.State = new RefTo(alreadyExists);
+                    return alreadyExists;
+                }
+                //todo нужно обработать остальные случаи
                 else
                 {
                     throw new InvalidOperationException();

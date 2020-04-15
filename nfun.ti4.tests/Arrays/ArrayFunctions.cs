@@ -25,6 +25,24 @@ namespace nfun.ti4.tests.Arrays
 
         }
 
+        [Test(Description = "y = [1,2][0]")]
+        public void Get_ConstrainsGeneric()
+        {
+            //     4  2 0,  1  3
+            //y = get([ 1, -1],0) 
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.I16);
+            graph.SetArrayInit(2,0,1);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.I16, PrimitiveType.Real);
+            result.AssertNamedEqualToArrayOf(generic, "y");
+
+        }
+
         [Test(Description = "y:char = x[0]")]
         public void Get_ConcreteDef()
         {
