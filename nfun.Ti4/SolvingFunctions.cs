@@ -186,6 +186,7 @@ namespace nfun.Ti4
                         if(result==null)
                             throw new InvalidOperationException();
                         descendant.State = result;
+                        descendant.Ancestors.Remove(ancestor);
                         return ancestor.State;
                     }
                     default:
@@ -329,13 +330,16 @@ namespace nfun.Ti4
                 return;
             }
 
+            var originAnc = nonRefAncestor.ToString();
+            var originDes = nonRefDescendant.ToString();
+
             switch (nonRefAncestor.State)
             {
                 case PrimitiveType concreteAnc:
                 {
                     if (nonRefDescendant.State is SolvingConstrains c && c.Fits(concreteAnc))
                     {
-                        Console.WriteLine($"    {nonRefAncestor} + {nonRefDescendant} = {concreteAnc}");
+                        Console.Write("p+c");
                         nonRefDescendant.State = concreteAnc;
                     }
                     break;
@@ -343,8 +347,13 @@ namespace nfun.Ti4
 
                 case ArrayOf arrayAnc:
                 {
+
                     if (nonRefDescendant.State is SolvingConstrains constrainsDesc && constrainsDesc.Fits(arrayAnc))
+                    {
+                        Console.Write("a+c");
                         nonRefDescendant.State = new RefTo(nonRefAncestor);
+                    }
+
                     break;
                 }
 
@@ -352,7 +361,7 @@ namespace nfun.Ti4
                 {
                     if (constrainsAnc.Fits(concreteDesc))
                     {
-                        Console.WriteLine($"    {nonRefAncestor} + {nonRefDescendant} = {concreteDesc}");
+                        Console.Write("c+p");
                         descendantNode.State = ancestorNode.State = nonRefAncestor.State = concreteDesc;
                     }
 
@@ -361,12 +370,12 @@ namespace nfun.Ti4
 
                 case SolvingConstrains constrainsAnc when nonRefDescendant.State is SolvingConstrains constrainsDesc:
                 {
+                    Console.Write("c+c");
+
                     var result = constrainsAnc.MergeOrNull(constrainsDesc);
                     if (result == null)
                         return;
 
-                    Console.WriteLine(
-                        $"    {nonRefAncestor} + {nonRefDescendant} = {result}.   {nonRefDescendant.Name}={nonRefAncestor.Name}");
                     if (result is PrimitiveType)
                     {
                         nonRefAncestor.State = nonRefDescendant.State = descendantNode.State = result;
@@ -392,15 +401,23 @@ namespace nfun.Ti4
 
                 case SolvingConstrains constrainsAnc when nonRefDescendant.State is ArrayOf arrayDes:
                 {
+                    Console.Write("c+a");
+
                     if (constrainsAnc.Fits(arrayDes))
                         nonRefAncestor.State = ancestorNode.State = new RefTo(nonRefDescendant);
 
                     break;
                 }
             }
+            
+            Console.WriteLine($"    {originAnc} + {originDes} = {nonRefDescendant.State}");
         }
 
         #endregion
+
+        #region finalize
+
+        
 
         public static FinalizationResults FinalizeUp(SolvingNode[] toposortedNodes)
         {
@@ -412,13 +429,16 @@ namespace nfun.Ti4
             {
                 if (node.State is RefTo)
                 {
-                    var originalOne = GetNonReference(node);
+                    var originalOne = node.GetNonReference();
                     node.State = new RefTo(originalOne);
 
-                    if (originalOne.State is PrimitiveType concrete)
-                    {
-                        node.State = concrete;
-                    }
+                    if (originalOne.IsSolved) 
+                        node.State = originalOne.State;
+                }
+                else if (node.State is ArrayOf array)
+                {
+                    if (array.Element is RefTo) 
+                        node.State = new ArrayOf(array.ElementNode.GetNonReference());
                 }
                 
                 if (node.Type== SolvingNodeType.TypeVariable)
@@ -434,6 +454,8 @@ namespace nfun.Ti4
 
             return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
         }
+        #endregion
+
         public static SolvingNode GetNonReference(this SolvingNode node)
         {
             var result = node;
@@ -496,6 +518,7 @@ namespace nfun.Ti4
 
             throw new NotSupportedException();
         }
+
         /// <summary>
         /// Превращает неопределенное ограничение в ограничение с массивом
         /// </summary>
@@ -503,14 +526,39 @@ namespace nfun.Ti4
         /// <param name="descendant"></param>
         /// <param name="ancestor"></param>
         /// <returns></returns>
-        private static object TransformToArrayOrNull(string descNodeName, SolvingConstrains descendant, ArrayOf ancestor)
+        private static ArrayOf TransformToArrayOrNull(string descNodeName, SolvingConstrains descendant,
+            ArrayOf ancestor)
         {
-            if (!descendant.NoConstrains)
-                return null;
-            var constrains = new SolvingConstrains();
-            var node = new SolvingNode(descNodeName + "'", constrains, SolvingNodeType.TypeVariable);
-            node.Ancestors.Add(ancestor.ElementNode);
-            return new ArrayOf(node);
+            if (descendant.NoConstrains)
+            {
+                var constrains = new SolvingConstrains();
+                string eName;
+                
+                if (descNodeName.StartsWith("T") && descNodeName.Length > 1)
+                    eName = descNodeName.Substring(1)+"'";
+                else
+                    eName = descNodeName.ToLower() + "'";
+                
+                var node = new SolvingNode(eName, constrains, SolvingNodeType.TypeVariable);
+                node.Ancestors.Add(ancestor.ElementNode);
+                return new ArrayOf(node);
+            }
+            
+            if (descendant.HasDescendant && descendant.Descedant is ArrayOf arrayEDesc)
+            {
+                if(arrayEDesc.Element is RefTo)
+                {
+                    var origin = arrayEDesc.ElementNode.GetNonReference();
+                    if(origin.IsSolved)
+                        return new ArrayOf(origin);
+                }
+                else if (arrayEDesc.ElementNode.IsSolved)
+                {
+                    return arrayEDesc;
+                }
+            }
+
+            return null;
         }
     }
 }

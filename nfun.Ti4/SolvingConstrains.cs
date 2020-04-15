@@ -151,7 +151,15 @@ namespace nfun.Ti4
             return result;
         }
        
-        public override string ToString() => $"[{Descedant}..{Ancestor}]";
+        public override string ToString()
+        {
+            var res =  $"[{Descedant}..{Ancestor}]";
+            if (IsComparable)
+                res += "<>";
+            if (PreferedType != null)
+                res += PreferedType + "!";
+            return res;
+        }
 
         public object GetOptimizedOrThrow()
         {

@@ -46,7 +46,13 @@ namespace nfun.Ti4
         }
 
         public string Name { get; }
-        public override string ToString() => Name + "." + State;
+        public override string ToString()
+        {
+            if (Name == State.ToString())
+                return Name;
+            else 
+                return $"{Name}:{State}";
+        }
 
         public void PrintToConsole()
         {
@@ -55,38 +61,19 @@ namespace nfun.Ti4
             Console.ResetColor();
 
             if (State is PrimitiveType concrete)
-                Console.WriteLine($"{concrete.Name} ");
+                Console.Write($"{concrete.Name} ");
             else if (State is RefTo reference)
-            {
-                if(Ancestors.Any())
-                    Console.WriteLine($"{reference.Node.Name} <={string.Join(",", Ancestors)}");
-                else
-                    Console.WriteLine($"{reference.Node.Name} ");
-            }
+                Console.Write($"{reference.Node.Name}");
             else if (State is SolvingConstrains constrains)
-            {
-                Console.Write($"[ ");
+                Console.Write(constrains);
+            else if (State is ArrayOf array)
+                Console.Write("arr("+ array.ElementNode.Name+")");
 
-                if (constrains.HasDescendant)
-                    Console.Write(constrains.Descedant);
+            if (Ancestors.Any()) 
+                Console.Write( "  <=" + string.Join(",", Ancestors.Select(a=>a.Name)));
 
-                Console.Write(" .. ");
+            Console.WriteLine();
 
-                if (constrains.HasAncestor || Ancestors.Any())
-                {
-                    if (constrains.HasAncestor)
-                        Console.Write($"{constrains.Ancestor}, ({(string.Join(", ", Ancestors))})");
-                    else
-                        Console.Write($"({(string.Join(", ", Ancestors))})");
-                }
-
-                Console.Write(" ]");
-                if(constrains.IsComparable)
-                    Console.Write(" <>");
-                if (constrains.PreferedType != null)
-                    Console.Write($" Pref: {constrains.PreferedType.Name}");
-                Console.WriteLine();
-            }
         }
 
 
@@ -140,6 +127,6 @@ namespace nfun.Ti4
             Node = node;
         }
         public SolvingNode Node { get; }
-        public override string ToString() => "RefTo." + Node;
+        public override string ToString() => $"ref({Node})";
     }
 }

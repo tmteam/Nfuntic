@@ -11,6 +11,12 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args) 
         {
+           GetEx();
+            Console.ReadLine();
+        }
+
+        static void ConcatEx()
+        {
             //              2     0 1
             //a:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
@@ -21,7 +27,18 @@ namespace nfun.ti4.app
             graph.SetDef("y", 2);
             graph.Solve();
 
-            Console.ReadLine();
+        }
+        static void GetEx()
+        {
+            //     2  0,1
+            //y = get(x,0)
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetDef("y", 2);
+            var result = graph.Solve();
+
         }
     }
 }

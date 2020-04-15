@@ -23,7 +23,7 @@
         public bool TrySetAncestor(PrimitiveType ancestorType) 
             => ancestorType.Equals(PrimitiveType.Any);
 
-        public override string ToString() => $"ArrayOf({ElementNode})";
+        public override string ToString() => $"arr({ElementNode})";
         public IType GetLastCommonAncestorOrNull(IType otherType)
         {
             var arrayType = otherType as ArrayOf;

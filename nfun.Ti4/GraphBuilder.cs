@@ -304,14 +304,24 @@ namespace nfun.Ti4
 
         public void PrintTrace()
         {
-            foreach (var solvingNode in _syntaxNodes) 
-                solvingNode?.PrintToConsole();
+            var alreadyPrinted = new HashSet<SolvingNode>();
 
-            foreach (var solvingNode in _variables) 
-                solvingNode.Value.PrintToConsole();
+            var allNodes = _syntaxNodes.Union(_variables.Select(v => v.Value)).Union(_typeVariables);
 
-            foreach (var typeVariable in _typeVariables) 
-                typeVariable.PrintToConsole();
+            void ReqPrintNode(SolvingNode node)
+            {
+                if(node==null)
+                    return;
+                if(alreadyPrinted.Contains(node))
+                    return;
+                if(node.State is ArrayOf arr)
+                    ReqPrintNode(arr.ElementNode);
+                node.PrintToConsole();
+                alreadyPrinted.Add(node);
+            }
+
+            foreach (var node in allNodes)
+                ReqPrintNode(node);
         }
       
 
