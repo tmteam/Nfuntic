@@ -11,8 +11,22 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args)
         {
-            ConcatEx();
+            SumGenericEx();
             Console.ReadLine();
+        }
+
+        static void SumGenericEx()
+        {
+            //     3  2 0,  1  
+            //y = sum([ 1, -1]) 
+            var graph = new GraphBuilder();
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.I16);
+            graph.SetArrayInit(2, 0, 1);
+            graph.SetSumCall(2, 3);
+            graph.SetDef("y", 3);
+            var result = graph.Solve();
+
         }
         static void ConcatEx()
         {

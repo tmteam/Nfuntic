@@ -6,7 +6,6 @@ using System.Text;
 
 namespace nfun.Ti4
 {
-
     public enum SolvingNodeType
     {
         Named,
@@ -130,6 +129,6 @@ namespace nfun.Ti4
             Node = node;
         }
         public SolvingNode Node { get; }
-        public override string ToString() => $"ref({Node})";
+        public override string ToString() => $"ref({Node.Name})";
     }
 }

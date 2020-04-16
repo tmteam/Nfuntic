@@ -20,10 +20,6 @@
         public bool IsSolved => (Element as IType)?.IsSolved == true;
         public object Element => ElementNode.State;
 
-        public bool TrySetAncestor(PrimitiveType ancestorType) 
-            => ancestorType.Equals(PrimitiveType.Any);
-
-        
 
         public override string ToString()
         {
@@ -52,5 +48,14 @@
 
         public bool CanBeImplicitlyConvertedTo(PrimitiveType type) 
             => type.Equals(PrimitiveType.Any);
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ArrayOf arr)
+            {
+                return arr.Element.Equals(this.Element);
+            }
+            return false;
+        }
     }
 }

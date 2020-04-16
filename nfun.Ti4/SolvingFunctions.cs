@@ -7,6 +7,62 @@ namespace nfun.Ti4
 {
     public static class SolvingFunctions 
     {
+        #region merges
+
+        
+
+        public static object GetMergedState(object stateA, object stateB)
+        {
+            if (stateB is SolvingConstrains c && c.NoConstrains)
+                return stateA;
+
+            if (stateA is IType typeA && typeA.IsSolved)
+            {
+                if (stateB is IType typeB && typeB.IsSolved)
+                {
+                    if (!typeB.Equals(typeA)) 
+                        throw new InvalidOperationException();
+                    return typeA;
+
+                }
+                if (stateB is SolvingConstrains constrainsB)
+                {
+                    if (!constrainsB.Fits(typeA))
+                        throw new InvalidOperationException();
+                    return typeA;
+                }
+            }
+            if (stateA is ArrayOf arrayA)
+            {
+                if (stateB is ArrayOf arrayB)
+                {
+                    Merge(arrayA.ElementNode, arrayB.ElementNode);
+                    return arrayA;
+                }
+            }
+            if (stateA is SolvingConstrains constrainsA)
+            {
+                if (stateB is SolvingConstrains constrainsB)
+                    return constrainsB.MergeOrNull(constrainsA) ?? throw new InvalidOperationException();
+                return GetMergedState(stateB, stateA);
+            }
+            throw new NotImplementedException();
+        }
+        public static void Merge(SolvingNode main, SolvingNode secondary)
+        {
+            var res = GetMergedState(main.State, secondary.State);
+            main.State = res;
+            if (res is IType t && t.IsSolved)
+            {
+                secondary.State = res;
+                return;
+            }
+
+            main.Ancestors.AddRange(secondary.Ancestors);
+            secondary.Ancestors.Clear();
+            secondary.State = new RefTo(main);
+        }
+
         public static void MergeCycle(SolvingNode[] cycleRoute)
         {
             var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) ?? cycleRoute.First();
@@ -24,30 +80,7 @@ namespace nfun.Ti4
                 {
                     //merge main and current
                     main.Ancestors.AddRange(current.Ancestors);
-                    if (main.State is PrimitiveType concrete)
-                    {
-                        if (current.State is PrimitiveType concreteB)
-                            if (!concreteB.Equals(concrete)) throw new InvalidOperationException();
-                            else if (current.State is SolvingConstrains constrainsB)
-                            {
-                                if (!constrainsB.Fits(concrete))
-                                    throw new InvalidOperationException();
-                                main.State = concrete;
-                            }
-                            else throw new NotImplementedException();
-                    }
-                    else if (main.State is SolvingConstrains constrainsA)
-                    {
-                        if (current.State is PrimitiveType concreteB)
-                        {
-                            if (!constrainsA.Fits(concreteB)) throw new InvalidOperationException();
-                            main.State = concreteB;
-                        }
-                        else if (current.State is SolvingConstrains constrainsB)
-                            main.State = constrainsB.MergeOrNull(constrainsA) ?? throw new InvalidOperationException();
-                        else throw new NotImplementedException();
-                    }
-                    else throw new NotImplementedException();
+                    main.State = GetMergedState(main.State, current.State);
                 }
                 if(!current.IsSolved)
                     current.State = new RefTo(main);
@@ -62,6 +95,7 @@ namespace nfun.Ti4
             main.Ancestors.Clear();
             main.Ancestors.AddRange(newAncestors);
         }
+    #endregion
 
         #region Upward 
 
@@ -511,52 +545,9 @@ namespace nfun.Ti4
         }
         public static void BecomeReferenceFor(this SolvingNode referencedNode, SolvingNode original)
         {
-            //todo рассмотреть все возможности (и невозможности) мержа
             referencedNode = referencedNode.GetNonReference();
-            var otherNode = original.GetNonReference();
-            if (otherNode.State is SolvingConstrains con && con.NoConstrains)
-            {
-                otherNode.State = new RefTo(referencedNode);
-                return;
-            }
-
-            if (referencedNode.State is PrimitiveType refConcrete)
-            {
-                switch (otherNode.State)
-                {
-                    case PrimitiveType c when !c.Equals(refConcrete):
-                        throw new InvalidOperationException();
-                    case PrimitiveType _: 
-                        return;
-                    case SolvingConstrains constrains when constrains.Fits(refConcrete):
-                        otherNode.State = refConcrete;
-                        return;
-                    case SolvingConstrains _: 
-                        throw new InvalidOperationException();
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-
-            if (referencedNode.State is SolvingConstrains refConstrains)
-            {
-                switch (otherNode.State)
-                {
-                    case PrimitiveType concrete when refConstrains.Fits(concrete):
-                        referencedNode.State = concrete;
-                        return;
-                    case PrimitiveType _: 
-                        throw  new InvalidOperationException();
-                    case SolvingConstrains constrains:
-                        referencedNode.State = constrains.MergeOrNull(refConstrains)??throw new InvalidOperationException();
-                        otherNode.State = new RefTo(referencedNode);
-                        return;
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-
-            throw new NotSupportedException();
+            original = original.GetNonReference();
+            Merge(referencedNode, original);
         }
 
 

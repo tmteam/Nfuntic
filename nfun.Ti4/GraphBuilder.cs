@@ -227,6 +227,14 @@ namespace nfun.Ti4
             var result = GetOrCreateNode(resultId);
             result.State = new RefTo(arrType);
         }
+
+        public void SetSumCall(int argId, int resultId)
+        {
+            var vartype = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.Real));
+            GetOrCreateArrayNode(argId, vartype);
+            var result = GetOrCreateNode(resultId);
+            vartype.BecomeReferenceFor(result);
+        }
         #endregion
         public SolvingNode[] Toposort()
         {
@@ -413,21 +421,8 @@ namespace nfun.Ti4
             var alreadyExists = _syntaxNodes[id];
             if (alreadyExists != null)
             {
-                if (alreadyExists.State is SolvingConstrains constrains && constrains.NoConstrains)
-                {
-                    alreadyExists.State = new ArrayOf(elementType);
-                    return alreadyExists;
-                }
-                else if (alreadyExists.State is ArrayOf && elementType.State is SolvingConstrains c2 && c2.NoConstrains )
-                {
-                    elementType.State = new RefTo(alreadyExists);
-                    return alreadyExists;
-                }
-                //todo нужно обработать остальные случаи
-                else
-                {
-                    throw new InvalidOperationException();
-                }
+                alreadyExists.State = SolvingFunctions.GetMergedState(new ArrayOf(elementType), alreadyExists.State);
+                return alreadyExists;
             }
 
             var res = new SolvingNode(id.ToString(), new ArrayOf(elementType), SolvingNodeType.SyntaxNode);
