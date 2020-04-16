@@ -352,11 +352,6 @@ namespace nfun.Ti4
         {
             void Destruction(SolvingNode node)
             {
-                if (node.Name == "eex''")
-                {
-
-                }
-
                 if (node.State is ArrayOf arrayDesc)
                 {
                     Destruction(arrayDesc.ElementNode);
@@ -391,6 +386,7 @@ namespace nfun.Ti4
 
             var originAnc = nonRefAncestor.ToString();
             var originDes = nonRefDescendant.ToString();
+
 
             switch (nonRefAncestor.State)
             {

@@ -194,5 +194,40 @@ namespace nfun.ti4.tests.Arrays
             result.AssertNoGenerics();
             result.AssertNamedEqualToArrayOf(PrimitiveType.Real, "y");
         }
+
+        [Test]
+        public void TwoDimention_InitConcrete()
+        {
+            //     4 3 0 1 2 
+            // y = [[1i,2i,3i]]
+            var graph = new GraphBuilder();
+            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(2, PrimitiveType.I32);
+            graph.SetArrayInit(3, 0, 1, 2);
+            graph.SetArrayInit(4,3);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "y");
+        }
+
+        [Test]
+        public void TwoDimention_InitConcrete_ConcreteDef()
+        {
+            //             4 3 0 1 2 
+            // y:int[][] = [[1i,2i,3i]]
+            var graph = new GraphBuilder();
+            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(2, PrimitiveType.I32);
+            graph.SetArrayInit(3, 0, 1, 2);
+            graph.SetArrayInit(4, 3);
+            graph.SetVarType("y", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "y");
+        }
     }
 }

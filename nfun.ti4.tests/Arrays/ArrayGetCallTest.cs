@@ -133,5 +133,127 @@ namespace nfun.ti4.tests.Arrays
             result.AssertNamed(ArrayOf.Create(new ArrayOf(generic)), "x");
             result.AssertAreGenerics(generic, "y");
         }
+
+
+        [Test(Description = "y:int = x[0][0]")]
+        public void TwoDimentions_ConcreteDef()
+        {
+            //    4    2  0,1  3
+            //y:int = get(get(x,0),0) 
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            graph.SetVarType("y", PrimitiveType.I32);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(PrimitiveType.I32, "y");
+        }
+
+        [Test(Description = "x:int[][]; y = x[0][0]")]
+        public void TwoDimentions_ConcreteArg()
+        {
+            //    4    2  0,1  3
+            //x:int[][]; y = get(get(x,0),0) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(PrimitiveType.I32, "y");
+        }
+
+        [Test(Description = "x:int[][]; y:int = x[0][0]")]
+        public void TwoDimentions_ConcreteArgAndDef()
+        {
+            //                   4    2  0,1  3
+            //x:int[][]; y:int = get(get(x,0),0) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            graph.SetVarType("y", PrimitiveType.I32);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(PrimitiveType.I32, "y");
+        }
+
+        [Test(Description = "x:int[][]; y:real = x[0][0]")]
+        public void TwoDimentions_ConcreteArgAndDefWithUpcast()
+        {
+            //                    4    2  0,1  3
+            //x:int[][]; y:real = get(get(x,0),0) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            graph.SetVarType("y", PrimitiveType.Real);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(PrimitiveType.Real, "y");
+        }
+
+        [Test(Description = "x:int[][]; y:i16 = x[0][0]")]
+        public void TwoDimentions_ImpossibleConcreteArgAndDef()
+        {
+            //                   4    2  0,1  3
+            //x:int[][]; y:i16 = get(get(x,0),0) 
+            var graph = new GraphBuilder();
+            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            try
+            {
+                graph.SetVarType("y", PrimitiveType.I16);
+                graph.SetDef("y", 4);
+                graph.Solve();
+                Assert.Fail();
+            } catch (Exception e) {
+                Console.WriteLine(e);
+            }
+        }
+
+        [Test(Description = "x:int[][]; y:i16 = x[0][0]")]
+        public void ThreeDimentions_ConcreteDefArrayOf()
+        {
+            //           4    2  0,1  3
+            //y:real[] = get(get(x,0),0) 
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.Real));
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(ArrayOf.Create(PrimitiveType.Real))), "x");
+            result.AssertNamed(ArrayOf.Create(PrimitiveType.Real), "y");
+        }
+
     }
 }

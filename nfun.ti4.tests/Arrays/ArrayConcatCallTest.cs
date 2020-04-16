@@ -147,5 +147,23 @@ namespace nfun.ti4.tests.Arrays
             result.AssertNamedEqualToArrayOf(PrimitiveType.I32, "b");
 
         }
+
+        [Test(Description = "y = concat(a,concat(b,c))")]
+        public void TwinConcat_Generic()
+        {
+            //     4     3    2   0 1
+            //y = concat(a,concat(b,c)) 
+            var graph = new GraphBuilder();
+            graph.SetVar("b", 0);
+            graph.SetVar("c", 1);
+
+            graph.SetConcatCall(0, 1, 2);
+            graph.SetVar("a", 3);
+            graph.SetConcatCall(3, 2, 4);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(null, null);
+            result.AssertNamed(new ArrayOf(generic), "b", "c", "a", "y");
+        }
     }
 }
