@@ -73,7 +73,7 @@ namespace nfun.ti4.tests
                 }
             }
         }
-        public static void AssertNamed(this FinalizationResults results, PrimitiveType type, params string[] varNames)
+        public static void AssertNamed(this FinalizationResults results, IType type, params string[] varNames)
         {
             foreach (var varName in varNames)
             {

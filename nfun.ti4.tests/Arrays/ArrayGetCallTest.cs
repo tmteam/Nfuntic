@@ -7,7 +7,7 @@ namespace nfun.ti4.tests.Arrays
     public class ArrayGetCallTest
     {
         [Test(Description = "y = x[0]")]
-        public void Get_Generic()
+        public void Generic()
         {
             //     2  0,1
             //y = get(x,0) 
@@ -23,7 +23,7 @@ namespace nfun.ti4.tests.Arrays
         }
 
         [Test(Description = "y = [1,2][0]")]
-        public void Get_ConstrainsGeneric()
+        public void ConstrainsGeneric()
         {
             //     4  2 0,  1  3
             //y = get([ 1, -1],0) 
@@ -41,7 +41,7 @@ namespace nfun.ti4.tests.Arrays
         }
 
         [Test(Description = "y:char = x[0]")]
-        public void Get_ConcreteDef()
+        public void ConcreteDef()
         {
             //          2  0,1
             //y:char = get(x,0) 
@@ -58,7 +58,7 @@ namespace nfun.ti4.tests.Arrays
         }
 
         [Test(Description = "x:int[]; y = x[0]")]
-        public void Get_ConcreteArg()
+        public void ConcreteArg()
         {
             //          2  0,1
             //x:int[]; y = get(x,0) 
@@ -75,7 +75,7 @@ namespace nfun.ti4.tests.Arrays
         }
 
         [Test(Description = "x:int[]; y = x[0]")]
-        public void Get_ConcreteArgAndDef_Upcast()
+        public void ConcreteArgAndDef_Upcast()
         {
             //          2  0,1
             //x:int[]; y:real = get(x,0) 
@@ -93,7 +93,7 @@ namespace nfun.ti4.tests.Arrays
         }
 
         [Test(Description = "x:int[]; y = x[0]")]
-        public void Get_ConcreteArgAndDef_Impossible()
+        public void ConcreteArgAndDef_Impossible()
         {
             try
             {
@@ -114,6 +114,24 @@ namespace nfun.ti4.tests.Arrays
                 Console.WriteLine(e);
 
             }
+        }
+
+        [Test(Description = "y = x[0][0]")]
+        public void TwoDimentions_Generic()
+        {
+            //    4    2  0,1  3
+            //y = get(get(x,0),0) 
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetArrGetCall(0, 1, 2);
+            graph.SetConst(3, PrimitiveType.I32);
+            graph.SetArrGetCall(2, 3, 4);
+            graph.SetDef("y", 4);
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(null, null);
+            result.AssertNamed(ArrayOf.Create(new ArrayOf(generic)), "x");
+            result.AssertAreGenerics(generic, "y");
         }
     }
 }

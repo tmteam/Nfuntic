@@ -7,14 +7,14 @@ namespace nfun.Ti4
 {
     public static class SolvingFunctions 
     {
-        #region merges
-
-        
+        #region Merges
 
         public static object GetMergedState(object stateA, object stateB)
         {
             if (stateB is SolvingConstrains c && c.NoConstrains)
                 return stateA;
+
+
 
             if (stateA is IType typeA && typeA.IsSolved)
             {
@@ -23,7 +23,6 @@ namespace nfun.Ti4
                     if (!typeB.Equals(typeA)) 
                         throw new InvalidOperationException();
                     return typeA;
-
                 }
                 if (stateB is SolvingConstrains constrainsB)
                 {
@@ -46,7 +45,17 @@ namespace nfun.Ti4
                     return constrainsB.MergeOrNull(constrainsA) ?? throw new InvalidOperationException();
                 return GetMergedState(stateB, stateA);
             }
-            throw new NotImplementedException();
+            if (stateA is RefTo refA)
+            {
+                var state = GetMergedState(refA.Node.State, stateB);
+                refA.Node.State = state;
+                return stateA;
+            }
+            if (stateB is RefTo)
+            {
+                return GetMergedState(stateB, stateA);
+            }
+            throw new InvalidOperationException();
         }
         public static void Merge(SolvingNode main, SolvingNode secondary)
         {
@@ -343,6 +352,18 @@ namespace nfun.Ti4
         {
             void Destruction(SolvingNode node)
             {
+                if (node.Name == "eex''")
+                {
+
+                }
+
+                if (node.State is ArrayOf arrayDesc)
+                {
+                    Destruction(arrayDesc.ElementNode);
+                    if (arrayDesc.Element is RefTo refTo)
+                       node.State = new ArrayOf(refTo.Node);
+                }
+
                 foreach (var ancestor in node.Ancestors.ToArray())
                 {
                     TryMergeDestructive(node, ancestor);
@@ -351,12 +372,8 @@ namespace nfun.Ti4
             for (int i = toposorteNodes.Length - 1; i >= 0; i--)
             {
                 var descendant = toposorteNodes[i];
-                if (descendant.State is ArrayOf arrayDesc) 
-                    Destruction(arrayDesc.ElementNode); 
-                
-                if(descendant.MemberOf.Any())
+                if (descendant.MemberOf.Any())
                     continue;
-                
                 Destruction(descendant);
             }
         }
@@ -457,9 +474,7 @@ namespace nfun.Ti4
 
         #endregion
 
-        #region finalize
-
-        
+        #region Finalize
 
         public static FinalizationResults FinalizeUp(SolvingNode[] toposortedNodes)
         {
