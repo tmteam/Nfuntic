@@ -12,17 +12,8 @@ namespace nfun.Ti4
         private readonly List<SolvingNode> _syntaxNodes = new List<SolvingNode>();
         private readonly List<SolvingNode> _typeVariables = new List<SolvingNode>();
         private int _varNodeId = 0;
-        private SolvingNode GetNamedNode(string name)
-        {
-            if (_variables.TryGetValue(name, out var varnode))
-            {
-                return varnode;
-            }
 
-            var ans = new SolvingNode("T" + name, new SolvingConstrains(), SolvingNodeType.Named);
-            _variables.Add(name, ans);
-            return ans;
-        }
+        #region set primitives
 
         public void SetVar(string name, int node)
         {
@@ -38,7 +29,6 @@ namespace nfun.Ti4
                     $"Node {node} cannot be referenced by '{name}' because it is not constrained node.");
             }
         }
-
         
         public void SetIfElse( int[] conditions, int[] expressions, int resultId)
         {
@@ -153,70 +143,7 @@ namespace nfun.Ti4
            //else
                 defNode.BecomeAncestorFor(exprNode);
         }
-
-        public SolvingNode[] Toposort()
-        {
-            int iteration = 0;
-            while (true)
-            {
-
-                var allNodes = _syntaxNodes.Concat(_variables.Values).Concat(_typeVariables).ToArray();
-                if (iteration > allNodes.Length * allNodes.Length)
-                    throw new InvalidOperationException();
-                iteration++;
-
-                var graph = new int[allNodes.Length][];
-                for (int i = 0; i < allNodes.Length; i++)
-                {
-                    allNodes[i].GraphId = i;
-                }
-
-                for (int i = 0; i < allNodes.Length; i++)
-                {
-                    var node = allNodes[i];
-                    var edges = node.Ancestors
-                        .Union(node.MemberOf)
-                        .Select(a => a.GraphId);
-                    
-                    if (node.State is RefTo reference)
-                    {
-                        //todo 2side reference
-                        graph[i] = edges.Append(reference.Node.GraphId).ToArray();
-                    }
-                    else
-                    {
-                        graph[i] = edges.ToArray();
-                    }
-                }
-
-                var sorted = GraphTools.SortTopology(graph);
-                var result = sorted.NodeNames.Select(n => allNodes[n]).Reverse().ToArray();
-                if (sorted.HasCycle)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"Found cycle: ");
-                    Console.ResetColor();
-                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
-
-                    //main node. every other node has to reference on it
-                    SolvingFunctions.MergeCycle(result);
-
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Cycle normalization results: ");
-                    Console.ResetColor();
-                    foreach (var solvingNode in result)
-                        solvingNode.PrintToConsole();
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Toposort results: ");
-                    Console.ResetColor();
-                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
-                    return result;
-                }
-            }
-        }
+#endregion
         #region Calls
 
         public void SetBitwiseInvert(int argId, int resultId)
@@ -301,6 +228,90 @@ namespace nfun.Ti4
             result.State = new RefTo(arrType);
         }
         #endregion
+        public SolvingNode[] Toposort()
+        {
+            int iteration = 0;
+            while (true)
+            {
+
+                var allNodes = _syntaxNodes.Concat(_variables.Values).Concat(_typeVariables).ToArray();
+                if (iteration > allNodes.Length * allNodes.Length)
+                    throw new InvalidOperationException();
+                iteration++;
+
+                var graph = ConvertToArrayGraph(allNodes);
+
+                var sorted = GraphTools.SortTopology(graph);
+                var result = sorted.NodeNames.Select(n => allNodes[n]).Reverse().ToArray();
+                if (sorted.HasCycle)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"Found cycle: ");
+                    Console.ResetColor();
+                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
+
+                    //main node. every other node has to reference on it
+                    SolvingFunctions.MergeCycle(result);
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Cycle normalization results: ");
+                    Console.ResetColor();
+                    foreach (var solvingNode in result)
+                        solvingNode.PrintToConsole();
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Toposort results: ");
+                    Console.ResetColor();
+                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
+                    return result;
+                }
+            }
+        }
+
+        private static int[][] ConvertToArrayGraph(SolvingNode[] allNodes)
+        {
+            var graph = new LinkedList<int>[allNodes.Length];
+            for (int i = 0; i < allNodes.Length; i++) 
+                allNodes[i].GraphId = i;
+
+            for (int i = 0; i < allNodes.Length; i++)
+            {
+                var node = allNodes[i];
+                   
+                
+                if (node.MemberOf.Any())
+                {
+                    foreach (var arrayNode in node.MemberOf)
+                    {
+                        PutEdges(arrayNode.GraphId, node);
+                    }
+                }
+                else
+                {
+                    PutEdges(i,node);
+                }
+            }
+            
+            return graph.Select(g=>g?.ToArray()).ToArray();
+
+            void PutEdges(int targetNode, SolvingNode source)
+            {
+                if(graph[targetNode]==null)
+                    graph[targetNode] = new LinkedList<int>();
+                foreach (var anc in source.Ancestors)
+                {
+                    graph[targetNode].AddLast(anc.GraphId);
+                }
+                if(source.State is RefTo reference)
+                {
+                    graph[targetNode].AddLast(reference.Node.GraphId);
+                }
+            }
+
+        }
+
 
         public void PrintTrace()
         {
@@ -371,7 +382,18 @@ namespace nfun.Ti4
             return results;
         }
 
-      
+        private SolvingNode GetNamedNode(string name)
+        {
+            if (_variables.TryGetValue(name, out var varnode))
+            {
+                return varnode;
+            }
+
+            var ans = new SolvingNode("T" + name, new SolvingConstrains(), SolvingNodeType.Named);
+            _variables.Add(name, ans);
+            return ans;
+        }
+
 
         private SolvingNode SetOrCreateConcrete(int id, PrimitiveType type)
         {

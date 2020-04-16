@@ -67,10 +67,9 @@ namespace nfun.ti4.tests
                     else
                         Assert.AreEqual(typeOrNode, array.ElementNode);
                 }
-                else if (node.State is ArrayOf arrayType)
+                else 
                 {
-                    var elementType = arrayType.Element;
-                    Assert.IsTrue(elementType.Equals(typeOrNode));
+                    Assert.Fail();
                 }
             }
         }

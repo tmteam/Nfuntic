@@ -41,6 +41,9 @@ namespace nfun.Ti4
                 if(IsSolved && value!=_state)
                     throw new InvalidOperationException("Node is already solved");
                 
+                if (value is ArrayOf array) 
+                    array.ElementNode.MemberOf.Add(this);
+                
                 _state = value;
             }
         }

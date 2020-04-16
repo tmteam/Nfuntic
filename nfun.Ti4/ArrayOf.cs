@@ -17,13 +17,22 @@
         }
 
         public SolvingNode ElementNode { get; }
-        public bool IsSolved => ElementNode.IsSolved;
+        public bool IsSolved => (Element as IType)?.IsSolved == true;
         public object Element => ElementNode.State;
 
         public bool TrySetAncestor(PrimitiveType ancestorType) 
             => ancestorType.Equals(PrimitiveType.Any);
 
-        public override string ToString() => $"arr({ElementNode})";
+        
+
+        public override string ToString()
+        {
+            if(ElementNode.IsSolved)
+                return $"arr({ElementNode})";
+
+            return $"arr({ElementNode.Name})";
+        }
+
         public IType GetLastCommonAncestorOrNull(IType otherType)
         {
             var arrayType = otherType as ArrayOf;

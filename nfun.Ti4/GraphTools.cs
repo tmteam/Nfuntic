@@ -29,15 +29,14 @@ namespace nfun.Ti4
         {
             private readonly int[][] _graph;
             private readonly NodeState[] _nodeStates;
-            private readonly int[] _route;
+            private readonly List<int> _route;
             private readonly Queue<int> _cycleRoute = new Queue<int>();
 
-            private int _processedCount = 0;
             public TopologySort(int[][] graph)
             {
                 _graph = graph;
                 _nodeStates = new NodeState[graph.Length];
-                _route = new int[graph.Length];
+                _route = new List<int>(graph.Length);
             }
 
             public TopologySortResults Sort()
@@ -47,18 +46,22 @@ namespace nfun.Ti4
                     if (!RecSort(i))
                         return new TopologySortResults(_cycleRoute.ToArray(), null, true);
                 }
+
                 return new TopologySortResults(_route, null, false);
             }
+
             private bool RecSort(int node)
             {
+                if (_graph[node] == null)
+                {
+                    _nodeStates[node] = NodeState.Checked;
+                    return true;
+                }
+
                 switch (_nodeStates[node])
                 {
-                    case NodeState.Checked:
-                        return true;
-                    case NodeState.Checking:
-                        {
-                            return false;
-                        }
+                    case NodeState.Checked: return true;
+                    case NodeState.Checking: return false;
                     default:
                         _nodeStates[node] = NodeState.Checking;
                         for (int child = 0; child < _graph[node].Length; child++)
@@ -72,15 +75,13 @@ namespace nfun.Ti4
 
                         _nodeStates[node] = NodeState.Checked;
 
-                        _route[_processedCount] = node;
-                        _processedCount++;
+                        _route.Add(node);
                         return true;
                 }
             }
-
-
         }
     }
+
     enum NodeState
     {
         NotProcessed,
@@ -159,14 +160,14 @@ namespace nfun.Ti4
         /// Topological sort order if has no cycle
         /// First cycle route otherwise
         /// </summary>
-        public readonly int[] NodeNames;
+        public readonly IList<int> NodeNames;
         public readonly bool HasCycle;
         /// <summary>
         /// List of recursive nodes or null if there are no one
         /// </summary>
         public readonly int[] RecursionsOrNull;
 
-        public TopologySortResults(int[] nodeNames, int[] recursionsOrNull, bool hasCycle)
+        public TopologySortResults(IList<int> nodeNames, int[] recursionsOrNull, bool hasCycle)
         {
             NodeNames = nodeNames;
             HasCycle = hasCycle;

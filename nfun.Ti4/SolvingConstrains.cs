@@ -107,7 +107,10 @@ namespace nfun.Ti4
 
         public void AddDescedant(IType type)
         {
+            
             if(type==null)
+                return;
+            if(!type.IsSolved)
                 return;
 
             if (Descedant == null)

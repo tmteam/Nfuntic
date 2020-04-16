@@ -33,6 +33,7 @@ namespace nfun.Ti4
 
     public interface IType
     {
+        bool IsSolved { get; }
         IType GetLastCommonAncestorOrNull(IType otherType);
         bool CanBeImplicitlyConvertedTo(PrimitiveType type);
     }
@@ -79,7 +80,8 @@ namespace nfun.Ti4
         }
 
         public PrimitiveTypeName Name { get; }
-        
+
+        public bool IsSolved => true;
         public bool IsNumeric => Name.HasFlag(PrimitiveTypeName._IsNumber);
         
         private int Layer => (int)((int)Name >>5 & 0b1111);

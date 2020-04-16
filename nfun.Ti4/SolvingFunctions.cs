@@ -78,7 +78,7 @@ namespace nfun.Ti4
                     HandleUpwardLimits(array.ElementNode);
             }
 
-            foreach (var node in toposortedNodes)
+            foreach (var node in toposortedNodes.Where(n=>!n.MemberOf.Any()))
                 HandleUpwardLimits(node);
         }
 
@@ -185,6 +185,8 @@ namespace nfun.Ti4
                         var result = TransformToArrayOrNull(descendant.Name, constrainsDesc, arrayAnc);
                         if(result==null)
                             throw new InvalidOperationException();
+                        
+                        result.ElementNode.Ancestors.Add(arrayAnc.ElementNode);
                         descendant.State = result;
                         descendant.Ancestors.Remove(ancestor);
                         return ancestor.State;
@@ -229,7 +231,11 @@ namespace nfun.Ti4
 
             for (int i = toposortedNodes.Length - 1; i >= 0; i--)
             {
+
                 var descendant = toposortedNodes[i];
+                if(descendant.MemberOf.Any())
+                    continue;
+                
                 Downwards(descendant);
             }
         }
@@ -249,7 +255,6 @@ namespace nfun.Ti4
                 return SetDownwardsLimits(referenceAnc.Node, descendant);
             }
             #endregion
-
 
             if (ancestor.State is ArrayOf ancArray)
             {
@@ -314,6 +319,9 @@ namespace nfun.Ti4
                 var descendant = toposorteNodes[i];
                 if (descendant.State is ArrayOf arrayDesc) 
                     Destruction(arrayDesc.ElementNode); 
+                
+                if(descendant.MemberOf.Any())
+                    continue;
                 
                 Destruction(descendant);
             }
@@ -421,7 +429,7 @@ namespace nfun.Ti4
 
         public static FinalizationResults FinalizeUp(SolvingNode[] toposortedNodes)
         {
-            var typeVariables = new List<SolvingNode>();
+            var typeVariables = new HashSet<SolvingNode>();
             var syntaxNodes = new SolvingNode[toposortedNodes.Length];
             var namedNodes = new List<SolvingNode>();
 
@@ -457,10 +465,15 @@ namespace nfun.Ti4
             {
                 Finalize(node);
 
-                if (node.Type== SolvingNodeType.TypeVariable)
+                var concreteElement = node.GetTypeLeafElement();
+
+                if (concreteElement.Type== SolvingNodeType.TypeVariable 
+                    && concreteElement.State is SolvingConstrains)
                 {
-                    typeVariables.Add(node);
+                    if(!typeVariables.Contains(concreteElement))
+                        typeVariables.Add(concreteElement);
                 }
+
 
                 if (node.Type == SolvingNodeType.Named)
                     namedNodes.Add(node);
@@ -471,6 +484,15 @@ namespace nfun.Ti4
             return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
         }
         #endregion
+
+        public static SolvingNode GetTypeLeafElement(this SolvingNode node)
+        {
+            if (node.State is RefTo reference)
+                return GetTypeLeafElement(reference.Node);
+            if (node.State is ArrayOf array)
+                return GetTypeLeafElement(array.ElementNode);
+            return node;
+        }
 
         public static SolvingNode GetNonReference(this SolvingNode node)
         {
@@ -537,6 +559,8 @@ namespace nfun.Ti4
             throw new NotSupportedException();
         }
 
+
+
         /// <summary>
         /// Превращает неопределенное ограничение в ограничение с массивом
         /// </summary>
@@ -553,9 +577,9 @@ namespace nfun.Ti4
                 string eName;
                 
                 if (descNodeName.StartsWith("T") && descNodeName.Length > 1)
-                    eName = descNodeName.Substring(1)+"'";
+                    eName = "e" + descNodeName.Substring(1).ToLower() + "'";
                 else
-                    eName = descNodeName.ToLower() + "'";
+                    eName = "e" + descNodeName.ToLower() + "'";
                 
                 var node = new SolvingNode(eName, constrains, SolvingNodeType.TypeVariable);
                 node.Ancestors.Add(ancestor.ElementNode);

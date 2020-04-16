@@ -148,7 +148,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetDef("y", 2);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamedEqualToArrayOf(ArrayOf.Create(PrimitiveType.I32),"y","a","b");
+            result.AssertNamedEqualToArrayOf(PrimitiveType.I32,"y","a","b");
         }
     }
 }
