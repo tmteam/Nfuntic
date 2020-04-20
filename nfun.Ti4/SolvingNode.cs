@@ -18,6 +18,9 @@ namespace nfun.Ti4
         private object _state;
         public int GraphId { get; set; }
 
+        public static SolvingNode CreateTypeNode(IType type) 
+            => new SolvingNode(type.ToString(), type, SolvingNodeType.TypeVariable);
+
         public SolvingNode(string name, object state, SolvingNodeType type)
         {
             Name = name;

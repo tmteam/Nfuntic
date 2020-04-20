@@ -159,8 +159,8 @@ namespace nfun.Ti4
 
         public void SetBitwise(int leftId, int rightId, int resultId)
         {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
+            var left   = GetOrCreateNode(leftId);
+            var right  = GetOrCreateNode(rightId);
             var result = GetOrCreateNode(resultId);
 
             var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U8, PrimitiveType.I96));
@@ -184,8 +184,8 @@ namespace nfun.Ti4
 
         public void SetArith(int leftId, int rightId, int resultId)
         {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
+            var left   = GetOrCreateNode(leftId);
+            var right  = GetOrCreateNode(rightId);
             var result = GetOrCreateNode(resultId);
 
             var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.Real));

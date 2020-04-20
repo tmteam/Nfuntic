@@ -7,14 +7,11 @@
             ElementNode = elementNode;
         }
 
-        public static ArrayOf Create(IType type)
-        {
-            var node = new SolvingNode(
-                name: type.ToString(), 
-                state: type, 
-                type: SolvingNodeType.TypeVariable);
-            return new ArrayOf(node);
-        }
+        public static ArrayOf Create(SolvingNode node) 
+            => new ArrayOf(node);
+
+        public static ArrayOf Create(IType type) 
+            => new ArrayOf(SolvingNode.CreateTypeNode(type));
 
         public SolvingNode ElementNode { get; }
         public bool IsSolved => (Element as IType)?.IsSolved == true;

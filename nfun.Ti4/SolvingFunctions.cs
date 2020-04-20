@@ -14,8 +14,6 @@ namespace nfun.Ti4
             if (stateB is SolvingConstrains c && c.NoConstrains)
                 return stateA;
 
-
-
             if (stateA is IType typeA && typeA.IsSolved)
             {
                 if (stateB is IType typeB && typeB.IsSolved)

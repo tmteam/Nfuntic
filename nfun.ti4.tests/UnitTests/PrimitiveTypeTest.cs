@@ -3,13 +3,14 @@ using NUnit.Framework;
 
 namespace nfun.ti4.tests
 {
-    public class ConcreteTypeTest
+    public class PrimitiveTypeTest
     {
         [TestCase(PrimitiveTypeName.Real, PrimitiveTypeName.Real, PrimitiveTypeName.Real)]
         [TestCase(PrimitiveTypeName.Real, PrimitiveTypeName.Char, PrimitiveTypeName.Any)]
         [TestCase(PrimitiveTypeName.Any, PrimitiveTypeName.Real, PrimitiveTypeName.Any)]
         [TestCase(PrimitiveTypeName.U24, PrimitiveTypeName.I32, PrimitiveTypeName.I32)]
         [TestCase(PrimitiveTypeName.I48, PrimitiveTypeName.I32, PrimitiveTypeName.I48)]
+        [TestCase(PrimitiveTypeName.I32, PrimitiveTypeName.U16, PrimitiveTypeName.I32)]
         [TestCase(PrimitiveTypeName.U48, PrimitiveTypeName.I32, PrimitiveTypeName.I64)]
         [TestCase(PrimitiveTypeName.U48, PrimitiveTypeName.U32, PrimitiveTypeName.U48)]
         [TestCase(PrimitiveTypeName.U64, PrimitiveTypeName.I32, PrimitiveTypeName.I96)]
