@@ -59,7 +59,7 @@ namespace nfun.ti4.tests
             foreach (var varName in varNames)
             {
                 var node = results.GetVariableNode(varName).GetNonReference();
-                if (node.State is ArrayOf array)
+                if (node.State is Array array)
                 {
                     var element = array.ElementNode;
                     if (typeOrNode is PrimitiveType concrete)

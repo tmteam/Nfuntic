@@ -1,6 +1,7 @@
 ﻿using System;
 using nfun.Ti4;
 using NUnit.Framework;
+using Array = nfun.Ti4.Array;
 
 namespace nfun.ti4.tests.Arrays
 {
@@ -63,7 +64,7 @@ namespace nfun.ti4.tests.Arrays
             //          2  0,1
             //x:int[]; y = get(x,0) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("x", Array.Of(PrimitiveType.I32));
             graph.SetVar("x", 0);
             graph.SetConst(1, PrimitiveType.I32);
             graph.SetArrGetCall(0, 1, 2);
@@ -80,7 +81,7 @@ namespace nfun.ti4.tests.Arrays
             //          2  0,1
             //x:int[]; y:real = get(x,0) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("x", Array.Of(PrimitiveType.I32));
             graph.SetVar("x", 0);
             graph.SetConst(1, PrimitiveType.I32);
             graph.SetArrGetCall(0, 1, 2);
@@ -100,7 +101,7 @@ namespace nfun.ti4.tests.Arrays
                 //          2  0,1
                 //x:real[]; y:int = get(x,0) 
                 var graph = new GraphBuilder();
-                graph.SetVarType("x", ArrayOf.Create(PrimitiveType.Real));
+                graph.SetVarType("x", Array.Of(PrimitiveType.Real));
                 graph.SetVar("x", 0);
                 graph.SetConst(1, PrimitiveType.I32);
                 graph.SetArrGetCall(0, 1, 2);
@@ -130,7 +131,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetDef("y", 4);
             var result = graph.Solve();
             var generic = result.AssertAndGetSingleGeneric(null, null);
-            result.AssertNamed(ArrayOf.Create(new ArrayOf(generic)), "x");
+            result.AssertNamed(Array.Of(new Array(generic)), "x");
             result.AssertAreGenerics(generic, "y");
         }
 
@@ -150,7 +151,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetDef("y", 4);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(Array.Of(Array.Of(PrimitiveType.I32)), "x");
             result.AssertNamed(PrimitiveType.I32, "y");
         }
 
@@ -160,7 +161,7 @@ namespace nfun.ti4.tests.Arrays
             //    4    2  0,1  3
             //x:int[][]; y = get(get(x,0),0) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVarType("x", Array.Of(Array.Of(PrimitiveType.I32)));
             graph.SetVar("x", 0);
             graph.SetConst(1, PrimitiveType.I32);
             graph.SetArrGetCall(0, 1, 2);
@@ -169,7 +170,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetDef("y", 4);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(Array.Of(Array.Of(PrimitiveType.I32)), "x");
             result.AssertNamed(PrimitiveType.I32, "y");
         }
 
@@ -179,7 +180,7 @@ namespace nfun.ti4.tests.Arrays
             //                   4    2  0,1  3
             //x:int[][]; y:int = get(get(x,0),0) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVarType("x", Array.Of(Array.Of(PrimitiveType.I32)));
             graph.SetVar("x", 0);
             graph.SetConst(1, PrimitiveType.I32);
             graph.SetArrGetCall(0, 1, 2);
@@ -189,7 +190,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetDef("y", 4);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(Array.Of(Array.Of(PrimitiveType.I32)), "x");
             result.AssertNamed(PrimitiveType.I32, "y");
         }
 
@@ -199,7 +200,7 @@ namespace nfun.ti4.tests.Arrays
             //                    4    2  0,1  3
             //x:int[][]; y:real = get(get(x,0),0) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVarType("x", Array.Of(Array.Of(PrimitiveType.I32)));
             graph.SetVar("x", 0);
             graph.SetConst(1, PrimitiveType.I32);
             graph.SetArrGetCall(0, 1, 2);
@@ -209,7 +210,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetDef("y", 4);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)), "x");
+            result.AssertNamed(Array.Of(Array.Of(PrimitiveType.I32)), "x");
             result.AssertNamed(PrimitiveType.Real, "y");
         }
 
@@ -219,7 +220,7 @@ namespace nfun.ti4.tests.Arrays
             //                   4    2  0,1  3
             //x:int[][]; y:i16 = get(get(x,0),0) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(ArrayOf.Create(PrimitiveType.I32)));
+            graph.SetVarType("x", Array.Of(Array.Of(PrimitiveType.I32)));
             graph.SetVar("x", 0);
             graph.SetConst(1, PrimitiveType.I32);
             graph.SetArrGetCall(0, 1, 2);
@@ -247,12 +248,12 @@ namespace nfun.ti4.tests.Arrays
             graph.SetArrGetCall(0, 1, 2);
             graph.SetConst(3, PrimitiveType.I32);
             graph.SetArrGetCall(2, 3, 4);
-            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.Real));
+            graph.SetVarType("y", Array.Of(PrimitiveType.Real));
             graph.SetDef("y", 4);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(ArrayOf.Create(ArrayOf.Create(ArrayOf.Create(PrimitiveType.Real))), "x");
-            result.AssertNamed(ArrayOf.Create(PrimitiveType.Real), "y");
+            result.AssertNamed(Array.Of(Array.Of(Array.Of(PrimitiveType.Real))), "x");
+            result.AssertNamed(Array.Of(PrimitiveType.Real), "y");
         }
 
     }

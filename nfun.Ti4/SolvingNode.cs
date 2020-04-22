@@ -31,7 +31,7 @@ namespace nfun.Ti4
         public SolvingNodeType Type { get; }
         public List<SolvingNode> Ancestors { get; } = new List<SolvingNode>();
         public List<SolvingNode> MemberOf { get; } = new List<SolvingNode>();
-        public bool IsSolved => State is PrimitiveType || (State as ArrayOf)?.IsSolved == true;
+        public bool IsSolved => State is PrimitiveType || (State as Array)?.IsSolved == true;
 
         public ISolvingState State
         {
@@ -43,7 +43,7 @@ namespace nfun.Ti4
                 if(IsSolved && value!=_state)
                     throw new InvalidOperationException("Node is already solved");
                 
-                if (value is ArrayOf array) 
+                if (value is Array array) 
                     array.ElementNode.MemberOf.Add(this);
                 
                 _state = value;
@@ -71,7 +71,7 @@ namespace nfun.Ti4
                 Console.Write($"{reference.Node.Name}");
             else if (State is SolvingConstrains constrains)
                 Console.Write(constrains);
-            else if (State is ArrayOf array)
+            else if (State is Array array)
                 Console.Write("arr("+ array.ElementNode.Name+")");
 
             if (Ancestors.Any()) 

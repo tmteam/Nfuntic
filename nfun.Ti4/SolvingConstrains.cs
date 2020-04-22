@@ -41,13 +41,13 @@ namespace nfun.Ti4
                     return false;
                 return true;
             }
-            else if (type is ArrayOf array)
+            else if (type is Array array)
             {
                 if (IsComparable)
                     return false;
                 if (!HasDescendant)
                     return true;
-                if (!(Descedant is ArrayOf descArray))
+                if (!(Descedant is Array descArray))
                     return false;
                 if (array.Element.Equals(descArray.Element))
                     return true;

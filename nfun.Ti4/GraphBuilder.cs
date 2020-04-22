@@ -63,7 +63,7 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetVarType(string s, ArrayOf array)
+        public void SetVarType(string s, Array array)
         {
             var node = GetNamedNode(s);
             node.State = array;
@@ -104,7 +104,7 @@ namespace nfun.Ti4
                         node.SetAncestor(primitive);
                         break;
                     }
-                    case ArrayOf array:
+                    case Array array:
                     {
                         GetOrCreateArrayNode(argId, array.ElementNode);
                         break;
@@ -232,7 +232,7 @@ namespace nfun.Ti4
                     return;
                 if(alreadyPrinted.Contains(node))
                     return;
-                if(node.State is ArrayOf arr)
+                if(node.State is Array arr)
                     ReqPrintNode(arr.ElementNode);
                 node.PrintToConsole();
                 alreadyPrinted.Add(node);
@@ -320,11 +320,11 @@ namespace nfun.Ti4
             var alreadyExists = _syntaxNodes[id];
             if (alreadyExists != null)
             {
-                alreadyExists.State = SolvingFunctions.GetMergedState(new ArrayOf(elementType), alreadyExists.State);
+                alreadyExists.State = SolvingFunctions.GetMergedState(new Array(elementType), alreadyExists.State);
                 return alreadyExists;
             }
 
-            var res = new SolvingNode(id.ToString(), new ArrayOf(elementType), SolvingNodeType.SyntaxNode);
+            var res = new SolvingNode(id.ToString(), new Array(elementType), SolvingNodeType.SyntaxNode);
             _syntaxNodes[id] = res;
             return res;
         }

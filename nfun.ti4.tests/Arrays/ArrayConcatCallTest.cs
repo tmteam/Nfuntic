@@ -29,7 +29,7 @@ namespace nfun.ti4.tests.Arrays
             //              2     0 1
             //a:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("a", Array.Of(PrimitiveType.I32));
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
@@ -45,7 +45,7 @@ namespace nfun.ti4.tests.Arrays
             //              2     0 1
             //b:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("b", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("b", Array.Of(PrimitiveType.I32));
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
@@ -61,8 +61,8 @@ namespace nfun.ti4.tests.Arrays
             //              2     0 1
             //a:int[]; b:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", ArrayOf.Create(PrimitiveType.I32));
-            graph.SetVarType("b", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("a", Array.Of(PrimitiveType.I32));
+            graph.SetVarType("b", Array.Of(PrimitiveType.I32));
 
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
@@ -78,8 +78,8 @@ namespace nfun.ti4.tests.Arrays
             //              2     0 1
             //a:int[]; b:char[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", ArrayOf.Create(PrimitiveType.I32));
-            graph.SetVarType("b", ArrayOf.Create(PrimitiveType.Char));
+            graph.SetVarType("a", Array.Of(PrimitiveType.I32));
+            graph.SetVarType("b", Array.Of(PrimitiveType.Char));
 
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
@@ -101,7 +101,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
-            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.Real));
+            graph.SetVarType("y", Array.Of(PrimitiveType.Real));
             graph.SetDef("y", 2);
             var result = graph.Solve();
             result.AssertNoGenerics();
@@ -115,12 +115,12 @@ namespace nfun.ti4.tests.Arrays
             //a:real[]; y:real[] = concat(a,b)
 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", ArrayOf.Create(PrimitiveType.Real));
+            graph.SetVarType("a", Array.Of(PrimitiveType.Real));
 
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
-            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.Real));
+            graph.SetVarType("y", Array.Of(PrimitiveType.Real));
             graph.SetDef("y", 2);
             var result = graph.Solve();
             result.AssertNoGenerics();
@@ -134,12 +134,12 @@ namespace nfun.ti4.tests.Arrays
             //b:int[]; y:real[] = concat(a,b)
 
             var graph = new GraphBuilder();
-            graph.SetVarType("b", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("b", Array.Of(PrimitiveType.I32));
 
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
-            graph.SetVarType("y", ArrayOf.Create(PrimitiveType.Real));
+            graph.SetVarType("y", Array.Of(PrimitiveType.Real));
             graph.SetDef("y", 2);
             var result = graph.Solve();
             result.AssertNoGenerics();
@@ -163,7 +163,7 @@ namespace nfun.ti4.tests.Arrays
             graph.SetDef("y", 4);
             var result = graph.Solve();
             var generic = result.AssertAndGetSingleGeneric(null, null);
-            result.AssertNamed(new ArrayOf(generic), "b", "c", "a", "y");
+            result.AssertNamed(new Array(generic), "b", "c", "a", "y");
         }
     }
 }

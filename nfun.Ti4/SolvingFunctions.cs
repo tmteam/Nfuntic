@@ -28,9 +28,9 @@ namespace nfun.Ti4
                     return typeA;
                 }
             }
-            if (stateA is ArrayOf arrayA)
+            if (stateA is Array arrayA)
             {
-                if (stateB is ArrayOf arrayB)
+                if (stateB is Array arrayB)
                 {
                     Merge(arrayA.ElementNode, arrayB.ElementNode);
                     return arrayA;
@@ -114,7 +114,7 @@ namespace nfun.Ti4
                     var ancestor = node.Ancestors[index];
                     ancestor.State = SetUpwardsLimits(node, ancestor);
                 }
-                if (node.State is ArrayOf array) 
+                if (node.State is Array array) 
                     HandleUpwardLimits(array.ElementNode);
             }
 
@@ -169,9 +169,9 @@ namespace nfun.Ti4
                         result.AddDescedant(typeDesc);
                         return result.GetOptimizedOrThrow();
                     }
-                    case ArrayOf arrayAnc:
+                    case Array arrayAnc:
                     {
-                        if (!(typeDesc is ArrayOf arrayDesc))
+                        if (!(typeDesc is Array arrayDesc))
                             throw new NotSupportedException();
                         
                         descendant.Ancestors.Remove(ancestor);
@@ -220,7 +220,7 @@ namespace nfun.Ti4
                             result.AddDescedant(constrainsDesc.Descedant);
                             return result.GetOptimizedOrThrow();
                         }
-                    case ArrayOf arrayAnc:
+                    case Array arrayAnc:
                     {
                         var result = TransformToArrayOrNull(descendant.Name, constrainsDesc, arrayAnc);
                         if(result==null)
@@ -263,7 +263,7 @@ namespace nfun.Ti4
         {
             void Downwards(SolvingNode descendant)
             {
-                if (descendant.State is ArrayOf array)
+                if (descendant.State is Array array)
                     Downwards(array.ElementNode);
                 foreach (var ancestor in descendant.Ancestors)
                     descendant.State = SetDownwardsLimits(descendant, ancestor);
@@ -296,7 +296,7 @@ namespace nfun.Ti4
             }
             #endregion
 
-            if (ancestor.State is ArrayOf ancArray)
+            if (ancestor.State is Array ancArray)
             {
                 if (descendant.State is SolvingConstrains constr)
                 {
@@ -306,7 +306,7 @@ namespace nfun.Ti4
                     descendant.State = result;
                 }
 
-                if (descendant.State is ArrayOf desArray)
+                if (descendant.State is Array desArray)
                 {
                     desArray.ElementNode.State = SetDownwardsLimits(desArray.ElementNode, ancArray.ElementNode);
                     return descendant.State;
@@ -321,7 +321,7 @@ namespace nfun.Ti4
                 if (constrainsAnc.HasAncestor) upType = constrainsAnc.Ancestor;
                 else return descendant.State;
             }
-            else if (ancestor.State is ArrayOf) return descendant.State;
+            else if (ancestor.State is Array) return descendant.State;
 
             if (upType == null)
                 throw new InvalidOperationException();
@@ -349,11 +349,11 @@ namespace nfun.Ti4
         {
             void Destruction(SolvingNode node)
             {
-                if (node.State is ArrayOf arrayDesc)
+                if (node.State is Array arrayDesc)
                 {
                     Destruction(arrayDesc.ElementNode);
                     if (arrayDesc.Element is RefTo refTo)
-                       node.State = new ArrayOf(refTo.Node);
+                       node.State = new Array(refTo.Node);
                 }
 
                 foreach (var ancestor in node.Ancestors.ToArray())
@@ -397,7 +397,7 @@ namespace nfun.Ti4
                     break;
                 }
 
-                case ArrayOf arrayAnc:
+                case Array arrayAnc:
                 {
 
                     if (nonRefDescendant.State is SolvingConstrains constrainsDesc && constrainsDesc.Fits(arrayAnc))
@@ -451,7 +451,7 @@ namespace nfun.Ti4
                     break;
                 }
 
-                case SolvingConstrains constrainsAnc when nonRefDescendant.State is ArrayOf arrayDes:
+                case SolvingConstrains constrainsAnc when nonRefDescendant.State is Array arrayDes:
                 {
                     Console.Write("c+a");
 
@@ -492,14 +492,14 @@ namespace nfun.Ti4
                         Console.WriteLine($"\t{node.Name}->s");
                     }
                 }
-                else if (node.State is ArrayOf array)
+                else if (node.State is Array array)
                 {
                     if (array.Element is RefTo reference)
                     {
-                        node.State = new ArrayOf(reference.Node.GetNonReference());
+                        node.State = new Array(reference.Node.GetNonReference());
                         Console.WriteLine($"\t{node.Name}->ar");
                     }
-                    Finalize((node.State as ArrayOf).ElementNode);
+                    Finalize((node.State as Array).ElementNode);
                 }
             }
 
@@ -531,7 +531,7 @@ namespace nfun.Ti4
         {
             if (node.State is RefTo reference)
                 return GetTypeLeafElement(reference.Node);
-            if (node.State is ArrayOf array)
+            if (node.State is Array array)
                 return GetTypeLeafElement(array.ElementNode);
             return node;
         }
@@ -567,8 +567,8 @@ namespace nfun.Ti4
         /// <param name="descendant"></param>
         /// <param name="ancestor"></param>
         /// <returns></returns>
-        private static ArrayOf TransformToArrayOrNull(string descNodeName, SolvingConstrains descendant,
-            ArrayOf ancestor)
+        private static Array TransformToArrayOrNull(string descNodeName, SolvingConstrains descendant,
+            Array ancestor)
         {
             if (descendant.NoConstrains)
             {
@@ -582,16 +582,16 @@ namespace nfun.Ti4
                 
                 var node = new SolvingNode(eName, constrains, SolvingNodeType.TypeVariable);
                 node.Ancestors.Add(ancestor.ElementNode);
-                return new ArrayOf(node);
+                return new Array(node);
             }
             
-            if (descendant.HasDescendant && descendant.Descedant is ArrayOf arrayEDesc)
+            if (descendant.HasDescendant && descendant.Descedant is Array arrayEDesc)
             {
                 if(arrayEDesc.Element is RefTo)
                 {
                     var origin = arrayEDesc.ElementNode.GetNonReference();
                     if(origin.IsSolved)
-                        return new ArrayOf(origin);
+                        return new Array(origin);
                 }
                 else if (arrayEDesc.ElementNode.IsSolved)
                 {

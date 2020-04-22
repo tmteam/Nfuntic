@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using nfun.Ti4;
+using Array = nfun.Ti4.Array;
 
 namespace nfun.ti4.app
 {
@@ -33,7 +34,7 @@ namespace nfun.ti4.app
             //              2     0 1
             //a:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("a", Array.Of(PrimitiveType.I32));
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
@@ -47,7 +48,7 @@ namespace nfun.ti4.app
                 //              2     0 1
                 //a:int[]; y = concat(a,b) 
                 var graph = new GraphBuilder();
-                graph.SetVarType("a", ArrayOf.Create(PrimitiveType.I32));
+                graph.SetVarType("a", Array.Of(PrimitiveType.I32));
                 graph.SetVar("a", 0);
                 graph.SetVar("b", 1);
                 graph.SetConcatCall(0, 1, 2);

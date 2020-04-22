@@ -1,6 +1,7 @@
 ﻿using System;
 using nfun.Ti4;
 using NUnit.Framework;
+using Array = nfun.Ti4.Array;
 
 namespace nfun.ti4.tests.Arrays
 {
@@ -82,7 +83,7 @@ namespace nfun.ti4.tests.Arrays
             //               2 0
             //x:int[]; y = sum(x) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("x", Array.Of(PrimitiveType.I32));
             graph.SetVar("x", 0);
             graph.SetSumCall(0, 1);
             graph.SetDef("y", 1);
@@ -98,7 +99,7 @@ namespace nfun.ti4.tests.Arrays
             //                   2  0
             //x:int[]; y:real = sum(x) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", ArrayOf.Create(PrimitiveType.I32));
+            graph.SetVarType("x", Array.Of(PrimitiveType.I32));
             graph.SetVar("x", 0);
             graph.SetSumCall(0, 1);
             graph.SetVarType("y", PrimitiveType.Real);
@@ -117,7 +118,7 @@ namespace nfun.ti4.tests.Arrays
                 //                   1  0
                 //x:real[]; y:int = sum(x) 
                 var graph = new GraphBuilder();
-                graph.SetVarType("x", ArrayOf.Create(PrimitiveType.Real));
+                graph.SetVarType("x", Array.Of(PrimitiveType.Real));
                 graph.SetVar("x", 0);
                 graph.SetSumCall(0, 1);
                 graph.SetVarType("y", PrimitiveType.I32);

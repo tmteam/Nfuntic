@@ -77,7 +77,7 @@ namespace nfun.Ti4
         {
             var varNode = builder.InitializeVarNode();
             builder.SetCall(
-                new ISolvingState []{ArrayOf.Create(varNode), PrimitiveType.I32, varNode },new []{arrArgId,indexArgId, resId});
+                new ISolvingState []{Array.Of(varNode), PrimitiveType.I32, varNode },new []{arrArgId,indexArgId, resId});
         }
         
         public static void SetConcatCall(this GraphBuilder builder, int firstId, int secondId, int resultId)
@@ -86,7 +86,7 @@ namespace nfun.Ti4
             
             builder.SetCall(new ISolvingState[]
             {
-                ArrayOf.Create(varNode),ArrayOf.Create(varNode),ArrayOf.Create(varNode),
+                Array.Of(varNode),Array.Of(varNode),Array.Of(varNode),
             }, new []{firstId, secondId, resultId});
 
         }
@@ -95,7 +95,7 @@ namespace nfun.Ti4
         {
             var varNode = builder.InitializeVarNode(PrimitiveType.U24, PrimitiveType.Real);
 
-            builder.SetCall(new ISolvingState[]{ArrayOf.Create(varNode), varNode}, new []{argId,resultId});
+            builder.SetCall(new ISolvingState[]{Array.Of(varNode), varNode}, new []{argId,resultId});
         }
     }
 }

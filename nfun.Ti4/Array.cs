@@ -2,27 +2,27 @@
 
 namespace nfun.Ti4
 {
-    public class ArrayOf: IType, ISolvingState
+    public class Array: IType, ISolvingState
     {
-        public ArrayOf(SolvingNode elementNode)
+        public Array(SolvingNode elementNode)
         {
             ElementNode = elementNode;
         }
 
-        public static ArrayOf Create(ISolvingState state)
+        public static Array Of(ISolvingState state)
         {
             if (state is IType type)
-                return Create(type);
+                return Of(type);
             if (state is RefTo refTo)
-                return Create(refTo.Node);
+                return Of(refTo.Node);
             throw new InvalidOperationException();
         }
             
-        public static ArrayOf Create(SolvingNode node) 
-            => new ArrayOf(node);
+        public static Array Of(SolvingNode node) 
+            => new Array(node);
 
-        public static ArrayOf Create(IType type) 
-            => new ArrayOf(SolvingNode.CreateTypeNode(type));
+        public static Array Of(IType type) 
+            => new Array(SolvingNode.CreateTypeNode(type));
 
         public SolvingNode ElementNode { get; }
         public bool IsSolved => (Element as IType)?.IsSolved == true;
@@ -39,7 +39,7 @@ namespace nfun.Ti4
 
         public IType GetLastCommonAncestorOrNull(IType otherType)
         {
-            var arrayType = otherType as ArrayOf;
+            var arrayType = otherType as Array;
             if (arrayType == null)
                 return PrimitiveType.Any;
             var elementTypeA = Element as IType;
@@ -51,7 +51,7 @@ namespace nfun.Ti4
             var ancestor = elementTypeA.GetLastCommonAncestorOrNull(elementTypeB);
             if (ancestor == null)
                 return null;
-            return ArrayOf.Create(ancestor);
+            return Array.Of(ancestor);
         }
 
         public bool CanBeImplicitlyConvertedTo(PrimitiveType type) 
@@ -59,7 +59,7 @@ namespace nfun.Ti4
 
         public override bool Equals(object obj)
         {
-            if (obj is ArrayOf arr)
+            if (obj is Array arr)
             {
                 return arr.Element.Equals(this.Element);
             }

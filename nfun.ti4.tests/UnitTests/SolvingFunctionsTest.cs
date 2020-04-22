@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using nfun.Ti4;
 using NUnit.Framework;
+using Array = nfun.Ti4.Array;
 
 namespace nfun.ti4.tests.UnitTests
 {
@@ -43,8 +44,8 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetMergedState_TwoSameConcreteArrays()
         {
-            var res = SolvingFunctions.GetMergedState(ArrayOf.Create(PrimitiveType.I32), ArrayOf.Create(PrimitiveType.I32));
-            Assert.AreEqual(res, ArrayOf.Create(PrimitiveType.I32));
+            var res = SolvingFunctions.GetMergedState(Array.Of(PrimitiveType.I32), Array.Of(PrimitiveType.I32));
+            Assert.AreEqual(res, Array.Of(PrimitiveType.I32));
         }
 
         #region obviousFailed
@@ -60,8 +61,8 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetMergedState_TwoDifferentConcreteArraysThrows()
             => AssertGetMergedStateThrows(
-                    stateA: ArrayOf.Create(PrimitiveType.I32), 
-                    stateB: ArrayOf.Create(PrimitiveType.Real));
+                    stateA: Array.Of(PrimitiveType.I32), 
+                    stateB: Array.Of(PrimitiveType.Real));
         #endregion
 
         void AssertGetMergedStateThrows(ISolvingState stateA, ISolvingState stateB)
