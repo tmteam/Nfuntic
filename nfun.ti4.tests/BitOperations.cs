@@ -163,6 +163,7 @@ namespace nfun.ti4.tests
             result.AssertAreGenerics(generic, "y");
         }
         [Test]
+        [Ignore("Generic constants")]
         public void BitshiftGenericAndConstant()
         {
             //    0  2 1
@@ -179,6 +180,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
+        [Ignore("Generic constants")]
         public void BitshiftConstants()
         {
             //    0  2 1

@@ -231,8 +231,6 @@ namespace nfun.ti4.tests
             graph.SetConst(3, PrimitiveType.I32);
             graph.SetDef("a", 3);
 
-            
-
             var result = graph.Solve();
             
             //Assert.AreEqual(0,result.GenericsCount);

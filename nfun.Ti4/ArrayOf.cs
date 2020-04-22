@@ -1,4 +1,6 @@
-﻿namespace nfun.Ti4
+﻿using System;
+
+namespace nfun.Ti4
 {
     public class ArrayOf: IType, ISolvingState
     {
@@ -7,6 +9,15 @@
             ElementNode = elementNode;
         }
 
+        public static ArrayOf Create(ISolvingState state)
+        {
+            if (state is IType type)
+                return Create(type);
+            if (state is RefTo refTo)
+                return Create(refTo.Node);
+            throw new InvalidOperationException();
+        }
+            
         public static ArrayOf Create(SolvingNode node) 
             => new ArrayOf(node);
 

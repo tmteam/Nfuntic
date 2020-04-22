@@ -1,11 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Linq;
 
 namespace nfun.Ti4
 {
     public static class FunCallBuilderExtensions
     {
+        public static void SetCall(this GraphBuilder builder, PrimitiveType typesOfTheCall, params int[] argumentsThenResult)
+        {
+            var types = argumentsThenResult.Select(s => (ISolvingState)typesOfTheCall).ToArray();
+            builder.SetCall(types, argumentsThenResult);
+        }
+
         public static void SetEquality(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
             var t = builder.InitializeVarNode();
@@ -23,94 +27,75 @@ namespace nfun.Ti4
                 argThenReturnTypes: new ISolvingState[] { t, t, PrimitiveType.Bool },
                 argThenReturnIds: new[] { leftId, rightId, resultId });
         }
-        /*
-        public void SetBitwiseInvert(int argId, int resultId)
+        
+        public static void SetBitwiseInvert(this GraphBuilder builder, int argId, int resultId)
         {
-            var arg = GetOrCreateNode(argId);
-            var result = GetOrCreateNode(resultId);
+            var t = builder.InitializeVarNode(PrimitiveType.U8, PrimitiveType.I96);
 
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U8, PrimitiveType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(arg);
+            builder.SetCall(
+                argThenReturnTypes: new ISolvingState[] { t, t },
+                argThenReturnIds: new[] { argId, resultId});
         }
 
-        public void SetBitwise(int leftId, int rightId, int resultId)
+        public static void SetBitwise(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
+            var t = builder.InitializeVarNode(PrimitiveType.U8, PrimitiveType.I96);
 
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U8, PrimitiveType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
+            builder.SetCall(
+                argThenReturnTypes: new ISolvingState[] { t, t,t },
+                argThenReturnIds: new[] { leftId,rightId, resultId });
         }
 
-        public void SetBitShift(int leftId, int rightId, int resultId)
+        public static void SetBitShift(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
-            var left = GetOrCreateNode(leftId);
-            SetOrCreateConcrete(rightId, PrimitiveType.I48);
-            var result = GetOrCreateNode(resultId);
+            var t = builder.InitializeVarNode(PrimitiveType.U24, PrimitiveType.I96);
 
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(left);
+            builder.SetCall(
+                argThenReturnTypes: new ISolvingState[] { t, PrimitiveType.I48, t },
+                argThenReturnIds: new[] { leftId, rightId, resultId });
         }
 
-        public void SetArith(int leftId, int rightId, int resultId)
+        public static void SetArith(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
+            var t = builder.InitializeVarNode(PrimitiveType.U24, PrimitiveType.Real);
 
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.Real));
-
-            varNode.BecomeReferenceFor(result);
-
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
+            builder.SetCall(
+                argThenReturnTypes: new ISolvingState[] { t, t, t },
+                argThenReturnIds: new[] { leftId, rightId, resultId });
         }
 
-        public void SetNegateCall(int argId, int resultId)
+        public static void SetNegateCall(this GraphBuilder builder,int argId, int resultId)
         {
-            var vartype = CreateVarType(new SolvingConstrains(PrimitiveType.I16, PrimitiveType.Real));
-            var arg = GetOrCreateNode(argId);
-            var res = GetOrCreateNode(resultId);
-            vartype.BecomeReferenceFor(res);
-            vartype.BecomeAncestorFor(arg);
+            var t = builder.InitializeVarNode(PrimitiveType.I16, PrimitiveType.Real);
+
+            builder.SetCall(
+                argThenReturnTypes: new ISolvingState[] { t, t },
+                argThenReturnIds: new[] { argId, resultId });
         }
 
-        public void SetArrGetCall(int arrArgId, int indexArgId, int resId)
+        public static void SetArrGetCall(this GraphBuilder builder, int arrArgId, int indexArgId, int resId)
         {
-            var vartype = CreateVarType();
-            GetOrCreateArrayNode(arrArgId, vartype);
-            GetOrCreateNode(indexArgId).SetAncestor(PrimitiveType.I32);
-            var result = GetOrCreateNode(resId);
-            vartype.BecomeReferenceFor(result);
+            var varNode = builder.InitializeVarNode();
+            builder.SetCall(
+                new ISolvingState []{ArrayOf.Create(varNode), PrimitiveType.I32, varNode },new []{arrArgId,indexArgId, resId});
+        }
+        
+        public static void SetConcatCall(this GraphBuilder builder, int firstId, int secondId, int resultId)
+        {
+            var varNode = builder.InitializeVarNode();
+            
+            builder.SetCall(new ISolvingState[]
+            {
+                ArrayOf.Create(varNode),ArrayOf.Create(varNode),ArrayOf.Create(varNode),
+            }, new []{firstId, secondId, resultId});
+
         }
 
-        public void SetConcatCall(int firstId, int secondId, int resultId)
+        public static void SetSumCall(this GraphBuilder builder, int argId, int resultId)
         {
-            var varElementType = CreateVarType();
-            var arrType = CreateVarType(new ArrayOf(varElementType));
-            var first = GetOrCreateNode(firstId);
-            arrType.BecomeAncestorFor(first);
-            var second = GetOrCreateNode(secondId);
-            arrType.BecomeAncestorFor(second);
+            var varNode = builder.InitializeVarNode(PrimitiveType.U24, PrimitiveType.Real);
 
-            var result = GetOrCreateNode(resultId);
-            result.State = new RefTo(arrType);
+            builder.SetCall(new ISolvingState[]{ArrayOf.Create(varNode), varNode}, new []{argId,resultId});
         }
-
-        public void SetSumCall(int argId, int resultId)
-        {
-            var vartype = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.Real));
-            GetOrCreateArrayNode(argId, vartype);
-            var result = GetOrCreateNode(resultId);
-            vartype.BecomeReferenceFor(result);
-        }*/
     }
 }

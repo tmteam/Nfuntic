@@ -31,12 +31,7 @@ namespace nfun.Ti4
         U8   = _IsPrimitive | _IsNumber | _IsUint | 9 << 5,
     }
 
-    public enum ConvertPossibilities
-    {
-        Convertable,
-        NotConvertable,
-        NeedAdditionalInformation
-    }
+  
     public class PrimitiveType: IType, ISolvingState
     {
         private static PrimitiveType[] IntegerTypes;
@@ -79,7 +74,17 @@ namespace nfun.Ti4
         
         private int Layer => (int)((int)Name >>5 & 0b1111);
 
-        public override string ToString() => Name.ToString();
+        public override string ToString()
+        {
+            switch (Name)
+            {
+                case PrimitiveTypeName.Any:  return "A";
+                case PrimitiveTypeName.Char: return "C";
+                case PrimitiveTypeName.Bool: return "B";
+                case PrimitiveTypeName.Real: return "R";
+                default: return Name.ToString();
+            }
+        }
 
         public static PrimitiveType Any { get; } = new PrimitiveType(PrimitiveTypeName.Any);
         public static PrimitiveType Bool { get; } = new PrimitiveType(PrimitiveTypeName.Bool);

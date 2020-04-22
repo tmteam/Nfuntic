@@ -60,6 +60,21 @@ namespace nfun.ti4.tests
             result.AssertNamed(PrimitiveType.Real, "x");
             result.AssertNamed(PrimitiveType.Bool, "y");
         }
+
+        [Test(Description = "y = isNan(1i)")]
+        public void SimpleConcreteFunctionWithConstLimit()
+        {
+            //node |    1     0       
+            //expr |y = isNan(1i);
+            var graph = new GraphBuilder();
+            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetCall(new[] { PrimitiveType.Real, PrimitiveType.Bool }, new[] { 0, 1 });
+            graph.SetDef("y", 1);
+
+            var result = graph.Solve();
+            result.AssertNoGenerics();
+        }
+
         [Test(Description = "y = isNan(x); z = ~x")]
         [Ignore("Обобщенный вход без выхода")]
 
@@ -160,6 +175,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
+        [Ignore("Generic constants")]
         public void SummReducecByBitShift_AllTypesAreInt()
         {
             //  0 2 1  4 3
@@ -180,6 +196,28 @@ namespace nfun.ti4.tests
             var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U24, PrimitiveType.I96);
 
             result.AssertAreGenerics(generic, "x", "y", "out");
+        }
+
+        [Test]
+        [Ignore("Generic constants")]
+        public void ConcreteTypeOfArithmetical_ConstantsAreConcrete()
+        {
+            //3 4 0 2 1  
+            //x<<(1 + 2)
+
+            var graph = new GraphBuilder();
+
+            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetArith(0,1,2);
+            graph.SetVar("x", 3);
+            graph.SetBitShift(2, 3, 4);
+            graph.SetDef("out", 4);
+
+            var result = graph.Solve();
+            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U24, PrimitiveType.I96);
+
+            result.AssertAreGenerics(generic, "x", "out");
         }
 
 

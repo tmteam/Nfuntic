@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace nfun.Ti4
 {
@@ -89,37 +87,31 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetCall(PrimitiveType typesOfTheCall, params int[] argumentsThenResult)
-        {
-            PrimitiveType[] types = new PrimitiveType[argumentsThenResult.Length];
-            for (int i = 0; i < types.Length; i++)
-            {
-                types[i] = typesOfTheCall;
-            };
-            SetCall(types, argumentsThenResult);
-        }
         public void SetCall(ISolvingState[] argThenReturnTypes, int[] argThenReturnIds)
         {
+            if(argThenReturnTypes.Length!=argThenReturnIds.Length)
+                throw new ArgumentException("Sizes of type and id array have to be equal");
+
             for (int i = 0; i < argThenReturnIds.Length - 1; i++)
             {
                 var type = argThenReturnTypes[i];
-
+                var argId = argThenReturnIds[i];
                 switch (type)
                 {
                     case PrimitiveType primitive:
                     {
-                        var node = GetOrCreateNode(argThenReturnIds[i]);
+                        var node = GetOrCreateNode(argId);
                         node.SetAncestor(primitive);
                         break;
                     }
                     case ArrayOf array:
                     {
-                        GetOrCreateArrayNode(argThenReturnIds[i], array.ElementNode);
+                        GetOrCreateArrayNode(argId, array.ElementNode);
                         break;
                     }
                     case RefTo refTo:
                     {
-                        var node = GetOrCreateNode(argThenReturnIds[i]);
+                        var node = GetOrCreateNode(argId);
                         refTo.Node.BecomeAncestorFor(node);
                         break;
                     }
@@ -141,120 +133,6 @@ namespace nfun.Ti4
            //    defNode.BecomeReferenceFor(exprNode);
            //else
                 defNode.BecomeAncestorFor(exprNode);
-        }
-        #endregion
-        #region Calls
-        /*
-        public void SetEquality(int leftId, int rightId, int resultId)
-        {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
-            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
-
-            var varNode = CreateVarType();
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }*/
-        
-        /*
-        public void SetComparable(int leftId, int rightId, int resultId)
-        {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
-            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
-
-            var varNode = CreateVarType(new SolvingConstrains() { IsComparable = true });
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }*/
-
-        public void SetBitwiseInvert(int argId, int resultId)
-        {
-            var arg = GetOrCreateNode(argId);
-            var result = GetOrCreateNode(resultId);
-
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U8, PrimitiveType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(arg);
-        }
-
-        public void SetBitwise(int leftId, int rightId, int resultId)
-        {
-            var left   = GetOrCreateNode(leftId);
-            var right  = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
-
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U8, PrimitiveType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }
-
-        public void SetBitShift(int leftId, int rightId, int resultId)
-        {
-            var left = GetOrCreateNode(leftId);
-            SetOrCreateConcrete(rightId, PrimitiveType.I48);
-            var result = GetOrCreateNode(resultId);
-
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.I96));
-
-            varNode.BecomeReferenceFor(result);
-            varNode.BecomeAncestorFor(left);
-        }
-
-        public void SetArith(int leftId, int rightId, int resultId)
-        {
-            var left   = GetOrCreateNode(leftId);
-            var right  = GetOrCreateNode(rightId);
-            var result = GetOrCreateNode(resultId);
-
-            var varNode = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.Real));
-
-            varNode.BecomeReferenceFor(result);
-
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }
-
-        public void SetNegateCall(int argId, int resultId)
-        {
-            var vartype = CreateVarType(new SolvingConstrains(PrimitiveType.I16, PrimitiveType.Real));
-            var arg = GetOrCreateNode(argId);
-            var res = GetOrCreateNode(resultId);
-            vartype.BecomeReferenceFor(res);
-            vartype.BecomeAncestorFor(arg);
-        }
-
-        public void SetArrGetCall(int arrArgId, int indexArgId, int resId)
-        {
-            var vartype = CreateVarType();
-            GetOrCreateArrayNode(arrArgId, vartype);
-            GetOrCreateNode(indexArgId).SetAncestor(PrimitiveType.I32);
-            var result = GetOrCreateNode(resId);
-            vartype.BecomeReferenceFor(result);
-        }
-
-        public void SetConcatCall(int firstId, int secondId, int resultId)
-        {
-            var varElementType = CreateVarType();
-            var arrType = CreateVarType(new ArrayOf(varElementType));
-            var first = GetOrCreateNode(firstId);
-            arrType.BecomeAncestorFor(first);
-            var second = GetOrCreateNode(secondId);
-            arrType.BecomeAncestorFor(second);
-
-            var result = GetOrCreateNode(resultId);
-            result.State = new RefTo(arrType);
-        }
-
-        public void SetSumCall(int argId, int resultId)
-        {
-            var vartype = CreateVarType(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.Real));
-            GetOrCreateArrayNode(argId, vartype);
-            var result = GetOrCreateNode(resultId);
-            vartype.BecomeReferenceFor(result);
         }
         #endregion
         public SolvingNode[] Toposort()

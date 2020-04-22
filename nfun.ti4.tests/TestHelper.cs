@@ -21,7 +21,7 @@ namespace nfun.ti4.tests
         public static SolvingNode AssertAndGetSingleGeneric(this FinalizationResults result, PrimitiveType desc,
             PrimitiveType anc, bool isComparable = false)
         {
-            Assert.AreEqual(1, result.GenericsCount);
+            Assert.AreEqual(1, result.GenericsCount,"Incorrect generics count");
             var genericNode = result.Generics.Single();
 
             AssertGenericType(genericNode, desc, anc, isComparable);
