@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 
 namespace nfun.Ti4
 {
@@ -9,7 +8,7 @@ namespace nfun.Ti4
     {
         #region Merges
 
-        public static object GetMergedState(object stateA, object stateB)
+        public static ISolvingState GetMergedState(ISolvingState stateA, ISolvingState stateB)
         {
             if (stateB is SolvingConstrains c && c.NoConstrains)
                 return stateA;
@@ -123,7 +122,7 @@ namespace nfun.Ti4
                 HandleUpwardLimits(node);
         }
 
-        private static object SetUpwardsLimits(SolvingNode descendant, SolvingNode ancestor)
+        private static ISolvingState SetUpwardsLimits(SolvingNode descendant, SolvingNode ancestor)
         {
             #region handle refto cases. 
             if (ancestor == descendant)
@@ -280,7 +279,7 @@ namespace nfun.Ti4
                 Downwards(descendant);
             }
         }
-        private static object SetDownwardsLimits(SolvingNode descendant, SolvingNode ancestor)
+        private static ISolvingState SetDownwardsLimits(SolvingNode descendant, SolvingNode ancestor)
         {
             #region todo проверить случаи ссылок
             if (descendant == ancestor)

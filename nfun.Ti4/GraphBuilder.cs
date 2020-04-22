@@ -13,6 +13,9 @@ namespace nfun.Ti4
         private readonly List<SolvingNode> _typeVariables = new List<SolvingNode>();
         private int _varNodeId = 0;
 
+        public RefTo InitializeVarNode(IType desc = null, PrimitiveType anc = null, bool isComparable = false) 
+            => new RefTo(CreateVarType(new SolvingConstrains(desc, anc){IsComparable =  isComparable}));
+
         #region set primitives
 
         public void SetVar(string name, int node)
@@ -43,27 +46,6 @@ namespace nfun.Ti4
                 SetOrCreateConcrete(condId, PrimitiveType.Bool);
         }
 
-        public void SetEquality(int leftId, int rightId, int resultId)
-        {
-            var left = GetOrCreateNode(leftId);
-            var right = GetOrCreateNode(rightId);
-            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
-
-            var varNode = CreateVarType();
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }
-
-        public void SetComparable(int leftId, int rightId, int resultId)
-        {
-            var left   = GetOrCreateNode(leftId);
-            var right  = GetOrCreateNode(rightId);
-            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
-
-            var varNode = CreateVarType(new SolvingConstrains(){ IsComparable = true});
-            varNode.BecomeAncestorFor(left);
-            varNode.BecomeAncestorFor(right);
-        }
 
         public void SetConst(int id, PrimitiveType type) 
             => SetOrCreateConcrete(id, type);
@@ -94,7 +76,7 @@ namespace nfun.Ti4
             if (!node.BecomeConcrete(u64))
                 throw new InvalidOperationException();
         }
-
+        
         public void SetArrayInit(int resultIds, params int[] elementIds)
         {
             var elementType = CreateVarType();
@@ -107,17 +89,6 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetCall(PrimitiveType[] argThenReturnTypes, int[] argThenReturnIds)
-        {
-            for (int i = 0; i < argThenReturnIds.Length - 1; i++)
-            {
-                var node = GetOrCreateNode(argThenReturnIds[i]);
-                node.SetAncestor(argThenReturnTypes[i]);
-            }
-            SetOrCreateConcrete(
-                argThenReturnIds[argThenReturnIds.Length - 1],
-                argThenReturnTypes[argThenReturnIds.Length - 1]);
-        }
         public void SetCall(PrimitiveType typesOfTheCall, params int[] argumentsThenResult)
         {
             PrimitiveType[] types = new PrimitiveType[argumentsThenResult.Length];
@@ -126,12 +97,40 @@ namespace nfun.Ti4
                 types[i] = typesOfTheCall;
             };
             SetCall(types, argumentsThenResult);
-            /*
-            for (int i = 0; i < argumentsThenResult.Length; i++)
+        }
+        public void SetCall(ISolvingState[] argThenReturnTypes, int[] argThenReturnIds)
+        {
+            for (int i = 0; i < argThenReturnIds.Length - 1; i++)
             {
-                var argId = argumentsThenResult[i];
-                SetOrCreateConcrete(argId, typesOfTheCall);
-            }*/
+                var type = argThenReturnTypes[i];
+
+                switch (type)
+                {
+                    case PrimitiveType primitive:
+                    {
+                        var node = GetOrCreateNode(argThenReturnIds[i]);
+                        node.SetAncestor(primitive);
+                        break;
+                    }
+                    case ArrayOf array:
+                    {
+                        GetOrCreateArrayNode(argThenReturnIds[i], array.ElementNode);
+                        break;
+                    }
+                    case RefTo refTo:
+                    {
+                        var node = GetOrCreateNode(argThenReturnIds[i]);
+                        refTo.Node.BecomeAncestorFor(node);
+                        break;
+                    }
+                    default: throw new InvalidOperationException();
+                }
+            }
+
+            var returnId = argThenReturnIds[argThenReturnIds.Length - 1];
+            var returnType = argThenReturnTypes[argThenReturnIds.Length - 1];
+            var returnNode = GetOrCreateNode(returnId);
+            returnNode.State =  SolvingFunctions.GetMergedState(returnNode.State, returnType);
         }
         public void SetDef(string name, int rightNodeId)
         {
@@ -143,8 +142,31 @@ namespace nfun.Ti4
            //else
                 defNode.BecomeAncestorFor(exprNode);
         }
-#endregion
+        #endregion
         #region Calls
+        /*
+        public void SetEquality(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            var right = GetOrCreateNode(rightId);
+            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
+
+            var varNode = CreateVarType();
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
+        }*/
+        
+        /*
+        public void SetComparable(int leftId, int rightId, int resultId)
+        {
+            var left = GetOrCreateNode(leftId);
+            var right = GetOrCreateNode(rightId);
+            SetOrCreateConcrete(resultId, PrimitiveType.Bool);
+
+            var varNode = CreateVarType(new SolvingConstrains() { IsComparable = true });
+            varNode.BecomeAncestorFor(left);
+            varNode.BecomeAncestorFor(right);
+        }*/
 
         public void SetBitwiseInvert(int argId, int resultId)
         {
@@ -195,7 +217,6 @@ namespace nfun.Ti4
             varNode.BecomeAncestorFor(left);
             varNode.BecomeAncestorFor(right);
         }
-
 
         public void SetNegateCall(int argId, int resultId)
         {
@@ -445,7 +466,7 @@ namespace nfun.Ti4
             return res;
         }
 
-        private SolvingNode CreateVarType(object state = null)
+        private SolvingNode CreateVarType(ISolvingState state = null)
         {
             var varNode = new SolvingNode(
                 name:  "V" + _varNodeId,

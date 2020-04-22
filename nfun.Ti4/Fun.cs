@@ -1,6 +1,6 @@
 ﻿namespace nfun.Ti4
 {
-    public class Fun : IType
+    public class Fun : IType, ISolvingState
     {
         public static Fun Of(IType returnType, IType argType)
         {
@@ -68,9 +68,6 @@
             return fun.ArgType.Equals(ArgType) && fun.ReturnType.Equals(ReturnType);
         }
 
-        public override string ToString()
-        {
-            return $"({ArgType}->{ReturnType})";
-        }
+        public override string ToString() => $"({ArgType}->{ReturnType})";
     }
 }

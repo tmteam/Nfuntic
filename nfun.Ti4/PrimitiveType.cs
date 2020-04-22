@@ -31,20 +31,13 @@ namespace nfun.Ti4
         U8   = _IsPrimitive | _IsNumber | _IsUint | 9 << 5,
     }
 
-    public interface IType
-    {
-        bool IsSolved { get; }
-        IType GetLastCommonAncestorOrNull(IType otherType);
-        bool CanBeImplicitlyConvertedTo(PrimitiveType type);
-    }
-
     public enum ConvertPossibilities
     {
         Convertable,
         NotConvertable,
         NeedAdditionalInformation
     }
-    public class PrimitiveType: IType
+    public class PrimitiveType: IType, ISolvingState
     {
         private static PrimitiveType[] IntegerTypes;
         private static PrimitiveType[] UintTypes;

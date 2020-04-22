@@ -3,7 +3,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace nfun.Ti4
 {
-    public class SolvingConstrains
+    public class SolvingConstrains: ISolvingState
     {
         public SolvingConstrains(IType desc = null, PrimitiveType anc = null)
         {
@@ -126,7 +126,7 @@ namespace nfun.Ti4
         public bool IsComparable { get; set; }
         public bool NoConstrains => !HasDescendant && !HasAncestor && !IsComparable;
 
-        public object MergeOrNull(SolvingConstrains constrains)
+        public ISolvingState MergeOrNull(SolvingConstrains constrains)
         {
             var result = new SolvingConstrains(Descedant,Ancestor)
             {
@@ -164,7 +164,7 @@ namespace nfun.Ti4
             return res;
         }
 
-        public object GetOptimizedOrThrow()
+        public ISolvingState GetOptimizedOrThrow()
         {
             if (IsComparable)
             {

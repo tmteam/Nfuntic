@@ -64,13 +64,12 @@ namespace nfun.ti4.tests.UnitTests
                     stateB: ArrayOf.Create(PrimitiveType.Real));
         #endregion
 
-        void AssertGetMergedStateThrows(object stateA, object stateB)
+        void AssertGetMergedStateThrows(ISolvingState stateA, ISolvingState stateB)
         {
             Assert.Throws<InvalidOperationException>(
                 () => SolvingFunctions.GetMergedState(stateA, stateB));
             Assert.Throws<InvalidOperationException>(
                 () => SolvingFunctions.GetMergedState(stateB, stateA));
-
         }
     }
 }

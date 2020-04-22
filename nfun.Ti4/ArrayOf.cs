@@ -1,6 +1,6 @@
 ﻿namespace nfun.Ti4
 {
-    public class ArrayOf: IType
+    public class ArrayOf: IType, ISolvingState
     {
         public ArrayOf(SolvingNode elementNode)
         {

@@ -15,13 +15,13 @@ namespace nfun.Ti4
 
     public class SolvingNode
     {
-        private object _state;
+        private ISolvingState _state;
         public int GraphId { get; set; }
 
         public static SolvingNode CreateTypeNode(IType type) 
             => new SolvingNode(type.ToString(), type, SolvingNodeType.TypeVariable);
 
-        public SolvingNode(string name, object state, SolvingNodeType type)
+        public SolvingNode(string name, ISolvingState state, SolvingNodeType type)
         {
             Name = name;
             State = state;
@@ -33,7 +33,7 @@ namespace nfun.Ti4
         public List<SolvingNode> MemberOf { get; } = new List<SolvingNode>();
         public bool IsSolved => State is PrimitiveType || (State as ArrayOf)?.IsSolved == true;
 
-        public object State
+        public ISolvingState State
         {
             get => _state;
             set
@@ -119,19 +119,5 @@ namespace nfun.Ti4
             if(!TrySetAncestor(anc))
                 throw new InvalidOperationException();
         }
-    }
-
-    public class RefTo
-    {
-        public RefTo(SolvingNode node)
-        {
-            if (node.Type != SolvingNodeType.TypeVariable)
-            {
-
-            }
-            Node = node;
-        }
-        public SolvingNode Node { get; }
-        public override string ToString() => $"ref({Node.Name})";
     }
 }
