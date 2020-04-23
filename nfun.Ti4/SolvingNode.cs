@@ -31,7 +31,7 @@ namespace nfun.Ti4
         public SolvingNodeType Type { get; }
         public List<SolvingNode> Ancestors { get; } = new List<SolvingNode>();
         public List<SolvingNode> MemberOf { get; } = new List<SolvingNode>();
-        public bool IsSolved => State is PrimitiveType || (State as Array)?.IsSolved == true;
+        public bool IsSolved => State is Primitive || (State as Array)?.IsSolved == true;
 
         public IState State
         {
@@ -40,7 +40,7 @@ namespace nfun.Ti4
             {
                 if(value == null)
                     throw new InvalidOperationException();
-                if(IsSolved && value!=_state)
+                if(IsSolved && !value.Equals(_state))
                     throw new InvalidOperationException("Node is already solved");
                 
                 if (value is Array array) 
@@ -65,7 +65,7 @@ namespace nfun.Ti4
             Console.Write($"{Name}:");
             Console.ResetColor();
 
-            if (State is PrimitiveType concrete)
+            if (State is Primitive concrete)
                 Console.Write($"{concrete.Name} ");
             else if (State is RefTo reference)
                 Console.Write($"{reference.Node.Name}");
@@ -82,9 +82,9 @@ namespace nfun.Ti4
         }
 
 
-        public bool BecomeConcrete(PrimitiveType primitive)
+        public bool BecomeConcrete(Primitive primitive)
         {
-            if (this.State is PrimitiveType oldConcrete)
+            if (this.State is Primitive oldConcrete)
             {
                 return oldConcrete == primitive;
             }
@@ -98,13 +98,13 @@ namespace nfun.Ti4
 
             return false;
         }
-        public bool TrySetAncestor(PrimitiveType anc)
+        public bool TrySetAncestor(Primitive anc)
         {
             var node = this;
             if (node.State is RefTo)
                 node = node.GetNonReference();
 
-            if (node.State is PrimitiveType oldConcrete)
+            if (node.State is Primitive oldConcrete)
             {
                 return oldConcrete.CanBeImplicitlyConvertedTo(anc);
             }
@@ -114,7 +114,7 @@ namespace nfun.Ti4
             };
             return false;
         }
-        public void SetAncestor(PrimitiveType anc)
+        public void SetAncestor(Primitive anc)
         {
             if(!TrySetAncestor(anc))
                 throw new InvalidOperationException();

@@ -171,7 +171,7 @@ namespace nfun.Ti4
             {
                 switch (ancestor.State)
                 {
-                    case PrimitiveType concreteAnc:
+                    case Primitive concreteAnc:
                     {
                         if (!typeDesc.CanBeImplicitlyConvertedTo(concreteAnc))
                             throw new InvalidOperationException();
@@ -211,7 +211,7 @@ namespace nfun.Ti4
             {
                 switch (ancestor.State)
                 {
-                    case PrimitiveType concreteAnc:
+                    case Primitive concreteAnc:
                         {
                             if (constrainsDesc.HasDescendant && constrainsDesc.Descedant?.CanBeImplicitlyConvertedTo(concreteAnc) != true)
                                 throw new InvalidOperationException();
@@ -329,28 +329,28 @@ namespace nfun.Ti4
                 throw new InvalidOperationException();
             }
 
-            PrimitiveType upType = null;
-            if (ancestor.State is PrimitiveType concreteAnc) upType = concreteAnc;
+            Primitive up = null;
+            if (ancestor.State is Primitive concreteAnc) up = concreteAnc;
             else if (ancestor.State is Constrains constrainsAnc)
             {
-                if (constrainsAnc.HasAncestor) upType = constrainsAnc.Ancestor;
+                if (constrainsAnc.HasAncestor) up = constrainsAnc.Ancestor;
                 else return descendant.State;
             }
             else if (ancestor.State is Array) return descendant.State;
             else if (ancestor.State is Fun) return descendant.State;
 
-            if (upType == null)
+            if (up == null)
                 throw new InvalidOperationException();
 
             if (descendant.State is IType concreteDesc)
             {
-                if (concreteDesc.CanBeImplicitlyConvertedTo(upType))
+                if (concreteDesc.CanBeImplicitlyConvertedTo(up))
                     return descendant.State;
                 throw new InvalidOperationException();
             }
             if (descendant.State is Constrains constrainsDesc)
             {
-                constrainsDesc.AddAncestor(upType);
+                constrainsDesc.AddAncestor(up);
                 return descendant.State;
             }
 
@@ -368,8 +368,8 @@ namespace nfun.Ti4
                 if (node.State is Array arrayDesc)
                 {
                     Destruction(arrayDesc.ElementNode);
-                    if (arrayDesc.Element is RefTo refTo)
-                       node.State = new Array(refTo.Node);
+                    if (arrayDesc.Element is RefTo)
+                       node.State = new Array(arrayDesc.ElementNode.GetNonReference());
                 }
 
                 if (node.State is Fun funDesc)
@@ -377,8 +377,8 @@ namespace nfun.Ti4
                     Destruction(funDesc.ArgNode);
                     Destruction(funDesc.RetNode);
 
-                    if (funDesc.ArgType is RefTo refTo)
-                        node.State = new Array(refTo.Node);
+                    if (funDesc.ArgType is RefTo || funDesc.ReturnType is RefTo)
+                        node.State = Fun.Of(funDesc.ArgNode.GetNonReference(), funDesc.RetNode.GetNonReference());
                 }
 
                 foreach (var ancestor in node.Ancestors.ToArray())
@@ -412,7 +412,7 @@ namespace nfun.Ti4
 
             switch (nonRefAncestor.State)
             {
-                case PrimitiveType concreteAnc:
+                case Primitive concreteAnc:
                 {
                     if (nonRefDescendant.State is Constrains c && c.Fits(concreteAnc))
                     {
@@ -440,7 +440,7 @@ namespace nfun.Ti4
                     }
                     break;
                 }
-                case Constrains constrainsAnc when nonRefDescendant.State is PrimitiveType concreteDesc:
+                case Constrains constrainsAnc when nonRefDescendant.State is Primitive concreteDesc:
                 {
                     if (constrainsAnc.Fits(concreteDesc))
                     {
@@ -458,7 +458,7 @@ namespace nfun.Ti4
                     if (result == null)
                         return;
 
-                    if (result is PrimitiveType)
+                    if (result is Primitive)
                     {
                         nonRefAncestor.State = nonRefDescendant.State = descendantNode.State = result;
                         return;

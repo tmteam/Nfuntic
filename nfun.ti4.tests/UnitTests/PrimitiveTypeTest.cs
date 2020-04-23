@@ -1,7 +1,7 @@
 using nfun.Ti4;
 using NUnit.Framework;
 
-namespace nfun.ti4.tests
+namespace nfun.ti4.tests.UnitTests
 {
     public class PrimitiveTypeTest
     {
@@ -17,9 +17,9 @@ namespace nfun.ti4.tests
         [TestCase(PrimitiveTypeName.U48, PrimitiveTypeName.Real, PrimitiveTypeName.Real)]
         public void GetLastCommonAncestor(PrimitiveTypeName a, PrimitiveTypeName b, PrimitiveTypeName expected)
         {
-            var result =  new PrimitiveType(a).GetLastCommonPrimitiveAncestor(new PrimitiveType(b)).Name;
+            var result =  new Primitive(a).GetLastCommonPrimitiveAncestor(new Primitive(b)).Name;
             Assert.AreEqual( expected, result);
-            var revresult = new PrimitiveType(b).GetLastCommonPrimitiveAncestor(new PrimitiveType(a)).Name;
+            var revresult = new Primitive(b).GetLastCommonPrimitiveAncestor(new Primitive(a)).Name;
             Assert.AreEqual(expected, revresult);
         }
 
@@ -28,9 +28,9 @@ namespace nfun.ti4.tests
         [TestCase(PrimitiveTypeName.Bool, PrimitiveTypeName.Char)]
         public void GetFirstCommonDescedant_returnsNull(PrimitiveTypeName a, PrimitiveTypeName b)
         {
-            var result = new PrimitiveType(a).GetFirstCommonDescendantOrNull(new PrimitiveType(b));
+            var result = new Primitive(a).GetFirstCommonDescendantOrNull(new Primitive(b));
             Assert.IsNull(result);
-            var revresult = new PrimitiveType(b).GetFirstCommonDescendantOrNull(new PrimitiveType(a));
+            var revresult = new Primitive(b).GetFirstCommonDescendantOrNull(new Primitive(a));
             Assert.IsNull(revresult);
         }
 
@@ -51,9 +51,9 @@ namespace nfun.ti4.tests
 
         public void GetFirstCommonDescedant(PrimitiveTypeName a, PrimitiveTypeName b, PrimitiveTypeName expected)
         {
-            var result = new PrimitiveType(a).GetFirstCommonDescendantOrNull(new PrimitiveType(b)).Name;
+            var result = new Primitive(a).GetFirstCommonDescendantOrNull(new Primitive(b)).Name;
             Assert.AreEqual(expected, result);
-            var revresult = new PrimitiveType(b).GetFirstCommonDescendantOrNull(new PrimitiveType(a)).Name;
+            var revresult = new Primitive(b).GetFirstCommonDescendantOrNull(new Primitive(a)).Name;
             Assert.AreEqual(expected, revresult);
         }
 
@@ -76,7 +76,7 @@ namespace nfun.ti4.tests
 
         public void CanBeImplicitlyConverted_returnsTrue(PrimitiveTypeName from, PrimitiveTypeName to)
         {
-            Assert.IsTrue(new PrimitiveType(from).CanBeImplicitlyConvertedTo(new PrimitiveType(to)));
+            Assert.IsTrue(new Primitive(from).CanBeImplicitlyConvertedTo(new Primitive(to)));
         }
         [TestCase(PrimitiveTypeName.Real, PrimitiveTypeName.U48)]
         [TestCase(PrimitiveTypeName.I32, PrimitiveTypeName.U64)]
@@ -92,7 +92,7 @@ namespace nfun.ti4.tests
         [TestCase(PrimitiveTypeName.Char, PrimitiveTypeName.Bool)]
         public void CanBeImplicitlyConverted_returnsFalse(PrimitiveTypeName from, PrimitiveTypeName to)
         {
-            Assert.IsFalse(new PrimitiveType(from).CanBeImplicitlyConvertedTo(new PrimitiveType(to)));
+            Assert.IsFalse(new Primitive(from).CanBeImplicitlyConvertedTo(new Primitive(to)));
         }
     }
 }

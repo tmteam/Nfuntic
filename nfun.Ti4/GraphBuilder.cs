@@ -11,7 +11,7 @@ namespace nfun.Ti4
         private readonly List<SolvingNode> _typeVariables = new List<SolvingNode>();
         private int _varNodeId = 0;
 
-        public RefTo InitializeVarNode(IType desc = null, PrimitiveType anc = null, bool isComparable = false) 
+        public RefTo InitializeVarNode(IType desc = null, Primitive anc = null, bool isComparable = false) 
             => new RefTo(CreateVarType(new Constrains(desc, anc){IsComparable =  isComparable}));
 
         #region set primitives
@@ -41,41 +41,47 @@ namespace nfun.Ti4
             }
 
             foreach (var condId in conditions)
-                SetOrCreatePrimitive(condId, PrimitiveType.Bool);
+                SetOrCreatePrimitive(condId, Primitive.Bool);
         }
 
 
-        public void SetConst(int id, PrimitiveType type) 
+        public void SetConst(int id, Primitive type) 
             => SetOrCreatePrimitive(id, type);
 
-        public void SetIntConst(int id, PrimitiveType desc)
+        public void SetIntConst(int id, Primitive desc)
         {
             var node = GetOrCreateNode(id);
             if (node.State is Constrains constrains)
             {
-                constrains.AddAncestor(PrimitiveType.Real);
+                constrains.AddAncestor(Primitive.Real);
                 constrains.AddDescedant(desc);
-                constrains.PreferedType = PrimitiveType.Real;
+                constrains.Prefered = Primitive.Real;
             }
             else
             {
                 throw new NotImplementedException();
             }
         }
-
+        
+        public void SetVarType(string s, Fun fun)
+        {
+            var node = GetNamedNode(s);
+            node.State = fun;
+        }
         public void SetVarType(string s, Array array)
         {
             var node = GetNamedNode(s);
             node.State = array;
         }
-        public void SetVarType(string s, PrimitiveType u64)
+        public void SetVarType(string s, Primitive u64)
         {
             var node = GetNamedNode(s);
             if (!node.BecomeConcrete(u64))
                 throw new InvalidOperationException();
         }
 
-        public void CreateLabda(int returnId, int lambdaId, string[] varNames)
+        
+        public void CreateLambda(int returnId, int lambdaId,params string[] varNames)
         {
             var arg = GetNamedNode(varNames[0]);
             var ret = GetOrCreateNode(returnId);
@@ -108,7 +114,7 @@ namespace nfun.Ti4
                 var argId = argThenReturnIds[i];
                 switch (type)
                 {
-                    case PrimitiveType primitive:
+                    case Primitive primitive:
                     {
                         var node = GetOrCreateNode(argId);
                         node.SetAncestor(primitive);
@@ -116,7 +122,14 @@ namespace nfun.Ti4
                     }
                     case Array array:
                     {
+                        //todo Upcast support
                         GetOrCreateArrayNode(argId, array.ElementNode);
+                        break;
+                    }
+                    case Fun fun:
+                    {
+                        //todo Upcast support
+                        GetOrCreateFunNode(argId, fun);
                         break;
                     }
                     case RefTo refTo:
@@ -331,14 +344,31 @@ namespace nfun.Ti4
                 _syntaxNodes[lambdaId] = res;
             }
         }
-        private SolvingNode SetOrCreatePrimitive(int id, PrimitiveType type)
+        private SolvingNode SetOrCreatePrimitive(int id, Primitive type)
         {
             var node = GetOrCreateNode(id);
             if (!node.BecomeConcrete(type))
                 throw new InvalidOperationException();
             return node;
         }
+        private SolvingNode GetOrCreateFunNode(int id, Fun fun)
+        {
+            while (_syntaxNodes.Count <= id)
+            {
+                _syntaxNodes.Add(null);
+            }
 
+            var alreadyExists = _syntaxNodes[id];
+            if (alreadyExists != null)
+            {
+                alreadyExists.State = SolvingFunctions.GetMergedState(fun,alreadyExists.State);
+                return alreadyExists;
+            }
+
+            var res = new SolvingNode(id.ToString(), fun, SolvingNodeType.SyntaxNode);
+            _syntaxNodes[id] = res;
+            return res;
+        }
         private SolvingNode GetOrCreateArrayNode(int id, SolvingNode elementType)
         {
             while (_syntaxNodes.Count <= id)

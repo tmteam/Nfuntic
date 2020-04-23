@@ -16,10 +16,10 @@ namespace nfun.ti4.tests
         }
 
         public static SolvingNode AssertAndGetSingleArithGeneric(this FinalizationResults result)
-            => AssertAndGetSingleGeneric(result, PrimitiveType.U24, PrimitiveType.Real, false);
+            => AssertAndGetSingleGeneric(result, Primitive.U24, Primitive.Real, false);
 
-        public static SolvingNode AssertAndGetSingleGeneric(this FinalizationResults result, PrimitiveType desc,
-            PrimitiveType anc, bool isComparable = false)
+        public static SolvingNode AssertAndGetSingleGeneric(this FinalizationResults result, Primitive desc,
+            Primitive anc, bool isComparable = false)
         {
             Assert.AreEqual(1, result.GenericsCount,"Incorrect generics count");
             var genericNode = result.Generics.Single();
@@ -30,10 +30,10 @@ namespace nfun.ti4.tests
 
         public static void AssertGenericTypeIsArith(this SolvingNode node)
         {
-            AssertGenericType(node, PrimitiveType.U24, PrimitiveType.Real, false);
+            AssertGenericType(node, Primitive.U24, Primitive.Real, false);
         }
 
-        public static void AssertGenericType(this SolvingNode node, PrimitiveType desc, PrimitiveType anc,
+        public static void AssertGenericType(this SolvingNode node, Primitive desc, Primitive anc,
             bool isComparable = false)
         {
             var generic = node.State as Constrains;
@@ -62,7 +62,7 @@ namespace nfun.ti4.tests
                 if (node.State is Array array)
                 {
                     var element = array.ElementNode;
-                    if (typeOrNode is PrimitiveType concrete)
+                    if (typeOrNode is Primitive concrete)
                         Assert.IsTrue(concrete.Equals(element.State));
                     else
                         Assert.AreEqual(typeOrNode, array.ElementNode);
@@ -79,6 +79,14 @@ namespace nfun.ti4.tests
             {
                 Assert.AreEqual(type, results.GetVariableNode(varName).GetNonReference().State);
             }
+        }
+        public static void AssertNode(this FinalizationResults results, IType type, params int[] nodeIds)
+        {
+            foreach (var id in nodeIds)
+            {
+                Assert.AreEqual(type, results.GetSyntaxNode(id).GetNonReference().State);
+            }
+
         }
     }
 }

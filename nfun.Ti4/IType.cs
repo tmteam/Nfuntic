@@ -4,6 +4,6 @@
     {
         bool IsSolved { get; }
         IType GetLastCommonAncestorOrNull(IType otherType);
-        bool CanBeImplicitlyConvertedTo(PrimitiveType type);
+        bool CanBeImplicitlyConvertedTo(Primitive type);
     }
 }

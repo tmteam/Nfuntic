@@ -16,13 +16,13 @@ namespace nfun.ti4.tests
             //node |    1     0
             //expr |y = isNan(1) 
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
-            graph.SetCall(new []{PrimitiveType.Real, PrimitiveType.Bool}, new []{0,1});
+            graph.SetIntConst(0, Primitive.U8);
+            graph.SetCall(new []{Primitive.Real, Primitive.Bool}, new []{0,1});
             graph.SetDef("y", 1);
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Bool, "y");
+            result.AssertNamed(Primitive.Bool, "y");
         }
 
         [Test(Description = "y = isNan(x) ")]
@@ -33,13 +33,13 @@ namespace nfun.ti4.tests
             //expr |y = isNan(x) 
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
-            graph.SetCall(new[] { PrimitiveType.Real, PrimitiveType.Bool }, new[] { 0, 1 });
+            graph.SetCall(new[] { Primitive.Real, Primitive.Bool }, new[] { 0, 1 });
             graph.SetDef("y", 1);
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Real, "x");
-            result.AssertNamed(PrimitiveType.Bool, "y");
+            result.AssertNamed(Primitive.Real, "x");
+            result.AssertNamed(Primitive.Bool, "y");
         }
 
         [Test(Description = "x:int; y = isNan(x) ")]
@@ -50,15 +50,15 @@ namespace nfun.ti4.tests
             //node |           1     0
             //expr |x:int; y = isNan(x) 
             var graph = new GraphBuilder();
-            graph.SetVarType("x", PrimitiveType.I32);
+            graph.SetVarType("x", Primitive.I32);
             graph.SetVar("x", 0);
-            graph.SetCall(new[] { PrimitiveType.Real, PrimitiveType.Bool }, new[] { 0, 1 });
+            graph.SetCall(new[] { Primitive.Real, Primitive.Bool }, new[] { 0, 1 });
             graph.SetDef("y", 1);
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Real, "x");
-            result.AssertNamed(PrimitiveType.Bool, "y");
+            result.AssertNamed(Primitive.Real, "x");
+            result.AssertNamed(Primitive.Bool, "y");
         }
 
         [Test(Description = "y = isNan(1i)")]
@@ -67,8 +67,8 @@ namespace nfun.ti4.tests
             //node |    1     0       
             //expr |y = isNan(1i);
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.I32);
-            graph.SetCall(new[] { PrimitiveType.Real, PrimitiveType.Bool }, new[] { 0, 1 });
+            graph.SetConst(0, Primitive.I32);
+            graph.SetCall(new[] { Primitive.Real, Primitive.Bool }, new[] { 0, 1 });
             graph.SetDef("y", 1);
 
             var result = graph.Solve();
@@ -84,18 +84,18 @@ namespace nfun.ti4.tests
             //expr |y = isNan(x); z = isMaxInt(x) 
             var graph = new GraphBuilder();
             graph.SetVar("x", 0);
-            graph.SetCall(new[] { PrimitiveType.Real, PrimitiveType.Bool }, new[] { 0, 1 });
+            graph.SetCall(new[] { Primitive.Real, Primitive.Bool }, new[] { 0, 1 });
             graph.SetDef("y", 1);
 
             graph.SetVar("x",2);
-            graph.SetCall(new []{PrimitiveType.I32, PrimitiveType.Bool}, new []{2,3});
+            graph.SetCall(new []{Primitive.I32, Primitive.Bool}, new []{2,3});
             graph.SetDef("z", 3);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.I32, "x");
-            result.AssertNamed(PrimitiveType.Bool, "y","z");
+            result.AssertNamed(Primitive.I32, "x");
+            result.AssertNamed(Primitive.Bool, "y","z");
         }
 
         [Test(Description = "y = x ")]
@@ -158,18 +158,18 @@ namespace nfun.ti4.tests
             graph.SetDef("r",2);
 
             graph.SetVar("y", 3);
-            graph.SetIntConst(4, PrimitiveType.U8);
+            graph.SetIntConst(4, Primitive.U8);
             graph.SetBitShift(3, 4, 5);
             graph.SetDef("i", 5);
 
-            graph.SetIntConst(6, PrimitiveType.U8);
-            graph.SetIntConst(7, PrimitiveType.U8);
-            graph.SetCall(PrimitiveType.Real, 6,7,8);
+            graph.SetIntConst(6, Primitive.U8);
+            graph.SetIntConst(7, Primitive.U8);
+            graph.SetCall(Primitive.Real, 6,7,8);
             graph.SetDef("x", 8);
 
             var result = graph.Solve();
-            result.AssertNamed(PrimitiveType.Real, "x", "r");
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U24, PrimitiveType.I96);
+            result.AssertNamed(Primitive.Real, "x", "r");
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U24, Primitive.I96);
 
             result.AssertAreGenerics(generic, "y","i");
         }
@@ -187,13 +187,13 @@ namespace nfun.ti4.tests
             graph.SetVar("y", 1);
             graph.SetArith(0, 1, 2);
 
-            graph.SetIntConst(3, PrimitiveType.U8);
+            graph.SetIntConst(3, Primitive.U8);
 
             graph.SetBitShift(2, 3, 4);
             graph.SetDef("out", 4);
 
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U24, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U24, Primitive.I96);
 
             result.AssertAreGenerics(generic, "x", "y", "out");
         }
@@ -207,15 +207,15 @@ namespace nfun.ti4.tests
 
             var graph = new GraphBuilder();
 
-            graph.SetIntConst(0, PrimitiveType.U8);
-            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
+            graph.SetIntConst(1, Primitive.U8);
             graph.SetArith(0,1,2);
             graph.SetVar("x", 3);
             graph.SetBitShift(2, 3, 4);
             graph.SetDef("out", 4);
 
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U24, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U24, Primitive.I96);
 
             result.AssertAreGenerics(generic, "x", "out");
         }
@@ -227,12 +227,12 @@ namespace nfun.ti4.tests
             //         1    0  
             //a:real;  a = 1:int32
             var graph = new GraphBuilder();
-            graph.SetVarType("a", PrimitiveType.Real);
-            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetVarType("a", Primitive.Real);
+            graph.SetConst(0, Primitive.I32);
             graph.SetDef("a",0);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Real,"a" );
+            result.AssertNamed(Primitive.Real,"a" );
         }
 
         [Test]
@@ -241,14 +241,14 @@ namespace nfun.ti4.tests
             //    0            1
             //a = 1:int;  a = 1.0:int64
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetConst(0, Primitive.I32);
             graph.SetDef("a", 0);
-            graph.SetConst(1, PrimitiveType.I64);
+            graph.SetConst(1, Primitive.I64);
             graph.SetDef("a", 1);
 
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.I64, "a");
+            result.AssertNamed(Primitive.I64, "a");
         }
 
         [Test]
@@ -258,14 +258,14 @@ namespace nfun.ti4.tests
             //a = 1:int64;  a = 1.0:int32
 
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.I64);
+            graph.SetConst(0, Primitive.I64);
             graph.SetDef("a", 0);
-            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(1, Primitive.I32);
             graph.SetDef("a", 1);
 
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.I64, "a");
+            result.AssertNamed(Primitive.I64, "a");
         }
         [Test]
         public void OutEqualsToItself_SingleGenericFound()
@@ -285,12 +285,12 @@ namespace nfun.ti4.tests
         {
             //y:bool; y = y
             var graph = new GraphBuilder();
-            graph.SetVarType("y", PrimitiveType.Bool);
+            graph.SetVarType("y", Primitive.Bool);
             graph.SetVar("y", 0);
             graph.SetDef("y", 0);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Bool, "y");
+            result.AssertNamed(Primitive.Bool, "y");
         }
 
         [Test]
@@ -300,11 +300,11 @@ namespace nfun.ti4.tests
             var graph = new GraphBuilder();
             graph.SetVar("y", 0);
             graph.SetDef("y", 0);
-            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetIntConst(1, Primitive.U8);
             graph.SetDef("y", 1);
 
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.Real);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.Real);
             result.AssertAreGenerics(generic,"y");
         }
         [Test]
@@ -312,13 +312,13 @@ namespace nfun.ti4.tests
         {
             //y = 1; y =y
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
             graph.SetDef("y", 0);
             graph.SetVar("y", 1);
             graph.SetDef("y", 1);
 
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.Real);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.Real);
             result.AssertAreGenerics(generic, "y");
         }
 
@@ -348,7 +348,7 @@ namespace nfun.ti4.tests
             //    0      1      2
             //c:bool; a = b; b = c; c = a
             var graph = new GraphBuilder();
-            graph.SetVarType("c",PrimitiveType.Bool);
+            graph.SetVarType("c",Primitive.Bool);
             graph.SetVar("b", 0);
             graph.SetDef("a", 0);
 
@@ -360,7 +360,7 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Bool,"a","b","c");
+            result.AssertNamed(Primitive.Bool,"a","b","c");
         }
 
     }

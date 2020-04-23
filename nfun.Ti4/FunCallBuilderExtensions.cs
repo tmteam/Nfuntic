@@ -4,9 +4,9 @@ namespace nfun.Ti4
 {
     public static class FunCallBuilderExtensions
     {
-        public static void SetCall(this GraphBuilder builder, PrimitiveType typesOfTheCall, params int[] argumentsThenResult)
+        public static void SetCall(this GraphBuilder builder, Primitive ofTheCall, params int[] argumentsThenResult)
         {
-            var types = argumentsThenResult.Select(s => (IState)typesOfTheCall).ToArray();
+            var types = argumentsThenResult.Select(s => (IState)ofTheCall).ToArray();
             builder.SetCall(types, argumentsThenResult);
         }
 
@@ -15,7 +15,7 @@ namespace nfun.Ti4
             var t = builder.InitializeVarNode();
             
             builder.SetCall(
-                argThenReturnTypes: new IState []{t, t, PrimitiveType.Bool},
+                argThenReturnTypes: new IState []{t, t, Primitive.Bool},
                 argThenReturnIds: new []{leftId, rightId, resultId});
         }
         
@@ -24,13 +24,13 @@ namespace nfun.Ti4
             var t = builder.InitializeVarNode(isComparable: true);
 
             builder.SetCall(
-                argThenReturnTypes: new IState[] { t, t, PrimitiveType.Bool },
+                argThenReturnTypes: new IState[] { t, t, Primitive.Bool },
                 argThenReturnIds: new[] { leftId, rightId, resultId });
         }
         
         public static void SetBitwiseInvert(this GraphBuilder builder, int argId, int resultId)
         {
-            var t = builder.InitializeVarNode(PrimitiveType.U8, PrimitiveType.I96);
+            var t = builder.InitializeVarNode(Primitive.U8, Primitive.I96);
 
             builder.SetCall(
                 argThenReturnTypes: new IState[] { t, t },
@@ -39,7 +39,7 @@ namespace nfun.Ti4
 
         public static void SetBitwise(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
-            var t = builder.InitializeVarNode(PrimitiveType.U8, PrimitiveType.I96);
+            var t = builder.InitializeVarNode(Primitive.U8, Primitive.I96);
 
             builder.SetCall(
                 argThenReturnTypes: new IState[] { t, t,t },
@@ -48,16 +48,16 @@ namespace nfun.Ti4
 
         public static void SetBitShift(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
-            var t = builder.InitializeVarNode(PrimitiveType.U24, PrimitiveType.I96);
+            var t = builder.InitializeVarNode(Primitive.U24, Primitive.I96);
 
             builder.SetCall(
-                argThenReturnTypes: new IState[] { t, PrimitiveType.I48, t },
+                argThenReturnTypes: new IState[] { t, Primitive.I48, t },
                 argThenReturnIds: new[] { leftId, rightId, resultId });
         }
 
         public static void SetArith(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
-            var t = builder.InitializeVarNode(PrimitiveType.U24, PrimitiveType.Real);
+            var t = builder.InitializeVarNode(Primitive.U24, Primitive.Real);
 
             builder.SetCall(
                 argThenReturnTypes: new IState[] { t, t, t },
@@ -66,7 +66,7 @@ namespace nfun.Ti4
 
         public static void SetNegateCall(this GraphBuilder builder,int argId, int resultId)
         {
-            var t = builder.InitializeVarNode(PrimitiveType.I16, PrimitiveType.Real);
+            var t = builder.InitializeVarNode(Primitive.I16, Primitive.Real);
 
             builder.SetCall(
                 argThenReturnTypes: new IState[] { t, t },
@@ -77,7 +77,7 @@ namespace nfun.Ti4
         {
             var varNode = builder.InitializeVarNode();
             builder.SetCall(
-                new IState []{Array.Of(varNode), PrimitiveType.I32, varNode },new []{arrArgId,indexArgId, resId});
+                new IState []{Array.Of(varNode), Primitive.I32, varNode },new []{arrArgId,indexArgId, resId});
         }
         
         public static void SetConcatCall(this GraphBuilder builder, int firstId, int secondId, int resultId)
@@ -93,20 +93,32 @@ namespace nfun.Ti4
 
         public static void SetSumCall(this GraphBuilder builder, int argId, int resultId)
         {
-            var varNode = builder.InitializeVarNode(PrimitiveType.U24, PrimitiveType.Real);
+            var varNode = builder.InitializeVarNode(Primitive.U24, Primitive.Real);
 
             builder.SetCall(new IState[]{Array.Of(varNode), varNode}, new []{argId,resultId});
         }
-        public static void SetAnything(this GraphBuilder builder, int arrId, int funId, int resultId)
+        public static void SetIsAny(this GraphBuilder builder, int arrId, int funId, int resultId)
         {
             var inNode = builder.InitializeVarNode();
             if (inNode != null)
                 builder.SetCall(new IState[]
                 {
                     Array.Of(inNode),
-                    Fun.Of(returnType: PrimitiveType.Bool, argType: inNode),
-                    PrimitiveType.Bool,
+                    Fun.Of(returnType: Primitive.Bool, argType: inNode),
+                    Primitive.Bool,
                 }, new[] {arrId, funId, resultId});
+        }
+
+        public static void SetGetFirst(this GraphBuilder builder, int arrId, int funId, int resultId)
+        {
+            var inNode = builder.InitializeVarNode();
+            if (inNode != null)
+                builder.SetCall(new IState[]
+                {
+                    Array.Of(inNode),
+                    Fun.Of(returnType: Primitive.Bool, argType: inNode),
+                    inNode,
+                }, new[] { arrId, funId, resultId });
         }
 
         public static void SetMap(this GraphBuilder builder, int arrId, int funId, int resultId)

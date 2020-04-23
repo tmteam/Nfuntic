@@ -14,12 +14,12 @@ namespace nfun.ti4.tests
         {
             //y = ~1u 
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.U32);
+            graph.SetConst(0, Primitive.U32);
             graph.SetBitwiseInvert(0, 1);
             graph.SetDef("y", 1);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.U32, "y");
+            result.AssertNamed(Primitive.U32, "y");
         }
 
         [Test]
@@ -27,11 +27,11 @@ namespace nfun.ti4.tests
         {
             //y = ~1 
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
             graph.SetBitwiseInvert(0, 1);
             graph.SetDef("y", 1);
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.I96);
             result.AssertAreGenerics(generic, "y");
         }
         [Test]
@@ -43,7 +43,7 @@ namespace nfun.ti4.tests
             graph.SetBitwiseInvert(0, 1);
             graph.SetDef("y", 1);
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.I96);
             result.AssertAreGenerics(generic, "x", "y");
         }
 
@@ -53,13 +53,13 @@ namespace nfun.ti4.tests
             //    0  2 1
             //y = 1u & 2u
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.U32);
-            graph.SetConst(1, PrimitiveType.U32);
+            graph.SetConst(0, Primitive.U32);
+            graph.SetConst(1, Primitive.U32);
             graph.SetBitwise(0,1,2);
             graph.SetDef("y",2);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.U32, "y");
+            result.AssertNamed(Primitive.U32, "y");
         }
 
         
@@ -71,13 +71,13 @@ namespace nfun.ti4.tests
             //    0  2 1
             //y = 1u & 2i
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.U32);
-            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(0, Primitive.U32);
+            graph.SetConst(1, Primitive.I32);
             graph.SetBitwise(0, 1, 2);
             graph.SetDef("y", 2);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.I64, "y");
+            result.AssertNamed(Primitive.I64, "y");
         }
 
         [Test]
@@ -86,12 +86,12 @@ namespace nfun.ti4.tests
             //    0 2 1
             //y = 1 & x
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
             graph.SetVar("x",1);
             graph.SetBitwise(0, 1, 2);
             graph.SetDef("y", 2);
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.I96);
             result.AssertAreGenerics(generic, "x","y");
         }
 
@@ -101,13 +101,13 @@ namespace nfun.ti4.tests
             //    0 2 1
             //y = 1i & x
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.I32);
+            graph.SetConst(0, Primitive.I32);
             graph.SetVar("x", 1);
             graph.SetBitwise(0, 1, 2);
             graph.SetDef("y", 2);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.I32, "x","y");
+            result.AssertNamed(Primitive.I32, "x","y");
         }
 
         [Test]
@@ -116,16 +116,16 @@ namespace nfun.ti4.tests
             //    0 2 1 4   3 6 5
             //y = 1 & x | 256 | a
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
             graph.SetVar("x", 1);
             graph.SetBitwise(0, 1, 2);
-            graph.SetIntConst(3, PrimitiveType.U12);
+            graph.SetIntConst(3, Primitive.U12);
             graph.SetBitwise(2, 3, 4);
             graph.SetVar("a", 5);
             graph.SetBitwise(4, 5, 6);
             graph.SetDef("y", 6);
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U12, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U12, Primitive.I96);
             result.AssertAreGenerics(generic, "a", "x", "y");
         }
 
@@ -135,16 +135,16 @@ namespace nfun.ti4.tests
             //    0 2 1 4   3 6 5
             //y = 1 & x | -1 | a
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
             graph.SetVar("x", 1);
             graph.SetBitwise(0, 1, 2);
-            graph.SetIntConst(3, PrimitiveType.I16);
+            graph.SetIntConst(3, Primitive.I16);
             graph.SetBitwise(2, 3, 4);
             graph.SetVar("a", 5);
             graph.SetBitwise(4, 5, 6);
             graph.SetDef("y", 6);
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.I16, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.I16, Primitive.I96);
             result.AssertAreGenerics(generic, "a", "x", "y");
         }
 
@@ -154,12 +154,12 @@ namespace nfun.ti4.tests
             //    0 2 1
             //y = 1 & 2
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
-            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
+            graph.SetIntConst(1, Primitive.U8);
             graph.SetBitwise(0, 1, 2);
             graph.SetDef("y", 2);
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U8, PrimitiveType.I96);
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.I96);
             result.AssertAreGenerics(generic, "y");
         }
         [Test]
@@ -169,13 +169,13 @@ namespace nfun.ti4.tests
             //    0  2 1
             //y = 1 << x
             var graph = new GraphBuilder();
-            graph.SetIntConst(0, PrimitiveType.U8);
+            graph.SetIntConst(0, Primitive.U8);
             graph.SetVar("x", 1);
             graph.SetBitShift(0, 1, 2);
             graph.SetDef("y", 2);
             var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(PrimitiveType.U24, PrimitiveType.I96);
-            result.AssertNamed(PrimitiveType.I48, "x");
+            var generic = result.AssertAndGetSingleGeneric(Primitive.U24, Primitive.I96);
+            result.AssertNamed(Primitive.I48, "x");
             result.AssertAreGenerics(generic, "y");
         }
 
@@ -186,13 +186,13 @@ namespace nfun.ti4.tests
             //    0  2 1
             //y = 1i << 2
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.I32);
-            graph.SetIntConst(1, PrimitiveType.U8);
+            graph.SetConst(0, Primitive.I32);
+            graph.SetIntConst(1, Primitive.U8);
             graph.SetBitShift(0, 1, 2);
             graph.SetDef("y", 2);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.I32, "y");
+            result.AssertNamed(Primitive.I32, "y");
         }
 
     }

@@ -25,11 +25,11 @@ namespace nfun.Ti4
 
             return new Fun(argNode, retNode);
         }
-        public static Fun Of(IType returnType, IType argType)
+        public static Fun Of(IType retType, IType argType)
         {
             return new Fun(
                 argNode:    SolvingNode.CreateTypeNode(argType),    
-                retNode: SolvingNode.CreateTypeNode(returnType));
+                retNode: SolvingNode.CreateTypeNode(retType));
         }
         public static Fun Of(SolvingNode returnNode, SolvingNode argNode) 
             => new Fun(argNode, returnNode);
@@ -52,7 +52,7 @@ namespace nfun.Ti4
             var funType = otherType as Fun;
             
             if (funType == null)
-                return PrimitiveType.Any;
+                return Primitive.Any;
             
             if(!(ReturnType is IType returnType) || !(ArgType is IType argType))
                 return null;
@@ -67,10 +67,10 @@ namespace nfun.Ti4
 
             if(argType.Equals(argTypeB))
                 return Fun.Of(
-                    returnType: returnAnc, 
+                    retType: returnAnc, 
                     argType:    argType);
 
-            if (argType is PrimitiveType primitiveA && argTypeB is PrimitiveType primitiveB)
+            if (argType is Primitive primitiveA && argTypeB is Primitive primitiveB)
             {
                 var argDesc = primitiveA.GetFirstCommonDescendantOrNull(primitiveB);
                 if (argDesc != null) 
@@ -81,8 +81,8 @@ namespace nfun.Ti4
             return null;
         }
 
-        public bool CanBeImplicitlyConvertedTo(PrimitiveType type) 
-            => type.Equals(PrimitiveType.Any);
+        public bool CanBeImplicitlyConvertedTo(Primitive type) 
+            => type.Equals(Primitive.Any);
 
         public override bool Equals(object obj)
         {

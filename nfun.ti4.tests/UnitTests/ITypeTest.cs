@@ -12,28 +12,28 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetLastCommonAncestorOrNull_ConcreteFunTypesAndPrimitive_ReturnsAny()
         {
-            var fun = Fun.Of(PrimitiveType.I32, PrimitiveType.I64);
+            var fun = Fun.Of(Primitive.I32, Primitive.I64);
 
-            Assert.AreEqual(PrimitiveType.Any, fun.GetLastCommonAncestorOrNull(PrimitiveType.I32));
-            Assert.AreEqual(PrimitiveType.Any, PrimitiveType.I32.GetLastCommonAncestorOrNull(fun));
+            Assert.AreEqual(Primitive.Any, fun.GetLastCommonAncestorOrNull(Primitive.I32));
+            Assert.AreEqual(Primitive.Any, Primitive.I32.GetLastCommonAncestorOrNull(fun));
         }
 
         [Test]
         public void GetLastCommonAncestorOrNull_ConcreteFunTypeAndConcreteArray_ReturnsAny()
         {
-            var fun = Fun.Of(PrimitiveType.I32, PrimitiveType.I64);
-            var array = Array.Of(PrimitiveType.I64);
-            Assert.AreEqual(PrimitiveType.Any, fun.GetLastCommonAncestorOrNull(array));
-            Assert.AreEqual(PrimitiveType.Any, array.GetLastCommonAncestorOrNull(fun));
+            var fun = Fun.Of(Primitive.I32, Primitive.I64);
+            var array = Array.Of(Primitive.I64);
+            Assert.AreEqual(Primitive.Any, fun.GetLastCommonAncestorOrNull(array));
+            Assert.AreEqual(Primitive.Any, array.GetLastCommonAncestorOrNull(fun));
         }
 
         [Test]
         public void GetLastCommonAncestorOrNull_ConcreteFunTypeAndConstrainsArray_ReturnsAny()
         {
-            var fun = Fun.Of(PrimitiveType.I32, PrimitiveType.I64);
+            var fun = Fun.Of(Primitive.I32, Primitive.I64);
             var array = Array.Of(CreateConstrainsNode());
-            Assert.AreEqual(PrimitiveType.Any, fun.GetLastCommonAncestorOrNull(array));
-            Assert.AreEqual(PrimitiveType.Any, array.GetLastCommonAncestorOrNull(fun));
+            Assert.AreEqual(Primitive.Any, fun.GetLastCommonAncestorOrNull(array));
+            Assert.AreEqual(Primitive.Any, array.GetLastCommonAncestorOrNull(fun));
         }
 
 

@@ -21,7 +21,7 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
             
-            result.AssertNamed(PrimitiveType.Bool,"y");
+            result.AssertNamed(Primitive.Bool,"y");
             var generic = result.AssertAndGetSingleGeneric(null, null);
             result.AssertAreGenerics(generic, "a", "b");
         }
@@ -33,15 +33,15 @@ namespace nfun.ti4.tests
             // y = a == 1i
             var graph = new GraphBuilder();
             graph.SetVar("a", 0);
-            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(1, Primitive.I32);
             graph.SetEquality(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Bool, "y");
-            result.AssertNamed(PrimitiveType.I32, "a");
+            result.AssertNamed(Primitive.Bool, "y");
+            result.AssertNamed(Primitive.I32, "a");
         }
         [Test]
         public void ConstEquality()
@@ -49,15 +49,15 @@ namespace nfun.ti4.tests
             //     0  2 1
             // y = 1i == 1i
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.I32);
-            graph.SetConst(1, PrimitiveType.I32);
+            graph.SetConst(0, Primitive.I32);
+            graph.SetConst(1, Primitive.I32);
             graph.SetEquality(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Bool, "y");
+            result.AssertNamed(Primitive.Bool, "y");
         }
 
         [Test]
@@ -66,15 +66,15 @@ namespace nfun.ti4.tests
             //     0   2 1
             // y = 1i == 1.0
             var graph = new GraphBuilder();
-            graph.SetConst(0, PrimitiveType.I32);
-            graph.SetConst(1, PrimitiveType.Real);
+            graph.SetConst(0, Primitive.I32);
+            graph.SetConst(1, Primitive.Real);
             graph.SetEquality(0, 1, 2);
             graph.SetDef("y", 2);
 
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(PrimitiveType.Bool, "y");
+            result.AssertNamed(Primitive.Bool, "y");
         }
     }
 }

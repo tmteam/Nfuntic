@@ -32,14 +32,14 @@ namespace nfun.Ti4
     }
 
   
-    public class PrimitiveType: IType, IState
+    public class Primitive: IType, IState
     {
-        private static PrimitiveType[] IntegerTypes;
-        private static PrimitiveType[] UintTypes;
+        private static Primitive[] _integer;
+        private static Primitive[] _uint;
 
-        static PrimitiveType()
+        static Primitive()
         {
-            UintTypes = new[]
+            _uint = new[]
             {
 
                 U64,
@@ -50,7 +50,7 @@ namespace nfun.Ti4
                 U12,
                 U8
             };
-            IntegerTypes = new[]
+            _integer = new[]
             {
                 Real,
                 I96,
@@ -62,7 +62,7 @@ namespace nfun.Ti4
             };
         }
 
-        public PrimitiveType(PrimitiveTypeName name)
+        public Primitive(PrimitiveTypeName name)
         {
             Name = name;
         }
@@ -86,26 +86,26 @@ namespace nfun.Ti4
             }
         }
 
-        public static PrimitiveType Any { get; } = new PrimitiveType(PrimitiveTypeName.Any);
-        public static PrimitiveType Bool { get; } = new PrimitiveType(PrimitiveTypeName.Bool);
-        public static PrimitiveType Char { get; } = new PrimitiveType(PrimitiveTypeName.Char);
-        public static PrimitiveType Real { get; } = new PrimitiveType(PrimitiveTypeName.Real);
-        public static PrimitiveType I96 { get; } = new PrimitiveType(PrimitiveTypeName.I96);
-        public static PrimitiveType I64 { get; } = new PrimitiveType(PrimitiveTypeName.I64);
-        public static PrimitiveType I48 { get; } = new PrimitiveType(PrimitiveTypeName.I48);
-        public static PrimitiveType I32 { get; } = new PrimitiveType(PrimitiveTypeName.I32);
-        public static PrimitiveType I24 { get; } = new PrimitiveType(PrimitiveTypeName.I24);
-        public static PrimitiveType I16 { get; } = new PrimitiveType(PrimitiveTypeName.I16);
-        public static PrimitiveType U64 { get; } = new PrimitiveType(PrimitiveTypeName.U64);
-        public static PrimitiveType U48 { get; } = new PrimitiveType(PrimitiveTypeName.U48);
-        public static PrimitiveType U32 { get; } = new PrimitiveType(PrimitiveTypeName.U32);
-        public static PrimitiveType U24 { get; } = new PrimitiveType(PrimitiveTypeName.U24);
-        public static PrimitiveType U16 { get; } = new PrimitiveType(PrimitiveTypeName.U16);
-        public static PrimitiveType U12 { get; } = new PrimitiveType(PrimitiveTypeName.U12);
-        public static PrimitiveType U8 { get; } = new PrimitiveType(PrimitiveTypeName.U8);
+        public static Primitive Any { get; } = new Primitive(PrimitiveTypeName.Any);
+        public static Primitive Bool { get; } = new Primitive(PrimitiveTypeName.Bool);
+        public static Primitive Char { get; } = new Primitive(PrimitiveTypeName.Char);
+        public static Primitive Real { get; } = new Primitive(PrimitiveTypeName.Real);
+        public static Primitive I96 { get; } = new Primitive(PrimitiveTypeName.I96);
+        public static Primitive I64 { get; } = new Primitive(PrimitiveTypeName.I64);
+        public static Primitive I48 { get; } = new Primitive(PrimitiveTypeName.I48);
+        public static Primitive I32 { get; } = new Primitive(PrimitiveTypeName.I32);
+        public static Primitive I24 { get; } = new Primitive(PrimitiveTypeName.I24);
+        public static Primitive I16 { get; } = new Primitive(PrimitiveTypeName.I16);
+        public static Primitive U64 { get; } = new Primitive(PrimitiveTypeName.U64);
+        public static Primitive U48 { get; } = new Primitive(PrimitiveTypeName.U48);
+        public static Primitive U32 { get; } = new Primitive(PrimitiveTypeName.U32);
+        public static Primitive U24 { get; } = new Primitive(PrimitiveTypeName.U24);
+        public static Primitive U16 { get; } = new Primitive(PrimitiveTypeName.U16);
+        public static Primitive U12 { get; } = new Primitive(PrimitiveTypeName.U12);
+        public static Primitive U8 { get; } = new Primitive(PrimitiveTypeName.U8);
         public bool IsComparable => IsNumeric || Name == PrimitiveTypeName.Char;
 
-        public bool CanBeImplicitlyConvertedTo(PrimitiveType type)
+        public bool CanBeImplicitlyConvertedTo(Primitive type)
         {
             if (type.Name == PrimitiveTypeName.Any)
                 return true;
@@ -123,60 +123,60 @@ namespace nfun.Ti4
             return true;
         }
 
-        public PrimitiveType GetFirstCommonDescendantOrNull(PrimitiveType otherType)
+        public Primitive GetFirstCommonDescendantOrNull(Primitive other)
         {
-            if (this.Equals(otherType))
+            if (this.Equals(other))
                 return this;
 
-            if (otherType.CanBeImplicitlyConvertedTo(this))
-                return otherType;
-            if (this.CanBeImplicitlyConvertedTo(otherType))
+            if (other.CanBeImplicitlyConvertedTo(this))
+                return other;
+            if (this.CanBeImplicitlyConvertedTo(other))
                 return this;
             
-            if (!otherType.IsNumeric || !this.IsNumeric)
+            if (!other.IsNumeric || !this.IsNumeric)
                 return null;
 
-            var intType = otherType;
+            var intType = other;
 
-            if (otherType.Name.HasFlag(PrimitiveTypeName._IsUint))
+            if (other.Name.HasFlag(PrimitiveTypeName._IsUint))
                 intType = this;
 
             var layer = intType.Layer + 1;
-            return UintTypes[layer-3];
+            return _uint[layer-3];
         }
         public IType GetLastCommonAncestorOrNull(IType otherType)
         {
-            var primitive = otherType as PrimitiveType;
+            var primitive = otherType as Primitive;
             if (primitive == null)
                 return Any;
             return GetLastCommonPrimitiveAncestor(primitive);
         }
 
-        public PrimitiveType GetLastCommonPrimitiveAncestor(PrimitiveType otherType)
+        public Primitive GetLastCommonPrimitiveAncestor(Primitive other)
         {
-            if (this.Equals(otherType))
+            if (this.Equals(other))
                 return this;
             
-            if (!otherType.IsNumeric || !this.IsNumeric)
+            if (!other.IsNumeric || !this.IsNumeric)
                 return Any;
-            if (otherType.CanBeImplicitlyConvertedTo(this))
+            if (other.CanBeImplicitlyConvertedTo(this))
                 return this;
-            if (this.CanBeImplicitlyConvertedTo(otherType))
-                return otherType;
+            if (this.CanBeImplicitlyConvertedTo(other))
+                return other;
 
             var uintType = this;
-            if (otherType.Name.HasFlag(PrimitiveTypeName._IsUint))
-                uintType = otherType;
+            if (other.Name.HasFlag(PrimitiveTypeName._IsUint))
+                uintType = other;
 
             for (int i = uintType.Layer; i >= 1; i--)
             {
-                if (uintType.CanBeImplicitlyConvertedTo(IntegerTypes[i]))
-                    return IntegerTypes[i];
+                if (uintType.CanBeImplicitlyConvertedTo(_integer[i]))
+                    return _integer[i];
             }
 
             throw new InvalidOperationException();
         }
 
-        public override bool Equals(object obj) => (obj as PrimitiveType)?.Name == Name;
+        public override bool Equals(object obj) => (obj as Primitive)?.Name == Name;
     }
 }

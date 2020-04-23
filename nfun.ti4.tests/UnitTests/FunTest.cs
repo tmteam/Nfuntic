@@ -11,24 +11,24 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void ConcreteTypes_SameTypes_EqualsReturnsTrue()
         {
-            var funA = Fun.Of(PrimitiveType.Any, PrimitiveType.I32);
-            var funB = Fun.Of(PrimitiveType.Any, PrimitiveType.I32);
+            var funA = Fun.Of(Primitive.Any, Primitive.I32);
+            var funB = Fun.Of(Primitive.Any, Primitive.I32);
             Assert.IsTrue(funA.Equals(funB));
         }
 
         [Test]
         public void ConcreteTypes_DifferentArgs_EqualsReturnsFalse()
         {
-            var funA = Fun.Of(PrimitiveType.Any, PrimitiveType.I32);
-            var funB = Fun.Of(PrimitiveType.Any, PrimitiveType.Real);
+            var funA = Fun.Of(Primitive.Any, Primitive.I32);
+            var funB = Fun.Of(Primitive.Any, Primitive.Real);
             Assert.IsFalse(funA.Equals(funB));
         }
 
         [Test]
         public void ConcreteTypes_DifferentReturns_EqualsReturnsFalse()
         {
-            var funA = Fun.Of(PrimitiveType.Any, PrimitiveType.I32);
-            var funB = Fun.Of(PrimitiveType.Real, PrimitiveType.I32);
+            var funA = Fun.Of(Primitive.Any, Primitive.I32);
+            var funB = Fun.Of(Primitive.Real, Primitive.I32);
             Assert.IsFalse(funA.Equals(funB));
         }
         [Test]
@@ -56,7 +56,7 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void ConcreteTypes_IsSolvedReturnsTrue()
         {
-            var fun = Fun.Of(PrimitiveType.Any, PrimitiveType.I32);
+            var fun = Fun.Of(Primitive.Any, Primitive.I32);
             Assert.IsTrue(fun.IsSolved);
         }
 
@@ -70,8 +70,8 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetLastCommonAncestorOrNull_SameConcreteTypes_ReturnsEqualType()
         {
-            var funA = Fun.Of(PrimitiveType.Any, PrimitiveType.I32);
-            var funB = Fun.Of(PrimitiveType.Any, PrimitiveType.I32);
+            var funA = Fun.Of(Primitive.Any, Primitive.I32);
+            var funB = Fun.Of(Primitive.Any, Primitive.I32);
             var ancestor = funA.GetLastCommonAncestorOrNull(funB);
             Assert.AreEqual(funA, ancestor);
             var ancestor2 = funB.GetLastCommonAncestorOrNull(funA);
@@ -81,9 +81,9 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetLastCommonAncestorOrNull_ConcreteType_ReturnsAncestor()
         {
-            var funA = Fun.Of(PrimitiveType.I32, PrimitiveType.I64);
-            var funB = Fun.Of(PrimitiveType.U16, PrimitiveType.U64);
-            var expected = Fun.Of(PrimitiveType.I32, PrimitiveType.U48);
+            var funA = Fun.Of(Primitive.I32, Primitive.I64);
+            var funB = Fun.Of(Primitive.U16, Primitive.U64);
+            var expected = Fun.Of(Primitive.I32, Primitive.U48);
 
             Assert.AreEqual(expected, funA.GetLastCommonAncestorOrNull(funB));
             Assert.AreEqual(expected, funB.GetLastCommonAncestorOrNull(funA));
@@ -92,8 +92,8 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetLastCommonAncestorOrNull_NotConcreteTypes_ReturnsNull()
         {
-            var funA = Fun.Of(CreateConstrainsNode(), SolvingNode.CreateTypeNode(PrimitiveType.I32));
-            var funB = Fun.Of(CreateConstrainsNode(), SolvingNode.CreateTypeNode(PrimitiveType.I32));
+            var funA = Fun.Of(CreateConstrainsNode(), SolvingNode.CreateTypeNode(Primitive.I32));
+            var funB = Fun.Of(CreateConstrainsNode(), SolvingNode.CreateTypeNode(Primitive.I32));
 
             Assert.IsNull(funA.GetLastCommonAncestorOrNull(funB));
             Assert.IsNull(funB.GetLastCommonAncestorOrNull(funA));
@@ -102,8 +102,8 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetLastCommonAncestorOrNull_ConcreteAndNotConcreteType_ReturnsNull()
         {
-            var funA     = Fun.Of(CreateConstrainsNode(), SolvingNode.CreateTypeNode(PrimitiveType.I32));
-            var funB     = Fun.Of(PrimitiveType.U16, PrimitiveType.U64);
+            var funA     = Fun.Of(CreateConstrainsNode(), SolvingNode.CreateTypeNode(Primitive.I32));
+            var funB     = Fun.Of(Primitive.U16, Primitive.U64);
 
             Assert.IsNull(funA.GetLastCommonAncestorOrNull(funB));
             Assert.IsNull(funB.GetLastCommonAncestorOrNull(funA));

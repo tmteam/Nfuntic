@@ -5,7 +5,7 @@ namespace nfun.Ti4
 {
     public class Constrains: IState
     {
-        public Constrains(IType desc = null, PrimitiveType anc = null)
+        public Constrains(IType desc = null, Primitive anc = null)
         {
             Descedant = desc;
             Ancestor = anc;
@@ -16,7 +16,7 @@ namespace nfun.Ti4
             var result = new Constrains(Descedant, Ancestor)
             {
                 IsComparable = this.IsComparable,
-                PreferedType = this.PreferedType
+                Prefered = this.Prefered
             };
             return result;
         }
@@ -29,7 +29,7 @@ namespace nfun.Ti4
                     return false;
             }
 
-            if (type is PrimitiveType primitive)
+            if (type is Primitive primitive)
             {
                 if (HasDescendant)
                 {
@@ -57,7 +57,7 @@ namespace nfun.Ti4
             throw new NotImplementedException();
         }
 
-        public bool Fits(PrimitiveType primitive)
+        public bool Fits(Primitive primitive)
         {
             if (HasAncestor)
             {
@@ -76,13 +76,13 @@ namespace nfun.Ti4
             return true;
         }
 
-        public PrimitiveType Ancestor { get; private set; }
+        public Primitive Ancestor { get; private set; }
         public IType Descedant { get; private set; }
 
         public bool HasAncestor => Ancestor!=null;
         public bool HasDescendant => Descedant!=null;
 
-        public bool TryAddAncestor(PrimitiveType type)
+        public bool TryAddAncestor(Primitive type)
         {
             if (type == null)
                 return true;
@@ -99,7 +99,7 @@ namespace nfun.Ti4
 
             return true;
         }
-        public void AddAncestor(PrimitiveType type)
+        public void AddAncestor(Primitive type)
         {
             if(!TryAddAncestor(type))
                 throw new InvalidOperationException();
@@ -122,7 +122,7 @@ namespace nfun.Ti4
                     Descedant = ancestor;
             }
         }
-        public PrimitiveType PreferedType { get; set; }
+        public Primitive Prefered { get; set; }
         public bool IsComparable { get; set; }
         public bool NoConstrains => !HasDescendant && !HasAncestor && !IsComparable;
 
@@ -159,8 +159,8 @@ namespace nfun.Ti4
             var res =  $"[{Descedant}..{Ancestor}]";
             if (IsComparable)
                 res += "<>";
-            if (PreferedType != null)
-                res += PreferedType + "!";
+            if (Prefered != null)
+                res += Prefered + "!";
             return res;
         }
 
@@ -170,12 +170,12 @@ namespace nfun.Ti4
             {
                 if (Descedant != null)
                 {
-                    if (Descedant.Equals(PrimitiveType.Char))
-                        return PrimitiveType.Char;
+                    if (Descedant.Equals(Primitive.Char))
+                        return Primitive.Char;
                     
-                    if (Descedant is PrimitiveType primitive && primitive.IsNumeric)
+                    if (Descedant is Primitive primitive && primitive.IsNumeric)
                     {
-                        if(!TryAddAncestor(PrimitiveType.Real))
+                        if(!TryAddAncestor(Primitive.Real))
                             throw new InvalidOperationException();
                     }
                     else
@@ -191,8 +191,8 @@ namespace nfun.Ti4
                     throw new InvalidOperationException();
             }
 
-            if (Descedant?.Equals(PrimitiveType.Any)==true)
-                return PrimitiveType.Any;
+            if (Descedant?.Equals(Primitive.Any)==true)
+                return Primitive.Any;
 
             return this;
         }

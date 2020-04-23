@@ -41,7 +41,7 @@ namespace nfun.Ti4
         {
             var arrayType = otherType as Array;
             if (arrayType == null)
-                return PrimitiveType.Any;
+                return Primitive.Any;
             var elementTypeA = Element as IType;
             if (elementTypeA == null)
                 return null;
@@ -54,8 +54,8 @@ namespace nfun.Ti4
             return Array.Of(ancestor);
         }
 
-        public bool CanBeImplicitlyConvertedTo(PrimitiveType type) 
-            => type.Equals(PrimitiveType.Any);
+        public bool CanBeImplicitlyConvertedTo(Primitive type) 
+            => type.Equals(Primitive.Any);
 
         public override bool Equals(object obj)
         {
