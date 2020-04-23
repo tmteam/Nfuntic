@@ -110,6 +110,6 @@ namespace nfun.ti4.tests.UnitTests
         }
 
         private SolvingNode CreateConstrainsNode()
-            => new SolvingNode("", new SolvingConstrains(), SolvingNodeType.TypeVariable);
+            => new SolvingNode("", new Constrains(), SolvingNodeType.TypeVariable);
     }
 }

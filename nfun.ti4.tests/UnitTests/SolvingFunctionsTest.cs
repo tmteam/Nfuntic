@@ -19,26 +19,26 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void GetMergedState_PrimitiveAndEmptyConstrains()
         {
-            var res = SolvingFunctions.GetMergedState(PrimitiveType.I32, new SolvingConstrains());
+            var res = SolvingFunctions.GetMergedState(PrimitiveType.I32, new Constrains());
             Assert.AreEqual(res, PrimitiveType.I32);
         }
 
         [Test]
         public void GetMergedState_EmptyConstrainsAndPrimitive()
         {
-            var res = SolvingFunctions.GetMergedState(new SolvingConstrains(), PrimitiveType.I32);
+            var res = SolvingFunctions.GetMergedState(new Constrains(), PrimitiveType.I32);
             Assert.AreEqual(res, PrimitiveType.I32);
         }
         [Test]
         public void GetMergedState_PrimitiveAndConstrainsThatFit()
         {
-            var res = SolvingFunctions.GetMergedState(PrimitiveType.I32, new SolvingConstrains(PrimitiveType.U24, PrimitiveType.I48));
+            var res = SolvingFunctions.GetMergedState(PrimitiveType.I32, new Constrains(PrimitiveType.U24, PrimitiveType.I48));
             Assert.AreEqual(res, PrimitiveType.I32);
         }
         [Test]
         public void GetMergedState_ConstrainsThatFitAndPrimitive()
         {
-            var res = SolvingFunctions.GetMergedState(new SolvingConstrains(PrimitiveType.U24, PrimitiveType.I48), PrimitiveType.I32);
+            var res = SolvingFunctions.GetMergedState(new Constrains(PrimitiveType.U24, PrimitiveType.I48), PrimitiveType.I32);
             Assert.AreEqual(res, PrimitiveType.I32);
         }
         [Test]
@@ -52,7 +52,7 @@ namespace nfun.ti4.tests.UnitTests
 
         [Test]
         public void GetMergedState_PrimitiveAndConstrainsThatNotFit() 
-            => AssertGetMergedStateThrows(PrimitiveType.I32, new SolvingConstrains(PrimitiveType.U24, PrimitiveType.U48));
+            => AssertGetMergedStateThrows(PrimitiveType.I32, new Constrains(PrimitiveType.U24, PrimitiveType.U48));
 
         [Test]
         public void GetMergedState_TwoDifferentPrimitivesThrows() 
@@ -65,7 +65,7 @@ namespace nfun.ti4.tests.UnitTests
                     stateB: Array.Of(PrimitiveType.Real));
         #endregion
 
-        void AssertGetMergedStateThrows(ISolvingState stateA, ISolvingState stateB)
+        void AssertGetMergedStateThrows(IState stateA, IState stateB)
         {
             Assert.Throws<InvalidOperationException>(
                 () => SolvingFunctions.GetMergedState(stateA, stateB));

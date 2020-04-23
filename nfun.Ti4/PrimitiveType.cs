@@ -32,7 +32,7 @@ namespace nfun.Ti4
     }
 
   
-    public class PrimitiveType: IType, ISolvingState
+    public class PrimitiveType: IType, IState
     {
         private static PrimitiveType[] IntegerTypes;
         private static PrimitiveType[] UintTypes;

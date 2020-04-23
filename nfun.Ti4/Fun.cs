@@ -1,29 +1,52 @@
-﻿namespace nfun.Ti4
+﻿using System;
+
+namespace nfun.Ti4
 {
-    public class Fun : IType, ISolvingState
+    public class Fun : IType, IState
     {
+        public static Fun Of(IState returnType, IState argType)
+        {
+            SolvingNode argNode = null;
+            SolvingNode retNode = null;
+
+            if (returnType is IType rt)
+                retNode = SolvingNode.CreateTypeNode(rt);
+            else if(returnType is RefTo retRef)
+                retNode = retRef.Node;
+            else
+                throw new InvalidOperationException();
+
+            if (argType is IType at)
+                argNode = SolvingNode.CreateTypeNode(at);
+            else if (argType is RefTo aRef)
+                argNode = aRef.Node;
+            else
+                throw new InvalidOperationException();
+
+            return new Fun(argNode, retNode);
+        }
         public static Fun Of(IType returnType, IType argType)
         {
             return new Fun(
                 argNode:    SolvingNode.CreateTypeNode(argType),    
-                returnNode: SolvingNode.CreateTypeNode(returnType));
+                retNode: SolvingNode.CreateTypeNode(returnType));
         }
         public static Fun Of(SolvingNode returnNode, SolvingNode argNode) 
             => new Fun(argNode, returnNode);
 
-        private Fun(SolvingNode argNode, SolvingNode returnNode)
+        private Fun(SolvingNode argNode, SolvingNode retNode)
         {
             ArgNode = argNode;
-            ReturnNode = returnNode;
+            RetNode = retNode;
         }
 
-        public object ReturnType => ReturnNode.State;
+        public object ReturnType => RetNode.State;
         public object ArgType => ArgNode.State;
 
-        public SolvingNode ReturnNode { get; }
+        public SolvingNode RetNode { get; }
         public SolvingNode ArgNode { get; }
 
-        public bool IsSolved => ReturnNode.IsSolved && ArgNode.IsSolved;
+        public bool IsSolved => RetNode.IsSolved && ArgNode.IsSolved;
         public IType GetLastCommonAncestorOrNull(IType otherType)
         {
             var funType = otherType as Fun;

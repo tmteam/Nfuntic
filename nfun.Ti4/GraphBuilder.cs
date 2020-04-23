@@ -12,7 +12,7 @@ namespace nfun.Ti4
         private int _varNodeId = 0;
 
         public RefTo InitializeVarNode(IType desc = null, PrimitiveType anc = null, bool isComparable = false) 
-            => new RefTo(CreateVarType(new SolvingConstrains(desc, anc){IsComparable =  isComparable}));
+            => new RefTo(CreateVarType(new Constrains(desc, anc){IsComparable =  isComparable}));
 
         #region set primitives
 
@@ -20,7 +20,7 @@ namespace nfun.Ti4
         {
             var namedNode = GetNamedNode(name);
             var idNode = GetOrCreateNode(node);
-            if (idNode.State is SolvingConstrains)
+            if (idNode.State is Constrains)
             {
                 namedNode.Ancestors.Add(idNode);
             }
@@ -41,17 +41,17 @@ namespace nfun.Ti4
             }
 
             foreach (var condId in conditions)
-                SetOrCreateConcrete(condId, PrimitiveType.Bool);
+                SetOrCreatePrimitive(condId, PrimitiveType.Bool);
         }
 
 
         public void SetConst(int id, PrimitiveType type) 
-            => SetOrCreateConcrete(id, type);
+            => SetOrCreatePrimitive(id, type);
 
         public void SetIntConst(int id, PrimitiveType desc)
         {
             var node = GetOrCreateNode(id);
-            if (node.State is SolvingConstrains constrains)
+            if (node.State is Constrains constrains)
             {
                 constrains.AddAncestor(PrimitiveType.Real);
                 constrains.AddDescedant(desc);
@@ -74,7 +74,17 @@ namespace nfun.Ti4
             if (!node.BecomeConcrete(u64))
                 throw new InvalidOperationException();
         }
+
+        public void CreateLabda(int returnId, int lambdaId, string[] varNames)
+        {
+            var arg = GetNamedNode(varNames[0]);
+            var ret = GetOrCreateNode(returnId);
+            SetOrCreateLambda(lambdaId, ret, arg);
+        }
+
         
+
+
         public void SetArrayInit(int resultIds, params int[] elementIds)
         {
             var elementType = CreateVarType();
@@ -87,7 +97,7 @@ namespace nfun.Ti4
             }
         }
 
-        public void SetCall(ISolvingState[] argThenReturnTypes, int[] argThenReturnIds)
+        public void SetCall(IState[] argThenReturnTypes, int[] argThenReturnIds)
         {
             if(argThenReturnTypes.Length!=argThenReturnIds.Length)
                 throw new ArgumentException("Sizes of type and id array have to be equal");
@@ -296,13 +306,32 @@ namespace nfun.Ti4
                 return varnode;
             }
 
-            var ans = new SolvingNode("T" + name, new SolvingConstrains(), SolvingNodeType.Named);
+            var ans = new SolvingNode("T" + name, new Constrains(), SolvingNodeType.Named);
             _variables.Add(name, ans);
             return ans;
         }
 
+        private void SetOrCreateLambda(int lambdaId, SolvingNode ret, SolvingNode arg)
+        {
+            var fun = Fun.Of(argNode: arg, returnNode: ret);
 
-        private SolvingNode SetOrCreateConcrete(int id, PrimitiveType type)
+            while (_syntaxNodes.Count <= lambdaId)
+            {
+                _syntaxNodes.Add(null);
+            }
+
+            var alreadyExists = _syntaxNodes[lambdaId];
+            if (alreadyExists != null)
+            {
+                alreadyExists.State = SolvingFunctions.GetMergedState(fun, alreadyExists.State);
+            }
+            else
+            {
+                var res = new SolvingNode(lambdaId.ToString(), fun, SolvingNodeType.SyntaxNode);
+                _syntaxNodes[lambdaId] = res;
+            }
+        }
+        private SolvingNode SetOrCreatePrimitive(int id, PrimitiveType type)
         {
             var node = GetOrCreateNode(id);
             if (!node.BecomeConcrete(type))
@@ -339,16 +368,16 @@ namespace nfun.Ti4
             if (alreadyExists != null)
                 return alreadyExists;
 
-            var res = new SolvingNode(id.ToString(), new SolvingConstrains(), SolvingNodeType.SyntaxNode);
+            var res = new SolvingNode(id.ToString(), new Constrains(), SolvingNodeType.SyntaxNode);
             _syntaxNodes[id] = res;
             return res;
         }
 
-        private SolvingNode CreateVarType(ISolvingState state = null)
+        private SolvingNode CreateVarType(IState state = null)
         {
             var varNode = new SolvingNode(
                 name:  "V" + _varNodeId,
-                state: state ?? new SolvingConstrains(),
+                state: state ?? new Constrains(),
                 type:  SolvingNodeType.TypeVariable);
             _varNodeId++;
             _typeVariables.Add(varNode);

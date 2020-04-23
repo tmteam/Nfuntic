@@ -3,17 +3,17 @@ using Microsoft.Win32.SafeHandles;
 
 namespace nfun.Ti4
 {
-    public class SolvingConstrains: ISolvingState
+    public class Constrains: IState
     {
-        public SolvingConstrains(IType desc = null, PrimitiveType anc = null)
+        public Constrains(IType desc = null, PrimitiveType anc = null)
         {
             Descedant = desc;
             Ancestor = anc;
         }
 
-        public SolvingConstrains GetCopy()
+        public Constrains GetCopy()
         {
-            var result = new SolvingConstrains(Descedant, Ancestor)
+            var result = new Constrains(Descedant, Ancestor)
             {
                 IsComparable = this.IsComparable,
                 PreferedType = this.PreferedType
@@ -126,9 +126,9 @@ namespace nfun.Ti4
         public bool IsComparable { get; set; }
         public bool NoConstrains => !HasDescendant && !HasAncestor && !IsComparable;
 
-        public ISolvingState MergeOrNull(SolvingConstrains constrains)
+        public IState MergeOrNull(Constrains constrains)
         {
-            var result = new SolvingConstrains(Descedant,Ancestor)
+            var result = new Constrains(Descedant,Ancestor)
             {
                 IsComparable = this.IsComparable || constrains.IsComparable
             };
@@ -164,7 +164,7 @@ namespace nfun.Ti4
             return res;
         }
 
-        public ISolvingState GetOptimizedOrThrow()
+        public IState GetOptimizedOrThrow()
         {
             if (IsComparable)
             {

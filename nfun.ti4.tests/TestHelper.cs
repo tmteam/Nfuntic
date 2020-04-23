@@ -36,7 +36,7 @@ namespace nfun.ti4.tests
         public static void AssertGenericType(this SolvingNode node, PrimitiveType desc, PrimitiveType anc,
             bool isComparable = false)
         {
-            var generic = node.State as SolvingConstrains;
+            var generic = node.State as Constrains;
             Assert.IsNotNull(generic);
             if (desc == null)
                 Assert.IsFalse(generic.HasDescendant);

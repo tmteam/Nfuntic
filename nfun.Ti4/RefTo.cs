@@ -1,6 +1,6 @@
 ﻿namespace nfun.Ti4
 {
-    public class RefTo: ISolvingState
+    public class RefTo: IState
     {
         public RefTo(SolvingNode node)
         {
@@ -11,7 +11,7 @@
             Node = node;
         }
 
-        public ISolvingState Element => Node.State; 
+        public IState Element => Node.State; 
         public SolvingNode Node { get; }
         public override string ToString() => $"ref({Node.Name})";
     }

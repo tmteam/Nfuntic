@@ -15,13 +15,13 @@ namespace nfun.Ti4
 
     public class SolvingNode
     {
-        private ISolvingState _state;
+        private IState _state;
         public int GraphId { get; set; }
 
         public static SolvingNode CreateTypeNode(IType type) 
             => new SolvingNode(type.ToString(), type, SolvingNodeType.TypeVariable);
 
-        public SolvingNode(string name, ISolvingState state, SolvingNodeType type)
+        public SolvingNode(string name, IState state, SolvingNodeType type)
         {
             Name = name;
             State = state;
@@ -33,7 +33,7 @@ namespace nfun.Ti4
         public List<SolvingNode> MemberOf { get; } = new List<SolvingNode>();
         public bool IsSolved => State is PrimitiveType || (State as Array)?.IsSolved == true;
 
-        public ISolvingState State
+        public IState State
         {
             get => _state;
             set
@@ -69,7 +69,7 @@ namespace nfun.Ti4
                 Console.Write($"{concrete.Name} ");
             else if (State is RefTo reference)
                 Console.Write($"{reference.Node.Name}");
-            else if (State is SolvingConstrains constrains)
+            else if (State is Constrains constrains)
                 Console.Write(constrains);
             else if (State is Array array)
                 Console.Write("arr("+ array.ElementNode.Name+")");
@@ -88,7 +88,7 @@ namespace nfun.Ti4
             {
                 return oldConcrete == primitive;
             }
-            else if (this.State is SolvingConstrains constrains)
+            else if (this.State is Constrains constrains)
             {
                 if (!constrains.Fits(primitive))
                     return false;
@@ -108,7 +108,7 @@ namespace nfun.Ti4
             {
                 return oldConcrete.CanBeImplicitlyConvertedTo(anc);
             }
-            else if (node.State is SolvingConstrains constrains)
+            else if (node.State is Constrains constrains)
             {
                 return constrains.TryAddAncestor(anc);
             };

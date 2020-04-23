@@ -20,8 +20,8 @@ namespace nfun.Ti4
             NamedNodes.First(n => n.Name == syntaxNode.ToString()).State;
 
         private IEnumerable<SolvingNode> AllNodes => TypeVariables.Union(NamedNodes).Union(SyntaxNodes);
-        public IEnumerable<SolvingNode> Generics => AllNodes.Where(t => t?.State is SolvingConstrains);
-        public int GenericsCount => AllNodes.Count(t => t?.State is SolvingConstrains);
+        public IEnumerable<SolvingNode> Generics => AllNodes.Where(t => t?.State is Constrains);
+        public int GenericsCount => AllNodes.Count(t => t?.State is Constrains);
 
         public SolvingNode[] TypeVariables { get; }
         public SolvingNode[] NamedNodes { get; }

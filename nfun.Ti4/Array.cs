@@ -2,14 +2,14 @@
 
 namespace nfun.Ti4
 {
-    public class Array: IType, ISolvingState
+    public class Array: IType, IState
     {
         public Array(SolvingNode elementNode)
         {
             ElementNode = elementNode;
         }
 
-        public static Array Of(ISolvingState state)
+        public static Array Of(IState state)
         {
             if (state is IType type)
                 return Of(type);

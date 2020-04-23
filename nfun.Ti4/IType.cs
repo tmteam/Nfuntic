@@ -1,6 +1,6 @@
 ﻿namespace nfun.Ti4
 {
-    public interface IType: ISolvingState
+    public interface IType: IState
     {
         bool IsSolved { get; }
         IType GetLastCommonAncestorOrNull(IType otherType);
