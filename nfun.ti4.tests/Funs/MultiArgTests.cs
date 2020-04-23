@@ -31,7 +31,32 @@ namespace nfun.ti4.tests.Funs
             result.AssertNode(Fun.Of(new []{t,t}, t), 4);
         }
 
-        
+        [Test]
+        public void Reduce_ConcreteLambdaReturn_GetSum()
+        {
+            //        5  0  4          132
+            //y = reduce(x, f(a,b):i64=a+b)
+            var graph = new GraphBuilder();
+
+            graph.SetVar("x", 0);
+            graph.SetVar("la", 1);
+            graph.SetVar("lb", 2);
+            graph.SetArith(1, 2, 3);
+            graph.CreateLambda(3, 4, Primitive.I64, "la", "lb");
+            SetReduceCall(graph, 0, 4, 5);
+            graph.SetDef("y", 5);
+
+            var result = graph.Solve();
+
+            result.AssertNoGenerics();
+
+
+            result.AssertNamed(Primitive.I64, "y", "la", "lb");
+            result.AssertNamed(Array.Of(Primitive.I64), "x");
+            result.AssertNode(Fun.Of(new[] { Primitive.I64, Primitive.I64 }, Primitive.I64), 4);
+        }
+
+
 
         [Test]
         public void ReduceConcreteOut_GetSum()
@@ -106,7 +131,31 @@ namespace nfun.ti4.tests.Funs
             result.AssertNamed(Primitive.Real, "lb");
             result.AssertNamed(Primitive.Bool, "la","y");
         }
+        [Test]
+        public void Fold_ConcreteLambda_GetSum()
+        {
+            //        5  0  4              132
+            //y = reduce(x, f(a,b:i32):i64=a+b)
+            var graph = new GraphBuilder();
 
+            graph.SetVar("x", 0);
+            graph.SetVar("la", 1);
+            graph.SetVarType("lb", Primitive.I32);
+            graph.SetVar("lb", 2);
+            graph.SetArith(1, 2, 3);
+            graph.CreateLambda(3, 4, Primitive.I64, "la", "lb");
+            SetReduceCall(graph, 0, 4, 5);
+            graph.SetDef("y", 5);
+
+            var result = graph.Solve();
+
+            result.AssertNoGenerics();
+
+            result.AssertNamed(Primitive.I64, "y", "la");
+            result.AssertNamed(Primitive.I32, "lb");
+            result.AssertNamed(Array.Of(Primitive.I32), "x");
+            result.AssertNode(Fun.Of(new[] { Primitive.I64, Primitive.I32}, Primitive.I64), 4);
+        }
         private static void SetReduceCall(GraphBuilder graph, int arrId, int funId, int returnId )
         {
             var generic = graph.InitializeVarNode();
@@ -127,7 +176,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetCall(new IState[]
             {
                 Array.Of(inT),
-                Fun.Of(new[] {inT, outT}, outT),
+                Fun.Of(new[] {outT,inT}, outT),
                 outT
             }, new[] { arrId, funId, returnId });
         }

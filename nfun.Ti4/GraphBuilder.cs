@@ -87,8 +87,17 @@ namespace nfun.Ti4
             var ret = GetOrCreateNode(returnId);
             SetOrCreateLambda(lambdaId, args,ret);
         }
+        public void CreateLambda(int returnId, int lambdaId,IType returnType, params string[] varNames)
+        {
+            var args = varNames.Select(GetNamedNode).ToArray();
+            var ret = GetOrCreateNode(returnId);
+            var ancNode = CreateVarType(returnType);
+            ret.Ancestors.Add(ancNode);
+            
+            SetOrCreateLambda(lambdaId, args, ret);
+        }
 
-        
+
 
 
         public void SetArrayInit(int resultIds, params int[] elementIds)

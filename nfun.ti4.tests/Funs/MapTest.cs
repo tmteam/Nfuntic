@@ -104,6 +104,29 @@ namespace nfun.ti4.tests.Funs
             result.AssertNode(Fun.Of(Primitive.Real, Primitive.Real), 5);
         }
         [Test]
+        public void ConcreteLambdaReturn()
+        {
+            //     6  1 0     5       2 4 3
+            //y = Map([ 1i ], (x):real->x*2)
+            var graph = new GraphBuilder();
+            graph.SetConst(0, Primitive.I32);
+            graph.SetArrayInit(1, 0);
+            graph.SetVar("lx", 2);
+            graph.SetIntConst(3, Primitive.U8);
+            graph.SetArith(2, 3, 4);
+            graph.CreateLambda(4, 5,Primitive.Real, "lx");
+            graph.SetMap(1, 5, 6);
+            graph.SetDef("y", 6);
+
+            var result = graph.Solve();
+
+            result.AssertNoGenerics();
+            result.AssertNamed(Primitive.I32, "lx");
+            result.AssertNamed(Array.Of(Primitive.Real), "y");
+            result.AssertNode(Fun.Of(Primitive.I32, Primitive.Real), 5);
+        }
+
+        [Test]
         public void Generic()
         {
             //     3  0  2 1
