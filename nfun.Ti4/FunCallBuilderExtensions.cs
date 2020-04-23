@@ -55,6 +55,14 @@ namespace nfun.Ti4
                 argThenReturnIds: new[] { leftId, rightId, resultId });
         }
 
+        public static void SetBoolCall(this GraphBuilder builder, int leftId, int rightId, int resultId)
+        {
+
+            builder.SetCall(
+                argThenReturnTypes: new IState[] { Primitive.Bool, Primitive.Bool, Primitive.Bool},
+                argThenReturnIds: new[] { leftId, rightId, resultId });
+        }
+
         public static void SetArith(this GraphBuilder builder, int leftId, int rightId, int resultId)
         {
             var t = builder.InitializeVarNode(Primitive.U24, Primitive.Real);

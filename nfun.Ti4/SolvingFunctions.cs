@@ -44,7 +44,7 @@ namespace nfun.Ti4
                 if (stateB is Fun funB)
                 {
                     if (funA.ArgsCount != funB.ArgsCount)
-                        throw new InvalidOperationException();
+                        throw new InvalidOperationException("Function signatures are different");
 
                     for (int i = 0; i < funA.ArgsCount; i++)
                         Merge(funA.ArgNodes[i], funB.ArgNodes[i]);

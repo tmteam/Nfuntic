@@ -83,9 +83,9 @@ namespace nfun.Ti4
         
         public void CreateLambda(int returnId, int lambdaId,params string[] varNames)
         {
-            var arg = GetNamedNode(varNames[0]);
+            var args = varNames.Select(GetNamedNode).ToArray();
             var ret = GetOrCreateNode(returnId);
-            SetOrCreateLambda(lambdaId, ret, arg);
+            SetOrCreateLambda(lambdaId, args,ret);
         }
 
         
@@ -324,9 +324,9 @@ namespace nfun.Ti4
             return ans;
         }
 
-        private void SetOrCreateLambda(int lambdaId, SolvingNode ret, SolvingNode arg)
+        private void SetOrCreateLambda(int lambdaId, SolvingNode[] args,SolvingNode ret)
         {
-            var fun = Fun.Of(argNode: arg, returnNode: ret);
+            var fun = Fun.Of(args, ret);
 
             while (_syntaxNodes.Count <= lambdaId)
             {
