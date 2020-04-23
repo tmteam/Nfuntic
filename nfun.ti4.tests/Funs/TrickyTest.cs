@@ -27,7 +27,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNamed(Array.Of(t), "lx");
             result.AssertNamed(Array.Of(Array.Of(t)), "a","y");
 
-            result.AssertNode(Fun.Of(argType: Array.Of(t), retType: Array.Of(t)), 3);
+            result.AssertNode(Fun.Of(Array.Of(t), Array.Of(t)), 3);
         }
     }
 }

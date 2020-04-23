@@ -26,7 +26,7 @@ namespace nfun.Ti4
 
         public SolvingNode ElementNode { get; }
         public bool IsSolved => (Element as IType)?.IsSolved == true;
-        public object Element => ElementNode.State;
+        public IState Element => ElementNode.State;
 
 
         public override string ToString()

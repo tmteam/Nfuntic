@@ -83,7 +83,7 @@ namespace nfun.ti4.tests.UnitTests
         {
             var funA = Fun.Of(Primitive.I32, Primitive.I64);
             var funB = Fun.Of(Primitive.U16, Primitive.U64);
-            var expected = Fun.Of(Primitive.I32, Primitive.U48);
+            var expected = Fun.Of(Primitive.U16, Primitive.I96);
 
             Assert.AreEqual(expected, funA.GetLastCommonAncestorOrNull(funB));
             Assert.AreEqual(expected, funB.GetLastCommonAncestorOrNull(funA));

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using nfun.Ti4;
 using NUnit.Framework;
 using Array = nfun.Ti4.Array;
@@ -12,8 +10,8 @@ namespace nfun.ti4.tests.Funs
         [Test]
         public void StrictArrayArg()
         {
-            //     6  1 0    5  2  4 3
-            //y = map([ 1i ], x->x==0)
+            //     6  1 0     5  2  4 3
+            //y = map([ 1i ], x->x == 0)
             var graph = new GraphBuilder();
             graph.SetConst(0, Primitive.I32);
             graph.SetArrayInit(1, 0);
@@ -29,7 +27,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNoGenerics();
             result.AssertNamed(Array.Of(Primitive.Bool), "y");
             result.AssertNamed(Primitive.I32, "lx");
-            result.AssertNode(Fun.Of(argType: Primitive.I32, retType: Primitive.Bool), 5);
+            result.AssertNode(Fun.Of(Primitive.I32, Primitive.Bool), 5);
         }
         [Test]
         public void StrictArrayAndLambdaArg()
@@ -52,7 +50,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNoGenerics();
             result.AssertNamed(Array.Of(Primitive.I32), "y");
             result.AssertNamed(Primitive.I32, "lx");
-            result.AssertNode(Ti4.Fun.Of(retType: Primitive.I32, argType: Primitive.I32), 5);
+            result.AssertNode(Fun.Of(Primitive.I32, Primitive.I32), 5);
         }
 
         [Test]
@@ -103,7 +101,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNoGenerics();
             result.AssertNamed(Primitive.Real, "lx");
             result.AssertNamed(Array.Of(Primitive.Real), "y");
-            result.AssertNode(Ti4.Fun.Of(retType: Primitive.Real, argType: Primitive.Real), 5);
+            result.AssertNode(Fun.Of(Primitive.Real, Primitive.Real), 5);
         }
         [Test]
         public void Generic()
@@ -123,7 +121,7 @@ namespace nfun.ti4.tests.Funs
             var t = result.AssertAndGetSingleGeneric(null, null);
 
             result.AssertNamed(Array.Of(t), "a","y");
-            result.AssertNode(Ti4.Fun.Of(t, t));
+            result.AssertNode(Fun.Of(t, t));
         }
 
         [Test]
@@ -145,7 +143,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNoGenerics();
 
             result.AssertNamed(Array.Of(Primitive.U16), "a", "y");
-            result.AssertNode(Ti4.Fun.Of(Primitive.U16, Primitive.U16));
+            result.AssertNode(Fun.Of(Primitive.U16, Primitive.U16));
         }
 
         [Test]
@@ -155,9 +153,7 @@ namespace nfun.ti4.tests.Funs
             //y = Map(a, SQRT)
             var graph = new GraphBuilder();
             graph.SetVar("a", 0);
-            graph.SetVarType("SQRT", Fun.Of(
-                 argType: Primitive.Real,
-                 retType: Primitive.Real));
+            graph.SetVarType("SQRT", Fun.Of(Primitive.Real,Primitive.Real));
             graph.SetVar("SQRT", 1);
             graph.SetMap(0, 1, 2);
             graph.SetDef("y", 2);
@@ -176,9 +172,7 @@ namespace nfun.ti4.tests.Funs
             var graph = new GraphBuilder();
             graph.SetVarType("a", Array.Of(Primitive.I32));
             graph.SetVar("a", 0);
-            graph.SetVarType("SQRT", Fun.Of(
-                argType: Primitive.Real,
-                retType: Primitive.Real));
+            graph.SetVarType("SQRT", Fun.Of(Primitive.Real,Primitive.Real));
             graph.SetVar("SQRT", 1);
             graph.SetMap(0, 1, 2);
             graph.SetDef("y", 2);

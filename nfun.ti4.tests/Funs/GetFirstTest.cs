@@ -27,7 +27,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNoGenerics();
             result.AssertNamed(Primitive.I32, "y");
             result.AssertNamed(Primitive.I32, "lx");
-            result.AssertNode(Fun.Of(argType: Primitive.I32, retType: Primitive.Bool), 5);
+            result.AssertNode(Fun.Of(Primitive.I32, Primitive.Bool), 5);
         }
         [Test]
         public void StrictArrayAndLambdaArg()
@@ -48,7 +48,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNoGenerics();
             result.AssertNamed(Primitive.I32, "y");
             result.AssertNamed(Primitive.I32, "lx");
-            result.AssertNode(Ti4.Fun.Of(retType: Primitive.Bool, argType: Primitive.I32), 5);
+            result.AssertNode(Ti4.Fun.Of(Primitive.I32, Primitive.Bool), 5);
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace nfun.ti4.tests.Funs
             var result = graph.Solve();
             result.AssertNoGenerics();
             result.AssertNamed(Primitive.Real, "x");
-            result.AssertNode(Ti4.Fun.Of(retType: Primitive.Bool, argType: Primitive.Real), 5);
+            result.AssertNode(Ti4.Fun.Of(Primitive.Real, Primitive.Bool), 5);
         }
         [Test]
         public void BoolArrayArg()
@@ -114,9 +114,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNamed(Array.Of(Primitive.Bool), "a");
             result.AssertNamed(Primitive.Bool, "2lx");
             result.AssertNamed(Primitive.Bool, "y");
-            result.AssertNode(Ti4.Fun.Of(
-                argType: Primitive.Bool,
-                retType: Primitive.Bool), 2);
+            result.AssertNode(Fun.Of(Primitive.Bool,Primitive.Bool), 2);
         }
 
         [Test]
@@ -126,9 +124,7 @@ namespace nfun.ti4.tests.Funs
             //y = First(a, isNan)
             var graph = new GraphBuilder();
             graph.SetVar("a", 0);
-            graph.SetVarType("isNan", Fun.Of(
-                 argType: Primitive.Real,
-                 retType: Primitive.Bool));
+            graph.SetVarType("isNan", Fun.Of(Primitive.Real,Primitive.Bool));
             graph.SetVar("isNan", 1);
             graph.SetGetFirst(0, 1, 2);
             graph.SetDef("y", 2);
@@ -145,9 +141,7 @@ namespace nfun.ti4.tests.Funs
             var graph = new GraphBuilder();
             graph.SetVarType("a", Array.Of(Primitive.I32));
             graph.SetVar("a", 0);
-            graph.SetVarType("isNan", Fun.Of(
-                argType: Primitive.Real,
-                retType: Primitive.Bool));
+            graph.SetVarType("isNan", Fun.Of(Primitive.Real,Primitive.Bool));
             graph.SetVar("isNan", 1);
             graph.SetGetFirst(0, 1, 2);
             graph.SetDef("y", 2);

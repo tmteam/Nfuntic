@@ -1,17 +1,44 @@
 ﻿using System;
+using System.Linq;
 
 namespace nfun.Ti4
 {
     public class Fun : IType, IState
     {
-        public static Fun Of(IState returnType, IState argType)
+        public static Fun Of(IState[] argTypes, IState returnType)
         {
+            SolvingNode[] argNodes = new SolvingNode[argTypes.Length];
+            SolvingNode retNode = null;
+
+            if (returnType is IType rt)
+                retNode = SolvingNode.CreateTypeNode(rt);
+            else if (returnType is RefTo retRef)
+                retNode = retRef.Node;
+            else
+                throw new InvalidOperationException();
+
+            for (int i = 0; i < argTypes.Length; i++)
+            {
+                if (argTypes[i] is IType at)
+                    argNodes[i] = SolvingNode.CreateTypeNode(at);
+                else if (argTypes[i] is RefTo aRef)
+                    argNodes[i] = aRef.Node;
+                else
+                    throw new InvalidOperationException();
+            }
+            
+
+            return new Fun(argNodes,retNode);
+        }
+        public static Fun Of(IState argType,IState returnType)
+        {
+            return Of(new[] { argType },returnType );
             SolvingNode argNode = null;
             SolvingNode retNode = null;
 
             if (returnType is IType rt)
                 retNode = SolvingNode.CreateTypeNode(rt);
-            else if(returnType is RefTo retRef)
+            else if(returnType is RefTo retRef) 
                 retNode = retRef.Node;
             else
                 throw new InvalidOperationException();
@@ -23,62 +50,81 @@ namespace nfun.Ti4
             else
                 throw new InvalidOperationException();
 
-            return new Fun(argNode, retNode);
+            return Of(argNode, retNode);
         }
-        public static Fun Of(IType retType, IType argType)
+        public static Fun Of(IType[] argTypes,IType retType)
         {
             return new Fun(
-                argNode:    SolvingNode.CreateTypeNode(argType),    
+                argNodes: argTypes.Select(SolvingNode.CreateTypeNode).ToArray(),
                 retNode: SolvingNode.CreateTypeNode(retType));
         }
-        public static Fun Of(SolvingNode returnNode, SolvingNode argNode) 
-            => new Fun(argNode, returnNode);
+        /*
+        public static Fun Of(IType retType, IType argType)
+            => Of(retType, new[] {argType});
+            */
+        public static Fun Of(SolvingNode[] argNodes,SolvingNode returnNode)
+            => new Fun(argNodes,returnNode);
 
-        private Fun(SolvingNode argNode, SolvingNode retNode)
+        public static Fun Of(SolvingNode argNode,SolvingNode returnNode) 
+            => new Fun(new []{argNode},returnNode);
+
+        private Fun(SolvingNode[] argNodes,SolvingNode retNode)
         {
-            ArgNode = argNode;
+            ArgNodes = argNodes;
             RetNode = retNode;
         }
 
-        public object ReturnType => RetNode.State;
-        public object ArgType => ArgNode.State;
-
+        public IState ReturnType => RetNode.State;
+        public IState GetArgType(int index) => ArgNodes[index].State;
         public SolvingNode RetNode { get; }
-        public SolvingNode ArgNode { get; }
-
-        public bool IsSolved => RetNode.IsSolved && ArgNode.IsSolved;
+        public SolvingNode[] ArgNodes { get; }
+        public int ArgsCount => ArgNodes.Length;
+        public bool IsSolved => RetNode.IsSolved && ArgNodes.All(n=>n.IsSolved);
         public IType GetLastCommonAncestorOrNull(IType otherType)
         {
             var funType = otherType as Fun;
             
             if (funType == null)
                 return Primitive.Any;
-            
-            if(!(ReturnType is IType returnType) || !(ArgType is IType argType))
+
+            if (funType.ArgsCount != ArgsCount)
+                return Primitive.Any;
+
+            if (!(ReturnType is IType returnType))
                 return null;
-            if (!(funType.ReturnType is IType returnTypeB) || !(funType.ArgType is IType argTypeB))
+            if (!(funType.ReturnType is IType returnTypeB))
                 return null;
             if (!returnType.IsSolved || !returnTypeB.IsSolved)
                 return null;
-            if (!argType.IsSolved || !argTypeB.IsSolved)
-                return null;
-
+            
             var returnAnc = returnType.GetLastCommonAncestorOrNull(returnTypeB);
 
-            if(argType.Equals(argTypeB))
-                return Fun.Of(
-                    retType: returnAnc, 
-                    argType:    argType);
+            IType[] argTypes = new IType[ArgsCount];
 
-            if (argType is Primitive primitiveA && argTypeB is Primitive primitiveB)
+            for (int i = 0; i < ArgsCount; i++)
             {
-                var argDesc = primitiveA.GetFirstCommonDescendantOrNull(primitiveB);
-                if (argDesc != null) 
-                    return Of(returnAnc, argDesc);
-            }
+                var aArg = GetArgType(i);
+                var bArg = funType.GetArgType(i);
+                if (!(aArg is IType typeA && bArg is IType typeB))
+                    return null;
 
-            //todo не рассмотрен случай для поиска общих наследников для непримитивных типов
-            return null;
+
+                if (!(typeA.IsSolved && typeB.IsSolved))
+                    return null;
+
+                if(typeA.Equals(typeB))
+                        argTypes[i] = typeA;
+                else if (aArg is Primitive primitiveA && bArg is Primitive primitiveB)
+                {
+                    var argDesc = primitiveA.GetFirstCommonDescendantOrNull(primitiveB);
+                    if (argDesc == null)
+                        return null;
+                    argTypes[i] = argDesc;
+                }
+                else return null;
+            }
+            return Of(retType: returnAnc, argTypes: argTypes);
+
         }
 
         public bool CanBeImplicitlyConvertedTo(Primitive type) 
@@ -88,9 +134,24 @@ namespace nfun.Ti4
         {
             if (!(obj is Fun fun))
                 return false;
-            return fun.ArgType.Equals(ArgType) && fun.ReturnType.Equals(ReturnType);
+            if(fun.ArgsCount != ArgsCount)
+                return false;
+
+            for (int i = 0; i < ArgsCount; i++)
+            {
+                if (!fun.GetArgType(i).Equals(GetArgType(i)))
+                    return false;
+            }
+
+            return fun.ReturnType.Equals(ReturnType);
         }
 
-        public override string ToString() => $"({ArgType}->{ReturnType})";
+        public override string ToString()
+        {
+            if(ArgsCount==1)
+                return $"({GetArgType(0)}->{ReturnType})";
+            return $"(({string.Join(",", ArgNodes.Select(a=>a.State))})->{ReturnType})";
+
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace nfun.Ti4
 
         public SolvingNode GetVariableNode(string variableName) =>
             NamedNodes.First(n => n.Name == "T" + variableName);
-        public object GetVariable(string variableName) =>
+        public IState GetVariable(string variableName) =>
             NamedNodes.First(n => n.Name == "T" + variableName).State;
         public SolvingNode GetSyntaxNode(int syntaxNode) =>
             SyntaxNodes.First(n => n.Name == syntaxNode.ToString());
