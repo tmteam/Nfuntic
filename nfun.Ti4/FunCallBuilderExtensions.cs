@@ -138,5 +138,29 @@ namespace nfun.Ti4
                 argType: inNode), 
                 Array.Of(outNode)}, new []{arrId,funId, resultId});
         }
+        public static void SetReduceCall(this GraphBuilder graph, int arrId, int funId, int returnId)
+        {
+            var generic = graph.InitializeVarNode();
+
+            graph.SetCall(new IState[]
+            {
+                Array.Of(generic),
+                Fun.Of(new[] {generic, generic}, generic),
+                generic
+            }, new[] { arrId, funId, returnId });
+        }
+
+        public static void SetFoldCall(this GraphBuilder graph, int arrId, int funId, int returnId)
+        {
+            var inT = graph.InitializeVarNode();
+            var outT = graph.InitializeVarNode();
+
+            graph.SetCall(new IState[]
+            {
+                Array.Of(inT),
+                Fun.Of(new[] {outT,inT}, outT),
+                outT
+            }, new[] { arrId, funId, returnId });
+        }
     }
 }

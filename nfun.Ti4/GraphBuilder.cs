@@ -90,15 +90,12 @@ namespace nfun.Ti4
         public void CreateLambda(int returnId, int lambdaId,IType returnType, params string[] varNames)
         {
             var args = varNames.Select(GetNamedNode).ToArray();
-            var ret = GetOrCreateNode(returnId);
-            var ancNode = CreateVarType(returnType);
-            ret.Ancestors.Add(ancNode);
-            
-            SetOrCreateLambda(lambdaId, args, ret);
+            var exprId = GetOrCreateNode(returnId);
+            var returnTypeNode = CreateVarType(returnType);
+            exprId.Ancestors.Add(returnTypeNode);
+            //expr<=returnType<= ...
+            SetOrCreateLambda(lambdaId, args, returnTypeNode);
         }
-
-
-
 
         public void SetArrayInit(int resultIds, params int[] elementIds)
         {
@@ -137,8 +134,9 @@ namespace nfun.Ti4
                     }
                     case Fun fun:
                     {
-                        //todo Upcast support
-                        GetOrCreateFunNode(argId, fun);
+                        var node = GetOrCreateNode(argId);
+                        var ancestor = CreateVarType(fun);
+                        ancestor.BecomeAncestorFor(node);
                         break;
                     }
                     case RefTo refTo:

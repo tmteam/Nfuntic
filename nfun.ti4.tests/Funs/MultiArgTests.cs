@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using nfun.Ti4;
 using NUnit.Framework;
+using Array = nfun.Ti4.Array;
 
 namespace nfun.ti4.tests.Funs
 {
@@ -19,7 +21,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetVar("lb", 2);
             graph.SetArith(1,2,3);
             graph.CreateLambda(3, 4, "la","lb");
-            SetReduceCall(graph, 0, 4, 5);
+            graph.SetReduceCall(0, 4, 5);
             graph.SetDef("y", 5);
 
             var result = graph.Solve();
@@ -43,7 +45,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetVar("lb", 2);
             graph.SetArith(1, 2, 3);
             graph.CreateLambda(3, 4, Primitive.I64, "la", "lb");
-            SetReduceCall(graph, 0, 4, 5);
+            graph.SetReduceCall(0, 4, 5);
             graph.SetDef("y", 5);
 
             var result = graph.Solve();
@@ -70,7 +72,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetVar("lb", 2);
             graph.SetArith(1, 2, 3);
             graph.CreateLambda(3, 4, "la", "lb");
-            SetReduceCall(graph, 0, 4, 5);
+            graph.SetReduceCall(0, 4, 5);
             graph.SetVarType("y", Primitive.U32);
             graph.SetDef("y", 5);
 
@@ -96,7 +98,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetVar("lb", 2);
             graph.SetArith(1, 2, 3);
             graph.CreateLambda(3, 4, "la", "lb");
-            SetReduceCall(graph, 0, 4, 5);
+            graph.SetReduceCall(0, 4, 5);
             graph.SetDef("y", 5);
 
             var result = graph.Solve();
@@ -110,6 +112,7 @@ namespace nfun.ti4.tests.Funs
 
 
         [Test]
+        [Ignore("Input variable generic")]
         public void GenericFold_AllIsNan()
         {
             //      6  0  5      1  4    3   2
@@ -122,7 +125,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetCall(new []{Primitive.Real, Primitive.Bool},new []{2,3});
             graph.SetBoolCall(1,3,4);
             graph.CreateLambda(4, 5, "la", "lb");
-            SetFoldCall(graph, 0, 5, 6);
+            graph.SetFoldCall(0, 5, 6);
             var result = graph.Solve();
 
             result.AssertNoGenerics();
@@ -134,8 +137,8 @@ namespace nfun.ti4.tests.Funs
         [Test]
         public void Fold_ConcreteLambda_GetSum()
         {
-            //        5  0  4              132
-            //y = reduce(x, f(a,b:i32):i64=a+b)
+            //         5  0  4              132
+            //y = fold(x, f(a,b:i32):i64=a+b)
             var graph = new GraphBuilder();
 
             graph.SetVar("x", 0);
@@ -144,7 +147,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetVar("lb", 2);
             graph.SetArith(1, 2, 3);
             graph.CreateLambda(3, 4, Primitive.I64, "la", "lb");
-            SetReduceCall(graph, 0, 4, 5);
+            graph.SetFoldCall( 0, 4, 5);
             graph.SetDef("y", 5);
 
             var result = graph.Solve();
@@ -156,29 +159,32 @@ namespace nfun.ti4.tests.Funs
             result.AssertNamed(Array.Of(Primitive.I32), "x");
             result.AssertNode(Fun.Of(new[] { Primitive.I64, Primitive.I32}, Primitive.I64), 4);
         }
-        private static void SetReduceCall(GraphBuilder graph, int arrId, int funId, int returnId )
-        {
-            var generic = graph.InitializeVarNode();
 
-            graph.SetCall(new IState[]
+        [Test]
+        public void Reduce_GetSumWithImpossibleTypes_throws()
+        {
+            //        5  0  4              132
+            //y = reduce(x, f(a,b:i32):i64=a+b)
+            var graph = new GraphBuilder();
+
+            graph.SetVar("x", 0);
+            graph.SetVar("la", 1);
+            graph.SetVarType("lb", Primitive.I32);
+            graph.SetVar("lb", 2);
+            graph.SetArith(1, 2, 3);
+            try
             {
-                Array.Of(generic),
-                Fun.Of(new[] {generic, generic}, generic),
-                generic
-            }, new []{arrId, funId, returnId});
+                graph.CreateLambda(3, 4, Primitive.I64, "la", "lb");
+                graph.SetReduceCall(0, 4, 5);
+                graph.SetDef("y", 5);
+                graph.Solve();
+                Assert.Fail("Impossible equation solved");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
-        private static void SetFoldCall(GraphBuilder graph, int arrId, int funId, int returnId)
-        {
-            var inT = graph.InitializeVarNode();
-            var outT = graph.InitializeVarNode();
-
-            graph.SetCall(new IState[]
-            {
-                Array.Of(inT),
-                Fun.Of(new[] {outT,inT}, outT),
-                outT
-            }, new[] { arrId, funId, returnId });
-        }
     }
 }

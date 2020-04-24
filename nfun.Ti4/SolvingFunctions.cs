@@ -226,7 +226,7 @@ namespace nfun.Ti4
 
                         funDesc.RetNode.Ancestors.Add(fun.RetNode);
                         for (int i = 0; i < funDesc.ArgsCount; i++)
-                            funDesc.ArgNodes[i].Ancestors.Add(fun.ArgNodes[i]);
+                            fun.ArgNodes[i].Ancestors.Add(funDesc.ArgNodes[i]);
 
                         return ancestor.State;
                     }

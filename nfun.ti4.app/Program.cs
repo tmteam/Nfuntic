@@ -12,10 +12,28 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args)
         {
-            SumGenericEx();
+            LambdaEx();
             Console.ReadLine();
         }
 
+        static void LambdaEx()
+        {
+            //        5  0  4              132
+            //y = reduce(x, f(a,b:i32):i64=a+b)
+            var graph = new GraphBuilder();
+
+            graph.SetVar("x", 0);
+            graph.SetVar("la", 1);
+            graph.SetVarType("lb", Primitive.I32);
+            graph.SetVar("lb", 2);
+            graph.SetArith(1, 2, 3);
+            graph.CreateLambda(3, 4, Primitive.I64, "la", "lb");
+            graph.SetReduceCall(0, 4, 5);
+            graph.SetDef("y", 5);
+
+            var result = graph.Solve();
+
+        }
         static void SumGenericEx()
         {
             //     3  2 0,  1  

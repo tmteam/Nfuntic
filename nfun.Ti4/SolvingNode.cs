@@ -73,7 +73,8 @@ namespace nfun.Ti4
                 Console.Write(constrains);
             else if (State is Array array)
                 Console.Write("arr("+ array.ElementNode.Name+")");
-
+            else if (State is Fun fun)
+                Console.Write($"({string.Join(",", fun.ArgNodes.Select(a => a.Name))})->{fun.RetNode.Name}");
             if (Ancestors.Any()) 
                 Console.Write( "  <=" + string.Join(",", Ancestors.Select(a=>a.Name)));
 

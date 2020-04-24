@@ -50,6 +50,30 @@ namespace nfun.ti4.tests.Funs
             result.AssertNode(Fun.Of(Primitive.I32, Primitive.Bool), 5);
         }
         [Test]
+        public void InvalidLambdaReturn_Throws()
+        {
+            //       3  0  2        1
+            //y = First(a, f(x):any=x)
+            var graph = new GraphBuilder();
+            graph.SetVar("a", 0);
+            graph.SetVar("2lx", 1);
+            graph.CreateLambda(1, 2, Primitive.Any, "2lx");
+
+            try
+            {
+                graph.SetGetFirst(0, 2, 3);
+                graph.SetDef("y", 3);
+                graph.Solve();
+                Assert.Fail("Impossible equation solved");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
+
+        }
+        [Test]
         public void StrictArrayAndLambdaArg()
         {
             //       6  1 0         5   2 4 3
