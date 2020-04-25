@@ -122,7 +122,7 @@ namespace nfun.ti4.tests.Funs
         }
 
         [Test]
-        [Ignore("Upcast for complex types")]
+        //[Ignore("Upcast for complex types")]
         public void ArgUpcastStrictArrayArg()
         {
             //       6  1 0     5       2 4 3
@@ -139,7 +139,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetDef("y", 6);
             var result = graph.Solve();
             result.AssertNoGenerics();
-            result.AssertNamed(Primitive.Real, "x");
+            result.AssertNamed(Primitive.Real, "lx");
             result.AssertNode(Ti4.Fun.Of(Primitive.Real, Primitive.Bool), 5);
         }
         [Test]
