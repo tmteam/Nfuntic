@@ -267,101 +267,11 @@ namespace nfun.ti4.tests
             result.AssertNoGenerics();
             result.AssertNamed(Primitive.I64, "a");
         }
-        [Test]
-        public void OutEqualsToItself_SingleGenericFound()
-        {
-            //    0
-            //y = y
-            var graph = new GraphBuilder();
-            graph.SetVar("y",0);
-            graph.SetDef("y",0);
-            var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(null, null, false);
-            result.AssertAreGenerics(generic,"y");
-        }
+        
 
-        [Test]
-        public void OutEqualsToItself_TypeSpecified_EquationSolved()
-        {
-            //y:bool; y = y
-            var graph = new GraphBuilder();
-            graph.SetVarType("y", Primitive.Bool);
-            graph.SetVar("y", 0);
-            graph.SetDef("y", 0);
-            var result = graph.Solve();
-            result.AssertNoGenerics();
-            result.AssertNamed(Primitive.Bool, "y");
-        }
+        
 
-        [Test]
-        public void OutEqualsToItself_TypeLimitedAfter_EquationSolved()
-        {
-            //y = y; y =1
-            var graph = new GraphBuilder();
-            graph.SetVar("y", 0);
-            graph.SetDef("y", 0);
-            graph.SetIntConst(1, Primitive.U8);
-            graph.SetDef("y", 1);
-
-            var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.Real);
-            result.AssertAreGenerics(generic,"y");
-        }
-        [Test]
-        public void OutEqualsToItself_TypeLimitedBefore_EquationSolved()
-        {
-            //y = 1; y =y
-            var graph = new GraphBuilder();
-            graph.SetIntConst(0, Primitive.U8);
-            graph.SetDef("y", 0);
-            graph.SetVar("y", 1);
-            graph.SetDef("y", 1);
-
-            var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(Primitive.U8, Primitive.Real);
-            result.AssertAreGenerics(generic, "y");
-        }
-
-        [Test]
-        public void CircularDependencies_SingleGenericFound()
-        {
-            //    0      1      2
-            //a = b; b = c; c = a
-            var graph = new GraphBuilder();
-            graph.SetVar("b", 0);
-            graph.SetDef("a", 0);
-
-            graph.SetVar("c", 1);
-            graph.SetDef("b", 1);
-
-            graph.SetVar("a", 2);
-            graph.SetDef("c", 2);
-
-            var result = graph.Solve();
-            var generic = result.AssertAndGetSingleGeneric(null, null);
-            result.AssertAreGenerics(generic, "a","b","c");
-        }
-
-        [Test]
-        public void CircularDependencies_AllTypesSpecified_EquationSolved()
-        {
-            //    0      1      2
-            //c:bool; a = b; b = c; c = a
-            var graph = new GraphBuilder();
-            graph.SetVarType("c",Primitive.Bool);
-            graph.SetVar("b", 0);
-            graph.SetDef("a", 0);
-
-            graph.SetVar("c", 1);
-            graph.SetDef("b", 1);
-
-            graph.SetVar("a", 2);
-            graph.SetDef("c", 2);
-
-            var result = graph.Solve();
-            result.AssertNoGenerics();
-            result.AssertNamed(Primitive.Bool,"a","b","c");
-        }
+        
 
     }
 }

@@ -179,7 +179,8 @@ namespace nfun.Ti4
                 var graph = ConvertToArrayGraph(allNodes);
 
                 var sorted = GraphTools.SortTopology(graph);
-                var result = sorted.NodeNames.Select(n => allNodes[n]).Reverse().ToArray();
+                var result = sorted.NodeNames.Select(n => allNodes[n.To]).Reverse().ToArray();
+                
                 if (sorted.HasCycle)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -207,7 +208,7 @@ namespace nfun.Ti4
             }
         }
 
-        private static int[][] ConvertToArrayGraph(SolvingNode[] allNodes)
+        private static Edge[][] ConvertToArrayGraph(SolvingNode[] allNodes)
         {
             var graph = new LinkedList<int>[allNodes.Length];
             for (int i = 0; i < allNodes.Length; i++) 
@@ -231,7 +232,9 @@ namespace nfun.Ti4
                 }
             }
             
-            return graph.Select(g=>g?.ToArray()).ToArray();
+            return graph.Select(
+                    g=>g?.Select(i=>new Edge(i, EdgeType.Ancestor)).ToArray()
+                    ).ToArray();
 
             void PutEdges(int targetNode, SolvingNode source)
             {

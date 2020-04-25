@@ -162,5 +162,11 @@ namespace nfun.Ti4
                 outT
             }, new[] { arrId, funId, returnId });
         }
+
+        public static void SetReverse(this GraphBuilder graph, int arrId, int resultId)
+        {
+            var t = graph.InitializeVarNode();
+            graph.SetCall(new[] { Array.Of(t), Array.Of(t) }, new[] { arrId, resultId });
+        }
     }
 }
