@@ -12,7 +12,7 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args)
         {
-            ReqDef4();
+            ReqDef();
             Console.ReadLine();
         }
 
@@ -66,15 +66,8 @@ namespace nfun.ti4.app
             graph.SetVar("x", 2);
             graph.SetArrayInit(3, 2);
             graph.SetArrayInit(4, 1, 3);
-            try
-            {
-                graph.SetDef("x", 4);
-                graph.Solve();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            graph.SetDef("x", 4);
+            graph.Solve();
         }
         static void LambdaEx()
         {

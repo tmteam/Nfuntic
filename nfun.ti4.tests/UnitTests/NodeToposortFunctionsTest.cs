@@ -9,6 +9,7 @@ namespace nfun.ti4.tests.UnitTests
 {
     class NodeToposortFunctionsTest
     {
+        /*
         [Test]
         public void OneNodeReferencesOther_noCycleFound()
         {
@@ -53,6 +54,6 @@ namespace nfun.ti4.tests.UnitTests
             var sorted = GraphTools.SortTopology(graph);
             Assert.IsTrue(sorted.HasCycle);
             Assert.AreEqual(3, sorted.NodeNames.Count);
-        }
+        }*/
     }
 }

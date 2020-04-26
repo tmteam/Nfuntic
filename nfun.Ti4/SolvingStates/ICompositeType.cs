@@ -2,8 +2,9 @@
 
 namespace nfun.Ti4
 {
-    interface ICompositeType : IType
+    public interface ICompositeType : IType
     {
+        ICompositeType GetNonReferenced();
         IEnumerable<SolvingNode> Members { get; }
     }
 }

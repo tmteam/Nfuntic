@@ -50,11 +50,11 @@ namespace nfun.Ti4.Toposort
 
             private bool RecSort(Edge edge, int from = -1)
             {
-                Console.Write($"S: {from} : {edge} ");
+                //Console.Write($"S: {from} : {edge} ");
                 var node = edge.To;
                 if (_graph[node] == null)
                 {
-                    Console.Write($"  --null\r\n");
+                  //  Console.Write($"  --null\r\n");
                     _nodeStates[node] = NodeState.Checked;
                     return true;
                 }
@@ -63,16 +63,16 @@ namespace nfun.Ti4.Toposort
                 {
                     case NodeState.Checked:
                     {
-                        Console.Write($"  --Checked\r\n");
+                       // Console.Write($"  --Checked\r\n");
                         return true;}
                     case NodeState.Checking:
                     {
-                        Console.Write($"  --Cycle\r\n");
+                        //Console.Write($"  --Cycle\r\n");
                         return false;
                     }
                     default:
                         _nodeStates[node] = NodeState.Checking;
-                        Console.Write($"--Checking\r\n");
+                        //Console.Write($"--Checking\r\n");
 
                         var hasSelfCycle = false;
                         for (int child = 0; child < _graph[node].Length; child++)

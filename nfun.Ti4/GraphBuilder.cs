@@ -177,34 +177,37 @@ namespace nfun.Ti4
                     throw new InvalidOperationException("Infinite cycle detected. Types cannot be solved");
                 iteration++;
 
-                var (result, sorted) = NodeToposortFunctions.Toposort(allNodes);
-                
-                if (sorted.HasCycle)
+                var result = NodeToposortFunctions.Toposort(allNodes);
+
+                if (result.Status == SortStatus.MemebershipCycle)
+                    throw new InvalidOperationException("Reqursive type defenition");
+
+                else if (result.Status == SortStatus.AncestorCycle)
                 {
-                    if(sorted.NodeNames.Any(n=>n.Type== EdgeType.Member))
-                        throw new InvalidOperationException("Reqursive type defenition");
-                    
+                    var cycle = result.Order;
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"Found cycle: ");
                     Console.ResetColor();
-                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
+                    Console.WriteLine(string.Join("->", cycle.Select(r => r.Name)));
 
                     //main node. every other node has to reference on it
-                    SolvingFunctions.MergeCycle(result);
+                    SolvingFunctions.MergeCycle(cycle);
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Cycle normalization results: ");
                     Console.ResetColor();
-                    foreach (var solvingNode in result)
+                    foreach (var solvingNode in cycle)
                         solvingNode.PrintToConsole();
                 }
-                else
+                else if (result.Status == SortStatus.Sorted)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Toposort results: ");
                     Console.ResetColor();
-                    Console.WriteLine(string.Join("->", result.Select(r => r.Name)));
-                    return result;
+                    Console.WriteLine(string.Join("->", result.Order.Select(r => r.Name)));
+                    Console.WriteLine("Refs:" + string.Join(",", result.Refs.Select(r => r.Name)));
+
+                    return result.Order.Union(result.Refs).ToArray();
                 }
             }
         }

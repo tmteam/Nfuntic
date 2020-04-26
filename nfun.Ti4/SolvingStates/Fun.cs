@@ -31,41 +31,17 @@ namespace nfun.Ti4
 
             return new Fun(argNodes,retNode);
         }
-        public static Fun Of(IState argType,IState returnType)
-        {
-            return Of(new[] { argType },returnType );
-            SolvingNode argNode = null;
-            SolvingNode retNode = null;
+        public static Fun Of(IState argType,IState returnType) 
+            => Of(new[] { argType },returnType );
 
-            if (returnType is IType rt)
-                retNode = SolvingNode.CreateTypeNode(rt);
-            else if(returnType is RefTo retRef) 
-                retNode = retRef.Node;
-            else
-                throw new InvalidOperationException();
-
-            if (argType is IType at)
-                argNode = SolvingNode.CreateTypeNode(at);
-            else if (argType is RefTo aRef)
-                argNode = aRef.Node;
-            else
-                throw new InvalidOperationException();
-
-            return Of(argNode, retNode);
-        }
         public static Fun Of(IType[] argTypes,IType retType)
         {
             return new Fun(
                 argNodes: argTypes.Select(SolvingNode.CreateTypeNode).ToArray(),
                 retNode: SolvingNode.CreateTypeNode(retType));
         }
-        /*
-        public static Fun Of(IType retType, IType argType)
-            => Of(retType, new[] {argType});
-            */
         public static Fun Of(SolvingNode[] argNodes,SolvingNode returnNode)
             => new Fun(argNodes,returnNode);
-
         public static Fun Of(SolvingNode argNode,SolvingNode returnNode) 
             => new Fun(new []{argNode},returnNode);
 
@@ -146,6 +122,10 @@ namespace nfun.Ti4
 
             return fun.ReturnType.Equals(ReturnType);
         }
+
+        public ICompositeType GetNonReferenced() 
+            => new Fun(ArgNodes.Select(a=>a.GetNonReference()).ToArray(), RetNode.GetNonReference());
+
         public IEnumerable<SolvingNode> Members => ArgNodes.Append(RetNode);
 
         public override string ToString()

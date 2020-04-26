@@ -67,6 +67,9 @@ namespace nfun.Ti4
             return false;
         }
 
+        public ICompositeType GetNonReferenced() 
+            => Array.Of(ElementNode.GetNonReference());
+
         public IEnumerable<SolvingNode> Members => new[] {ElementNode};
     }
 }

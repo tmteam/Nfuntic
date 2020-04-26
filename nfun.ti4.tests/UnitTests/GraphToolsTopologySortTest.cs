@@ -173,7 +173,7 @@ namespace nfun.ti4.tests.UnitTests
             AssertHasRoute(new[] { 0, 1, 2 }, res);
         }
         #endregion
-
+        /*
         [Test]
         public void ReferenceCycle_cycleFound()
         {
@@ -235,11 +235,11 @@ namespace nfun.ti4.tests.UnitTests
         public void ComplexSelfMemberCycle_CycleFound()
         {
 
-            /*    |---------------------|
-             *    2==8==7-->9-->4::>6::>2
-             *          |   |==3
-             *   5::>0==|   |==1
-             */
+           //   |---------------------|
+           //   2==8==7-->9-->4::>6::>2
+           //         |   |==3
+           //  5::>0==|   |==1
+           //
             var graph = new[]
             {
                 EqualsTo(7),
@@ -260,9 +260,9 @@ namespace nfun.ti4.tests.UnitTests
         [Test]
         public void ComplexSelfMemberCycleSimplified_CycleFound()
         {
-            /*
-             *    2==8==7-->9-->4::>6::>2
-             */
+            //
+            //   2==8==7-->9-->4::>6::>2
+            //
             
             var graph = new[]
             {
@@ -279,7 +279,7 @@ namespace nfun.ti4.tests.UnitTests
             };
             var res = GraphTools.SortTopology(graph);
             AssertHasCycle(new[] { 2, 6, 4, 9, 7, 8 }, res);
-        }
+        }*/
 
         private Edge[] NoParents => new Edge[0];
         private Edge[] From(params int[] routes) 
