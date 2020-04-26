@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using nfun.Ti4;
+using nfun.Ti4.Toposort;
 using NUnit.Framework;
 
 namespace nfun.ti4.tests.UnitTests

@@ -92,7 +92,8 @@ namespace nfun.Ti4
 
         public static void MergeCycle(SolvingNode[] cycleRoute)
         {
-            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) ?? cycleRoute.First();
+            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) 
+                       ?? cycleRoute.First();
             foreach (var current in cycleRoute)
             {
                 if (current == main)
@@ -106,15 +107,17 @@ namespace nfun.Ti4
                 else
                 {
                     //merge main and current
-                    main.Ancestors.AddRange(current.Ancestors);
                     main.State = GetMergedState(main.State, current.State);
                 }
+
+                main.Ancestors.AddRange(current.Ancestors);
+                current.Ancestors.Clear();
 
                 if (!current.IsSolved)
                     current.State = new RefTo(main);
             }
 
-            var newAncestors = cycleRoute
+            var newAncestors = main.Ancestors.Distinct()
                 .SelectMany(r => r.Ancestors)
                 .Where(r => !cycleRoute.Contains(r))
                 .Distinct()

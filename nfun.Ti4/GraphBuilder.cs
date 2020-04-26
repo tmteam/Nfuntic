@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using nfun.Ti4.Toposort;
 
 namespace nfun.Ti4
 {
@@ -173,13 +174,10 @@ namespace nfun.Ti4
 
                 var allNodes = _syntaxNodes.Concat(_variables.Values).Concat(_typeVariables).ToArray();
                 if (iteration > allNodes.Length * allNodes.Length)
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Infinite cycle detected. Types cannot be solved");
                 iteration++;
 
-                var graph = ConvertToArrayGraph(allNodes);
-
-                var sorted = GraphTools.SortTopology(graph);
-                var result = sorted.NodeNames.Select(n => allNodes[n.To]).Reverse().ToArray();
+                var (result, sorted) = NodeToposortFunctions.Toposort(allNodes);
                 
                 if (sorted.HasCycle)
                 {
@@ -208,51 +206,6 @@ namespace nfun.Ti4
             }
         }
 
-        private static Edge[][] ConvertToArrayGraph(SolvingNode[] allNodes)
-        {
-            var graph = new LinkedList<int>[allNodes.Length];
-            for (int i = 0; i < allNodes.Length; i++) 
-                allNodes[i].GraphId = i;
-
-            for (int i = 0; i < allNodes.Length; i++)
-            {
-                var node = allNodes[i];
-                   
-                
-                if (node.MemberOf.Any())
-                {
-                    foreach (var arrayNode in node.MemberOf)
-                    {
-                        PutEdges(arrayNode.GraphId, node);
-                    }
-                }
-                else
-                {
-                    PutEdges(i,node);
-                }
-            }
-            
-            return graph.Select(
-                    g=>g?.Select(i=>new Edge(i, EdgeType.Ancestor)).ToArray()
-                    ).ToArray();
-
-            void PutEdges(int targetNode, SolvingNode source)
-            {
-                if(graph[targetNode]==null)
-                    graph[targetNode] = new LinkedList<int>();
-                foreach (var anc in source.Ancestors)
-                {
-                    graph[targetNode].AddLast(anc.GraphId);
-                }
-                if(source.State is RefTo reference)
-                {
-                    graph[targetNode].AddLast(reference.Node.GraphId);
-                }
-            }
-
-        }
-
-
         public void PrintTrace()
         {
             var alreadyPrinted = new HashSet<SolvingNode>();
@@ -274,7 +227,6 @@ namespace nfun.Ti4
             foreach (var node in allNodes)
                 ReqPrintNode(node);
         }
-      
 
         public FinalizationResults Solve()
         {

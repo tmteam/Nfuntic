@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace nfun.Ti4
+namespace nfun.Ti4.Toposort
 {
     enum NodeState
     {
@@ -9,56 +8,8 @@ namespace nfun.Ti4
         Checked,
         Checking,
     }
-    public struct Edge
-    {
-        public readonly int To;
-        public readonly EdgeType Type;
 
-        public Edge(int to, EdgeType type)
-        {
-            To = to;
-            Type = type;
-        }
-
-        public override string ToString()
-        {
-            switch (Type)
-            {
-                case EdgeType.Root:     return "!!!" + To;
-                case EdgeType.Ancestor: return "::>"+To;
-                case EdgeType.Equal:    return "<=>"+To;
-                case EdgeType.MemberOf: return "-->" + To;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Edge e))
-                return false;
-            return Equals(e);
-        }
-
-        public bool Equals(Edge other) 
-            => To == other.To && Type == other.Type;
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (To * 397) ^ (int) Type;
-            }
-        }
-    }
-
-    public enum EdgeType
-    {
-        Root,
-        Ancestor,
-        Equal,
-        MemberOf
-    }
+    
     public static class GraphTools
     {
 
@@ -111,13 +62,29 @@ namespace nfun.Ti4
                     case NodeState.Checking: return false;
                     default:
                         _nodeStates[node] = NodeState.Checking;
+                        
+                        var hasSelfCycle = false;
                         for (int child = 0; child < _graph[node].Length; child++)
                         {
                             var to = _graph[node][child];
-                            if (from == to.To && edge.Type== EdgeType.Equal)
-                                continue; //reference. Skip route back
 
-                            if (!RecSort(edge: to, from: node))
+                            //if node a equals to b, then b should ref to a.
+                            //it is not a cycle. Skip it.
+                            //But we can do it only once.
+                            if (from == to.To
+                                && edge.Type == EdgeType.Equal
+                                && to.Type == EdgeType.Equal)
+                            {
+                                if (!hasSelfCycle)
+                                {  
+                                    //Can skip only one back reference
+                                    //Second one is a cycle
+                                    hasSelfCycle = true;
+                                    continue; //skip edge
+                                }
+                            }
+
+                            if (!RecSort(edge: to, @from: node))
                             {
                                 _cycleRoute.Enqueue(_graph[node][child]);
                                 return false;
@@ -130,27 +97,6 @@ namespace nfun.Ti4
                         return true;
                 }
             }
-        }
-    }
-
-    public struct TopologySortResults
-    {
-        /// <summary>
-        /// Topological sort order if has no cycle
-        /// First cycle route otherwise
-        /// </summary>
-        public readonly IList<Edge> NodeNames;
-        public readonly bool HasCycle;
-        /// <summary>
-        /// List of recursive nodes or null if there are no one
-        /// </summary>
-        public readonly int[] RecursionsOrNull;
-
-        public TopologySortResults(IList<Edge> nodeNames, int[] recursionsOrNull, bool hasCycle)
-        {
-            NodeNames = nodeNames;
-            HasCycle = hasCycle;
-            RecursionsOrNull = recursionsOrNull;
         }
     }
 }
