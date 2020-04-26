@@ -12,10 +12,70 @@ namespace nfun.ti4.app
     {
         static void Main(string[] args)
         {
-            LambdaEx();
+            ReqDef4();
             Console.ReadLine();
         }
 
+        static void ReqDef3()
+        {
+            //    1 0              
+            //x = [ x]
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetArrayInit(1, 0);
+            graph.SetDef("x", 1);
+            graph.Solve();
+        }
+        static void ReqDef4()
+        {
+            //   2 1 0              
+            //x =[ [ x] ]
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetArrayInit(1, 0);
+            graph.SetArrayInit(2, 1);
+            graph.SetDef("x", 2);
+            graph.Solve();
+        }
+
+        static void ReqDef2()
+        {
+            //    2 0 1              
+            //x = [ x,x]
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetVar("x", 1);
+            graph.SetArrayInit(2, 0, 1);
+            try
+            {
+                graph.SetDef("x", 2);
+                graph.Solve();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        static void ReqDef()
+        {
+            //    4 1 0  3 2           
+            //x = [ [ a],[ x]]
+            var graph = new GraphBuilder();
+            graph.SetVar("a", 0);
+            graph.SetArrayInit(1, 0);
+            graph.SetVar("x", 2);
+            graph.SetArrayInit(3, 2);
+            graph.SetArrayInit(4, 1, 3);
+            try
+            {
+                graph.SetDef("x", 4);
+                graph.Solve();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
         static void LambdaEx()
         {
             //        5  0  4              132

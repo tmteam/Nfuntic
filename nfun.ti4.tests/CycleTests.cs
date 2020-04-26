@@ -260,9 +260,25 @@ namespace nfun.ti4.tests
                 Console.WriteLine(e);
             }
         }
-
         [Test]
-        [Ignore("Array def toposort")]
+        public void ArrayCycle_Solved()
+        {
+            //    4  2  0 1    3       
+            //x = [ get(x,0) , 1]
+            var graph = new GraphBuilder();
+            graph.SetVar("x", 0);
+            graph.SetIntConst(1, Primitive.U8);
+            graph.SetArrGetCall(0,1,2);
+            graph.SetIntConst(3, Primitive.U8);
+            graph.SetArrayInit(4,2, 3);
+            graph.SetDef("x", 4);
+            var res = graph.Solve();
+            //todo generic constants
+            //var t = res.AssertAndGetSingleArithGeneric();
+            //res.AssertNamed(Array.Of(t),"x");
+        }
+        [Test]
+      //  [Ignore("Array def toposort")]
         public void Array_ReqursiveDefenition_throws()
         {
             //    1 0              
@@ -283,7 +299,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        [Ignore("Array def toposort")]
+       // [Ignore("Array def toposort")]
         public void Array_TwinReqursiveDefenition_throws()
         {
             //    2 0 1              
@@ -303,10 +319,30 @@ namespace nfun.ti4.tests
                 Console.WriteLine(e);
             }
         }
-
+       [Test]
+       //[Ignore("Array def toposort")]
+       public void Array_ComplexReqursiveDefenition_throws()
+       {
+           //    2 1 0             
+           //x = [ [ x]]
+           var graph = new GraphBuilder();
+           graph.SetVar("x", 0);
+           graph.SetArrayInit(1, 0);
+           graph.SetArrayInit(2, 1);
+           try
+           {
+               graph.SetDef("x", 2);
+               graph.Solve();
+               Assert.Fail("Impossible equation solved");
+           }
+           catch (Exception e)
+           {
+               Console.WriteLine(e);
+           }
+       }
         [Test]
-        [Ignore("Array def toposort")]
-        public void Array_ComplexReqursiveDefenition_throws()
+        //[Ignore("Array def toposort")]
+        public void Array_ComplexReqursiveDefenition2_throws()
         {
             //    4 1 0  3 2           
             //x = [ [ a],[ x]]

@@ -216,6 +216,70 @@ namespace nfun.ti4.tests.UnitTests
             var res = GraphTools.SortTopology(graph);
             AssertHasRoute(new[] { 2,1,0}, res);
         }
+        [Test]
+        public void SimpleSelfMemberCycle_CycleFound()
+        {
+            var graph = new[]
+            {
+                EqualsTo(4),
+                EqualsTo(5),
+                From(3),
+                From(0),
+                new []{Edge.ReferenceTo(0), Edge.MemberOf(5)},
+                new []{Edge.ReferenceTo(1), Edge.MemberOf(2)},
+            };
+            var res = GraphTools.SortTopology(graph);
+            AssertHasCycle(new[] { 0, 3, 2, 5,4}, res);
+        }
+        [Test]
+        public void ComplexSelfMemberCycle_CycleFound()
+        {
+
+            /*    |---------------------|
+             *    2==8==7-->9-->4::>6::>2
+             *          |   |==3
+             *   5::>0==|   |==1
+             */
+            var graph = new[]
+            {
+                EqualsTo(7),
+                EqualsTo(9),
+                EqualsTo(8),
+                EqualsTo(9),
+                From(6),
+                From(0),
+                From(2),
+                new []{Edge.ReferenceTo(0), Edge.ReferenceTo(8), Edge.MemberOf(9)},
+                EqualsTo(2,7),
+                new []{Edge.ReferenceTo(1), Edge.ReferenceTo(3), Edge.MemberOf(4)}
+            };
+            var res = GraphTools.SortTopology(graph);
+            AssertHasCycle(new []{2,8,7,9,4,6}, res);
+        }
+
+        [Test]
+        public void ComplexSelfMemberCycleSimplified_CycleFound()
+        {
+            /*
+             *    2==8==7-->9-->4::>6::>2
+             */
+            
+            var graph = new[]
+            {
+                NoParents,
+                NoParents,
+                EqualsTo(8),
+                NoParents,
+                From(6),
+                NoParents,
+                From(2),
+                new []{Edge.ReferenceTo(8), Edge.MemberOf(9)},
+                EqualsTo(2,7),
+                new []{Edge.MemberOf(4)}
+            };
+            var res = GraphTools.SortTopology(graph);
+            AssertHasCycle(new[] { 2, 6, 4, 9, 7, 8 }, res);
+        }
 
         private Edge[] NoParents => new Edge[0];
         private Edge[] From(params int[] routes) 

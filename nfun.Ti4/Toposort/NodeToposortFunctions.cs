@@ -42,11 +42,22 @@ namespace nfun.Ti4.Toposort
                     graph[from].AddLast(Edge.ReferenceTo(to));
                     graph[to].AddLast(Edge.ReferenceTo(from));
                 }
+                else if (node.State is ICompositeType composite)
+                {
+                    foreach (var member in composite.Members)
+                    {
+                        if(member.GraphId<0)
+                            continue;
+                        var mfrom = member.GraphId;
+
+                        if (graph[mfrom] == null)
+                            graph[mfrom] = new LinkedList<Edge>();
+                        graph[mfrom].AddLast(Edge.MemberOf(from));
+                    }
+                }
             }
 
             return graph.Select(g => g?.ToArray()).ToArray();
-
-            
         }
     }
 }

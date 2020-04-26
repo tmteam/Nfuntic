@@ -610,6 +610,17 @@ namespace nfun.Ti4
 
                     Finalize((node.State as Array).ElementNode);
                 }
+                else if (node.State is Fun fun)
+                {
+                    if (fun.Members.Any(m => m.State is RefTo))
+                    {
+                        node.State = Fun.Of(
+                            fun.ArgNodes.Select(a => a.GetNonReference()).ToArray(),
+                            fun.RetNode.GetNonReference());
+                    }
+
+                    foreach (var member in fun.Members) Finalize(member);
+                }
             }
 
             foreach (var node in toposortedNodes)

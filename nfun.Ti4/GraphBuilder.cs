@@ -181,6 +181,9 @@ namespace nfun.Ti4
                 
                 if (sorted.HasCycle)
                 {
+                    if(sorted.NodeNames.Any(n=>n.Type== EdgeType.Member))
+                        throw new InvalidOperationException("Reqursive type defenition");
+                    
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"Found cycle: ");
                     Console.ResetColor();

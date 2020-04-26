@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace nfun.Ti4
 {
-    public class Array: IType, IState
+    public class Array: ICompositeType, IType, IState
     {
         public Array(SolvingNode elementNode)
         {
@@ -65,5 +66,7 @@ namespace nfun.Ti4
             }
             return false;
         }
+
+        public IEnumerable<SolvingNode> Members => new[] {ElementNode};
     }
 }

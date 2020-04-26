@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace nfun.Ti4
 {
-    public class Fun : IType, IState
+    public class Fun : ICompositeType, IType, IState
     {
         public static Fun Of(IState[] argTypes, IState returnType)
         {
@@ -145,6 +146,7 @@ namespace nfun.Ti4
 
             return fun.ReturnType.Equals(ReturnType);
         }
+        public IEnumerable<SolvingNode> Members => ArgNodes.Append(RetNode);
 
         public override string ToString()
         {
@@ -153,5 +155,6 @@ namespace nfun.Ti4
             return $"(({string.Join(",", ArgNodes.Select(a=>a.State))})->{ReturnType})";
 
         }
+
     }
 }
