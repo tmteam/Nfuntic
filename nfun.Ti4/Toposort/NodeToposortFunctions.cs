@@ -21,34 +21,18 @@ namespace nfun.Ti4.Toposort
             for (int i = 0; i < allNodes.Length; i++)
                 allNodes[i].GraphId = i;
 
-            for (int i = 0; i < allNodes.Length; i++)
+            for (int from = 0; from < allNodes.Length; from++)
             {
-                var node = allNodes[i];
-                if (node.MemberOf.Any())
-                {
-                    foreach (var arrayNode in node.MemberOf)
-                    {
-                        PutEdges(arrayNode.GraphId, node);
-                    }
-                }
-                else
-                {
-                    PutEdges(i, node);
-                }
-            }
+                var node = allNodes[@from];
 
-            return graph.Select(g => g?.ToArray()).ToArray();
-
-            void PutEdges(int @from, SolvingNode source)
-            {
                 if (graph[@from] == null)
                     graph[@from] = new LinkedList<Edge>();
 
-                foreach (var anc in source.Ancestors)
+                foreach (var anc in node.Ancestors)
                 {
                     graph[from].AddLast(Edge.AncestorTo(anc.GraphId));
                 }
-                if (source.State is RefTo reference)
+                if (node.State is RefTo reference)
                 {
                     var to = reference.Node.GraphId;
                     if (graph[to] == null)
@@ -59,6 +43,10 @@ namespace nfun.Ti4.Toposort
                     graph[to].AddLast(Edge.ReferenceTo(from));
                 }
             }
+
+            return graph.Select(g => g?.ToArray()).ToArray();
+
+            
         }
     }
 }
