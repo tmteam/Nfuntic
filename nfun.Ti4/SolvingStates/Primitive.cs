@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nfun.Ti4
+namespace NFun.Tic.SolvingStates
 {
     public enum PrimitiveTypeName
     {

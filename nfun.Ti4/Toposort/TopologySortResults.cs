@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace nfun.Ti4.Toposort
+namespace NFun.Tic.Toposort
 {
     public struct TopologySortResults
     {

@@ -1,7 +1,7 @@
-using nfun.Ti4;
+using NFun.Tic.SolvingStates;
 using NUnit.Framework;
 
-namespace nfun.ti4.tests.UnitTests
+namespace NFun.Tic.Tests.UnitTests
 {
     public class PrimitiveTypeTest
     {

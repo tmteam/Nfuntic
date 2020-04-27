@@ -1,6 +1,7 @@
 ﻿using System.Linq;
+using NFun.Tic.SolvingStates;
 
-namespace nfun.Ti4
+namespace NFun.Tic
 {
     public static class FunCallBuilderExtensions
     {

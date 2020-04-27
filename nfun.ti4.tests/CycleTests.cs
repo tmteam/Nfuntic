@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using nfun.Ti4;
+using NFun.Tic.SolvingStates;
 using NUnit.Framework;
-using Array = nfun.Ti4.Array;
+using Array = NFun.Tic.SolvingStates.Array;
 
-namespace nfun.ti4.tests
+namespace NFun.Tic.Tests
 {
     class CycleTests
     {

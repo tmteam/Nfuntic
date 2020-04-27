@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using nfun.Ti4;
+using NFun.Tic.SolvingStates;
 using NUnit.Framework;
-using Array = nfun.Ti4.Array;
+using Array = NFun.Tic.SolvingStates.Array;
 
-namespace nfun.ti4.tests.Funs
+namespace NFun.Tic.Tests.Funs
 {
     public class GetFirstTests
     {
@@ -92,7 +90,7 @@ namespace nfun.ti4.tests.Funs
             result.AssertNoGenerics();
             result.AssertNamed(Primitive.I32, "y");
             result.AssertNamed(Primitive.I32, "lx");
-            result.AssertNode(Ti4.Fun.Of(Primitive.I32, Primitive.Bool), 5);
+            result.AssertNode(Fun.Of(Primitive.I32, Primitive.Bool), 5);
         }
 
         [Test]
@@ -140,7 +138,7 @@ namespace nfun.ti4.tests.Funs
             var result = graph.Solve();
             result.AssertNoGenerics();
             result.AssertNamed(Primitive.Real, "lx");
-            result.AssertNode(Ti4.Fun.Of(Primitive.Real, Primitive.Bool), 5);
+            result.AssertNode(Fun.Of(Primitive.Real, Primitive.Bool), 5);
         }
         [Test]
         public void BoolArrayArg()

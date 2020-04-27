@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using nfun.Ti4.SolvingStates;
+using NFun.Tic.SolvingStates;
 
-namespace nfun.Ti4
+namespace NFun.Tic
 {
     public class FinalizationResults
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace nfun.Ti4
+namespace NFun.Tic.SolvingStates
 {
     public class Fun : ICompositeType, IType, IState
     {

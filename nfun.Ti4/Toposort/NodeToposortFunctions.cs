@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using NFun.Tic.SolvingStates;
 
-namespace nfun.Ti4.Toposort
+namespace NFun.Tic.Toposort
 {
     public class NodeSortResult
     {

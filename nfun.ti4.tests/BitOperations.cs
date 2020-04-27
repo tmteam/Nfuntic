@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using nfun.Ti4;
+﻿using NFun.Tic.SolvingStates;
 using NUnit.Framework;
 
-namespace nfun.ti4.tests
+namespace NFun.Tic.Tests
 {
     //& | ~ << >>
     class BitOperations

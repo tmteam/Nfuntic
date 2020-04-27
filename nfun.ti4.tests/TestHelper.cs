@@ -1,9 +1,8 @@
 ﻿using System.Linq;
-using nfun.Ti4;
-using nfun.Ti4.SolvingStates;
+using NFun.Tic.SolvingStates;
 using NUnit.Framework;
 
-namespace nfun.ti4.tests
+namespace NFun.Tic.Tests
 {
     public static class TestHelper
     {

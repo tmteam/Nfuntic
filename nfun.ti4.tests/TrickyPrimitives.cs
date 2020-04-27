@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using nfun.Ti4;
+﻿using System.Linq;
+using NFun.Tic.SolvingStates;
 using NUnit.Framework;
 
-namespace nfun.ti4.tests
+namespace NFun.Tic.Tests
 {
     class TrickyPrimitives
     {

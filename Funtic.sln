@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nfun.Ti4", "nfun.Ti4\nfun.Ti4.csproj", "{952EED2F-039B-43A1-AB34-9526A6E03E12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFun.Tic", "nfun.Ti4\NFun.Tic.csproj", "{952EED2F-039B-43A1-AB34-9526A6E03E12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nfun.ti4.app", "nfun.ti4.app\nfun.ti4.app.csproj", "{9EBC04C3-9652-4C8C-A146-AA700EA8E141}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NFun.Tic.PlaygroundApp", "nfun.ti4.app\NFun.Tic.PlaygroundApp.csproj", "{9EBC04C3-9652-4C8C-A146-AA700EA8E141}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nfun.ti4.tests", "nfun.ti4.tests\nfun.ti4.tests.csproj", "{C3C82D1F-7AB5-4B45-8690-28863C6F70A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFun.Tic.Tests", "nfun.ti4.tests\NFun.Tic.Tests.csproj", "{C3C82D1F-7AB5-4B45-8690-28863C6F70A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

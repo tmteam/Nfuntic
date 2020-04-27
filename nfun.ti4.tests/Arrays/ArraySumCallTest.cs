@@ -1,9 +1,9 @@
 ﻿using System;
-using nfun.Ti4;
+using NFun.Tic.SolvingStates;
 using NUnit.Framework;
-using Array = nfun.Ti4.Array;
+using Array = NFun.Tic.SolvingStates.Array;
 
-namespace nfun.ti4.tests.Arrays
+namespace NFun.Tic.Tests.Arrays
 {
     public class ArraySumCallTest
     {

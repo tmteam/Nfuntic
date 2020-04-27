@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nfun.Ti4.Toposort
+namespace NFun.Tic.Toposort
 {
     public enum EdgeType
     {

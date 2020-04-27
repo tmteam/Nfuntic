@@ -1,4 +1,4 @@
-﻿namespace nfun.Ti4
+﻿namespace NFun.Tic.SolvingStates
 {
     public interface IState
     {

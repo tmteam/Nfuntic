@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using nfun.Ti4;
-using nfun.Ti4.SolvingStates;
+using NFun.Tic.SolvingStates;
 using NUnit.Framework;
-using Array = nfun.Ti4.Array;
+using Array = NFun.Tic.SolvingStates.Array;
 
-namespace nfun.ti4.tests.UnitTests
+namespace NFun.Tic.Tests.UnitTests
 {
     class SolvingFunctionsTest
     {

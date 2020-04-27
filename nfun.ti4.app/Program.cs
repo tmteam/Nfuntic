@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using nfun.Ti4;
-using Array = nfun.Ti4.Array;
+using NFun.Tic.SolvingStates;
 
-namespace nfun.ti4.app
+namespace NFun.Tic.PlaygroundApp
 {
     class Program
     {
@@ -105,7 +100,7 @@ namespace nfun.ti4.app
             //              2     0 1
             //a:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", Array.Of(Primitive.I32));
+            graph.SetVarType("a", System.Array.Of(Primitive.I32));
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
@@ -119,7 +114,7 @@ namespace nfun.ti4.app
                 //              2     0 1
                 //a:int[]; y = concat(a,b) 
                 var graph = new GraphBuilder();
-                graph.SetVarType("a", Array.Of(Primitive.I32));
+                graph.SetVarType("a", System.Array.Of(Primitive.I32));
                 graph.SetVar("a", 0);
                 graph.SetVar("b", 1);
                 graph.SetConcatCall(0, 1, 2);

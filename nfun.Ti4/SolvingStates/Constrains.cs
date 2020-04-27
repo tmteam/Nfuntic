@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace nfun.Ti4.SolvingStates
+namespace NFun.Tic.SolvingStates
 {
     public class Constrains: IState
     {

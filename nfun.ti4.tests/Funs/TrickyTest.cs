@@ -1,7 +1,7 @@
-﻿using nfun.Ti4;
+﻿using NFun.Tic.SolvingStates;
 using NUnit.Framework;
 
-namespace nfun.ti4.tests.Funs
+namespace NFun.Tic.Tests.Funs
 {
     public class TrickyTest
     {

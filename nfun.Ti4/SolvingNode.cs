@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using nfun.Ti4.SolvingStates;
+using NFun.Tic.SolvingStates;
+using Array = NFun.Tic.SolvingStates.Array;
 
-namespace nfun.Ti4
+namespace NFun.Tic
 {
     public enum SolvingNodeType
     {

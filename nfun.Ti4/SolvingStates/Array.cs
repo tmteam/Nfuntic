@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace nfun.Ti4
+namespace NFun.Tic.SolvingStates
 {
     public class Array: ICompositeType, IType, IState
     {

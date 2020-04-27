@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <AssemblyName>NFun.Tic.Tests</AssemblyName>
+
+    <RootNamespace>NFun.Tic.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\nfun.Ti4\nfun.Ti4.csproj" />
+    <ProjectReference Include="..\nfun.Ti4\NFun.Tic.csproj" />
   </ItemGroup>
 
 </Project>

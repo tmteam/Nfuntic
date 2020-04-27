@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9EBC04C3-9652-4C8C-A146-AA700EA8E141}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>nfun.ti4.app</RootNamespace>
-    <AssemblyName>nfun.ti4.app</AssemblyName>
+    <RootNamespace>NFun.Tic.PlaygroundApp</RootNamespace>
+    <AssemblyName>NFun.Tic.PlaygroundApp</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -50,9 +50,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\nfun.Ti4\nfun.Ti4.csproj">
+    <ProjectReference Include="..\nfun.Ti4\NFun.Tic.csproj">
       <Project>{952EED2F-039B-43A1-AB34-9526A6E03E12}</Project>
-      <Name>nfun.Ti4</Name>
+      <Name>NFun.Tic</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

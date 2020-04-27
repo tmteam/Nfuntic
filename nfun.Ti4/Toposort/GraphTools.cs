@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace nfun.Ti4.Toposort
+namespace NFun.Tic.Toposort
 {
     enum NodeState
     {
