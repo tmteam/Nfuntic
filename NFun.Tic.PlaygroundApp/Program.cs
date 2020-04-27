@@ -1,5 +1,6 @@
 ﻿using System;
 using NFun.Tic.SolvingStates;
+using Array = NFun.Tic.SolvingStates.Array;
 
 namespace NFun.Tic.PlaygroundApp
 {
@@ -100,7 +101,7 @@ namespace NFun.Tic.PlaygroundApp
             //              2     0 1
             //a:int[]; y = concat(a,b) 
             var graph = new GraphBuilder();
-            graph.SetVarType("a", System.Array.Of(Primitive.I32));
+            graph.SetVarType("a", Array.Of(Primitive.I32));
             graph.SetVar("a", 0);
             graph.SetVar("b", 1);
             graph.SetConcatCall(0, 1, 2);
@@ -114,7 +115,7 @@ namespace NFun.Tic.PlaygroundApp
                 //              2     0 1
                 //a:int[]; y = concat(a,b) 
                 var graph = new GraphBuilder();
-                graph.SetVarType("a", System.Array.Of(Primitive.I32));
+                graph.SetVarType("a", Array.Of(Primitive.I32));
                 graph.SetVar("a", 0);
                 graph.SetVar("b", 1);
                 graph.SetConcatCall(0, 1, 2);

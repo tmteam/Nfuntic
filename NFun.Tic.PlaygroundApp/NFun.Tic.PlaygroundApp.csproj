@@ -50,8 +50,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\nfun.Ti4\NFun.Tic.csproj">
-      <Project>{952EED2F-039B-43A1-AB34-9526A6E03E12}</Project>
+    <ProjectReference Include="..\Nfun.Tic\NFun.Tic.csproj">
+      <Project>{641E6FA0-8B97-4531-AF97-FACD0EB321F2}</Project>
       <Name>NFun.Tic</Name>
     </ProjectReference>
   </ItemGroup>

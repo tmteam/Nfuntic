@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFun.Tic", "nfun.Ti4\NFun.Tic.csproj", "{952EED2F-039B-43A1-AB34-9526A6E03E12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFun.Tic", "Nfun.Tic\NFun.Tic.csproj", "{641E6FA0-8B97-4531-AF97-FACD0EB321F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NFun.Tic.PlaygroundApp", "nfun.ti4.app\NFun.Tic.PlaygroundApp.csproj", "{9EBC04C3-9652-4C8C-A146-AA700EA8E141}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NFun.Tic.PlaygroundApp", "NFun.Tic.PlaygroundApp\NFun.Tic.PlaygroundApp.csproj", "{9EBC04C3-9652-4C8C-A146-AA700EA8E141}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFun.Tic.Tests", "nfun.ti4.tests\NFun.Tic.Tests.csproj", "{C3C82D1F-7AB5-4B45-8690-28863C6F70A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFun.Tic.Tests", "NFun.Tic.Tests\NFun.Tic.Tests.csproj", "{06B3566A-5A97-4CFE-A582-3443986C3F87}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{952EED2F-039B-43A1-AB34-9526A6E03E12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{952EED2F-039B-43A1-AB34-9526A6E03E12}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{952EED2F-039B-43A1-AB34-9526A6E03E12}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{952EED2F-039B-43A1-AB34-9526A6E03E12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{641E6FA0-8B97-4531-AF97-FACD0EB321F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{641E6FA0-8B97-4531-AF97-FACD0EB321F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{641E6FA0-8B97-4531-AF97-FACD0EB321F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{641E6FA0-8B97-4531-AF97-FACD0EB321F2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9EBC04C3-9652-4C8C-A146-AA700EA8E141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9EBC04C3-9652-4C8C-A146-AA700EA8E141}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EBC04C3-9652-4C8C-A146-AA700EA8E141}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EBC04C3-9652-4C8C-A146-AA700EA8E141}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3C82D1F-7AB5-4B45-8690-28863C6F70A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3C82D1F-7AB5-4B45-8690-28863C6F70A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3C82D1F-7AB5-4B45-8690-28863C6F70A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3C82D1F-7AB5-4B45-8690-28863C6F70A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06B3566A-5A97-4CFE-A582-3443986C3F87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06B3566A-5A97-4CFE-A582-3443986C3F87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06B3566A-5A97-4CFE-A582-3443986C3F87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06B3566A-5A97-4CFE-A582-3443986C3F87}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

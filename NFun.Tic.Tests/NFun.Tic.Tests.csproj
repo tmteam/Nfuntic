@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\nfun.Ti4\NFun.Tic.csproj" />
+    <ProjectReference Include="..\Nfun.Tic\NFun.Tic.csproj" />
   </ItemGroup>
 
 </Project>
