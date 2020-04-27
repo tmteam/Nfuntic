@@ -15,7 +15,7 @@ namespace nfun.Ti4
     {
         private IState _state;
         public int GraphId { get; set; } = -1;
-
+        public bool IsDefenitionNode { get; set; }
         public static SolvingNode CreateTypeNode(IType type) 
             => new SolvingNode(type.ToString(), type, SolvingNodeType.TypeVariable);
 

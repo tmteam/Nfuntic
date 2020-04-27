@@ -128,6 +128,27 @@ namespace nfun.Ti4
 
         public IEnumerable<SolvingNode> Members => ArgNodes.Append(RetNode);
 
+        public IEnumerable<SolvingNode> AllLeafTypes
+        {
+            get
+            {
+                foreach (var member in Members)
+                {
+                    if (member.State is ICompositeType composite)
+                    {
+                        foreach (var leaf in composite.AllLeafTypes)
+                        {
+                            yield return leaf;
+                        }
+                    }
+                    else
+                    {
+                        yield return member;
+                    }
+                }
+            }
+        }
+
         public override string ToString()
         {
             if(ArgsCount==1)

@@ -11,7 +11,7 @@ namespace nfun.Ti4
         private readonly List<SolvingNode> _syntaxNodes = new List<SolvingNode>();
         private readonly List<SolvingNode> _typeVariables = new List<SolvingNode>();
         private int _varNodeId = 0;
-
+        
         public RefTo InitializeVarNode(IType desc = null, Primitive anc = null, bool isComparable = false) 
             => new RefTo(CreateVarType(new Constrains(desc, anc){IsComparable =  isComparable}));
 
@@ -157,8 +157,10 @@ namespace nfun.Ti4
         }
         public void SetDef(string name, int rightNodeId)
         {
+            
             var exprNode = GetOrCreateNode(rightNodeId);
             var defNode = GetNamedNode(name);
+            defNode.IsDefenitionNode = true;
                 //todo use prefered type
            // if (exprNode.IsSolved)
            //    defNode.BecomeReferenceFor(exprNode);
@@ -319,24 +321,7 @@ namespace nfun.Ti4
                 throw new InvalidOperationException();
             return node;
         }
-        private SolvingNode GetOrCreateFunNode(int id, Fun fun)
-        {
-            while (_syntaxNodes.Count <= id)
-            {
-                _syntaxNodes.Add(null);
-            }
-
-            var alreadyExists = _syntaxNodes[id];
-            if (alreadyExists != null)
-            {
-                alreadyExists.State = SolvingFunctions.GetMergedState(fun,alreadyExists.State);
-                return alreadyExists;
-            }
-
-            var res = new SolvingNode(id.ToString(), fun, SolvingNodeType.SyntaxNode);
-            _syntaxNodes[id] = res;
-            return res;
-        }
+      
         private SolvingNode GetOrCreateArrayNode(int id, SolvingNode elementType)
         {
             while (_syntaxNodes.Count <= id)

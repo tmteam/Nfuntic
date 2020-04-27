@@ -71,5 +71,15 @@ namespace nfun.Ti4
             => Array.Of(ElementNode.GetNonReference());
 
         public IEnumerable<SolvingNode> Members => new[] {ElementNode};
+
+        public IEnumerable<SolvingNode> AllLeafTypes
+        {
+            get
+            {
+                if (ElementNode.State is ICompositeType composite)
+                    return composite.AllLeafTypes;
+                return new[] {ElementNode};
+            }
+        }
     }
 }

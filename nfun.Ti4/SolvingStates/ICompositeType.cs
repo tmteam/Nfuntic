@@ -6,5 +6,6 @@ namespace nfun.Ti4
     {
         ICompositeType GetNonReferenced();
         IEnumerable<SolvingNode> Members { get; }
+        IEnumerable<SolvingNode> AllLeafTypes { get; }
     }
 }

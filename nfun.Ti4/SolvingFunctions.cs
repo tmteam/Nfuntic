@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography;
 
 namespace nfun.Ti4
 {
@@ -92,8 +94,8 @@ namespace nfun.Ti4
 
         public static void MergeCycle(SolvingNode[] cycleRoute)
         {
-            var main = cycleRoute.FirstOrDefault(r => r.Type == SolvingNodeType.Named) 
-                       ?? cycleRoute.First();
+            var main = cycleRoute.First();
+
             foreach (var current in cycleRoute)
             {
                 if (current == main)
@@ -141,14 +143,9 @@ namespace nfun.Ti4
                     ancestor.State = SetUpwardsLimits(node, ancestor);
                 }
 
-                if (node.State is Array array)
-                    HandleUpwardLimits(array.ElementNode);
-                if (node.State is Fun fun)
-                {
-                    for (int i = 0; i < fun.ArgsCount; i++)
-                        HandleUpwardLimits(fun.ArgNodes[i]);
-                    HandleUpwardLimits(fun.RetNode);
-                }
+                if(node.State is ICompositeType composite)
+                    foreach (var member in composite.Members)
+                        HandleUpwardLimits(member);
             }
 
             foreach (var node in toposortedNodes.Where(n => !n.MemberOf.Any()))
@@ -302,15 +299,16 @@ namespace nfun.Ti4
         {
             void Downwards(SolvingNode descendant)
             {
-                if (descendant.State is Array array)
-                    Downwards(array.ElementNode);
+                if(descendant.State is ICompositeType composite)
+                    foreach (var member in composite.Members)
+                        Downwards(member);
+                
                 foreach (var ancestor in descendant.Ancestors)
                     descendant.State = SetDownwardsLimits(descendant, ancestor);
             }
 
             for (int i = toposortedNodes.Length - 1; i >= 0; i--)
             {
-
                 var descendant = toposortedNodes[i];
                 if (descendant.MemberOf.Any())
                     continue;
@@ -421,31 +419,17 @@ namespace nfun.Ti4
         {
             void Destruction(SolvingNode node)
             {
-                if (node.State is Array arrayDesc)
+                if (node.State is ICompositeType composite)
                 {
-                    Destruction(arrayDesc.ElementNode);
-                    if (arrayDesc.Element is RefTo)
-                        node.State = new Array(arrayDesc.ElementNode.GetNonReference());
+                    if (composite.Members.Any(m => m.State is RefTo))
+                        node.State = composite.GetNonReferenced();
+                    
+                    foreach (var member in composite.Members) 
+                        Destruction(member);
                 }
 
-                if (node.State is Fun funDesc)
-                {
-                    foreach (var argNode in funDesc.ArgNodes)
-                        Destruction(argNode);
-
-                    Destruction(funDesc.RetNode);
-
-                    if (funDesc.ArgNodes.Any(a => a.State is RefTo) || funDesc.ReturnType is RefTo)
-                        node.State = Fun.Of(
-                            returnNode: funDesc.RetNode.GetNonReference(),
-                            argNodes: funDesc.ArgNodes.Select(a => a.GetNonReference()).ToArray()
-                        );
-                }
-
-                foreach (var ancestor in node.Ancestors.ToArray())
-                {
+                foreach (var ancestor in node.Ancestors.ToArray()) 
                     TryMergeDestructive(node, ancestor);
-                }
             }
 
             for (int i = toposorteNodes.Length - 1; i >= 0; i--)
@@ -583,13 +567,29 @@ namespace nfun.Ti4
             var syntaxNodes = new SolvingNode[toposortedNodes.Length];
             var namedNodes = new List<SolvingNode>();
 
+            void TryAddTypeVar(SolvingNode member)
+            {
+                if (member.Type == SolvingNodeType.TypeVariable
+                    && member.State is Constrains)
+                {
+                     if (!typeVariables.Contains(member))
+                         typeVariables.Add(member);
+                }
+            }
+
+          
+
             void Finalize(SolvingNode node)
             {
                 if (node.State is RefTo)
                 {
                     var originalOne = node.GetNonReference();
+                    
                     if (originalOne != node)
                     {
+                        if (node.IsDefenitionNode)
+                            originalOne.IsDefenitionNode = true;
+
                         Console.WriteLine($"\t{node.Name}->r");
                         node.State = new RefTo(originalOne);
                     }
@@ -600,26 +600,18 @@ namespace nfun.Ti4
                         Console.WriteLine($"\t{node.Name}->s");
                     }
                 }
-                else if (node.State is Array array)
+                else if (node.State is ICompositeType composite)
                 {
-                    if (array.Element is RefTo reference)
+                    if (composite.Members.Any(m => m.State is RefTo))
                     {
-                        node.State = new Array(reference.Node.GetNonReference());
+                        node.State = composite.GetNonReferenced();
                         Console.WriteLine($"\t{node.Name}->ar");
                     }
 
-                    Finalize((node.State as Array).ElementNode);
-                }
-                else if (node.State is Fun fun)
-                {
-                    if (fun.Members.Any(m => m.State is RefTo))
+                    foreach (var member in composite.Members)
                     {
-                        node.State = Fun.Of(
-                            fun.ArgNodes.Select(a => a.GetNonReference()).ToArray(),
-                            fun.RetNode.GetNonReference());
+                        Finalize(member);
                     }
-
-                    foreach (var member in fun.Members) Finalize(member);
                 }
             }
 
@@ -627,16 +619,13 @@ namespace nfun.Ti4
             {
                 Finalize(node);
 
-                var concreteElement = node.GetTypeLeafElement();
-
-                if (concreteElement.Type == SolvingNodeType.TypeVariable
-                    && concreteElement.State is Constrains)
+                if (node.State is ICompositeType composite)
                 {
-                    if (!typeVariables.Contains(concreteElement))
-                        typeVariables.Add(concreteElement);
+                    foreach (var member in composite.AllLeafTypes)
+                        TryAddTypeVar(member);
                 }
-
-
+                else TryAddTypeVar(node);
+                
                 if (node.Type == SolvingNodeType.Named)
                     namedNodes.Add(node);
                 else if (node.Type == SolvingNodeType.SyntaxNode)
@@ -648,14 +637,7 @@ namespace nfun.Ti4
 
         #endregion
 
-        public static SolvingNode GetTypeLeafElement(this SolvingNode node)
-        {
-            if (node.State is RefTo reference)
-                return GetTypeLeafElement(reference.Node);
-            if (node.State is Array array)
-                return GetTypeLeafElement(array.ElementNode);
-            return node;
-        }
+      
 
         public static SolvingNode GetNonReference(this SolvingNode node)
         {
