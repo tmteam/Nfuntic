@@ -231,5 +231,7 @@ namespace NFun.Tic.SolvingStates
 
             return this;
         }
+
+        public string Description => ToString();
     }
 }

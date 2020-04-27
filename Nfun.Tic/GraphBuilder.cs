@@ -79,7 +79,7 @@ namespace NFun.Tic
         public void SetVarType(string s, Primitive u64)
         {
             var node = GetNamedNode(s);
-            if (!node.BecomeConcrete(u64))
+            if (!node.TryBecomeConcrete(u64))
                 throw new InvalidOperationException();
         }
 
@@ -126,7 +126,8 @@ namespace NFun.Tic
                     case Primitive primitive:
                     {
                         var node = GetOrCreateNode(argId);
-                        node.SetAncestor(primitive);
+                        if(!node.TrySetAncestor(primitive))
+                            throw new InvalidOperationException();
                         break;
                     }
                     case Array array:
@@ -197,7 +198,7 @@ namespace NFun.Tic
                         Console.WriteLine(string.Join("->", cycle.Select(r => r.Name)));
 
                         //main node. every other node has to reference on it
-                        SolvingFunctions.MergeCycle(cycle);
+                        SolvingFunctions.MergeGroup(cycle);
 
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine($"Cycle normalization results: ");
@@ -322,7 +323,7 @@ namespace NFun.Tic
         private SolvingNode SetOrCreatePrimitive(int id, Primitive type)
         {
             var node = GetOrCreateNode(id);
-            if (!node.BecomeConcrete(type))
+            if (!node.TryBecomeConcrete(type))
                 throw new InvalidOperationException();
             return node;
         }

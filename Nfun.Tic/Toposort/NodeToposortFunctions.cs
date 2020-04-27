@@ -118,7 +118,7 @@ namespace NFun.Tic.Toposort
                     return;
                 
                 var refCycle = refTopology.NodeNames.Select(n => nodes[n.To]).ToArray();
-                SolvingFunctions.MergeCycle(refCycle);
+                SolvingFunctions.MergeGroup(refCycle);
             }
         }
 

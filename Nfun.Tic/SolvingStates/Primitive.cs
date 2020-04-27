@@ -178,5 +178,6 @@ namespace NFun.Tic.SolvingStates
         }
 
         public override bool Equals(object obj) => (obj as Primitive)?.Name == Name;
+        public string Description => Name.ToString();
     }
 }

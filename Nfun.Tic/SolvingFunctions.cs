@@ -32,18 +32,12 @@ namespace NFun.Tic
                 }
             }
 
-            if (stateA is Array arrayA)
+            switch (stateA)
             {
-                if (stateB is Array arrayB)
-                {
+                case Array arrayA when stateB is Array arrayB:
                     Merge(arrayA.ElementNode, arrayB.ElementNode);
                     return arrayA;
-                }
-            }
-
-            if (stateA is Fun funA)
-            {
-                if (stateB is Fun funB)
+                case Fun funA when stateB is Fun funB:
                 {
                     if (funA.ArgsCount != funB.ArgsCount)
                         throw new InvalidOperationException("Function signatures are different");
@@ -53,20 +47,17 @@ namespace NFun.Tic
                     Merge(funA.RetNode, funB.RetNode);
                     return funA;
                 }
-            }
 
-            if (stateA is Constrains constrainsA)
-            {
-                if (stateB is Constrains constrainsB)
+                case Constrains constrainsA when stateB is Constrains constrainsB:
                     return constrainsB.MergeOrNull(constrainsA) ?? throw new InvalidOperationException();
-                return GetMergedState(stateB, stateA);
-            }
-
-            if (stateA is RefTo refA)
-            {
-                var state = GetMergedState(refA.Node.State, stateB);
-                refA.Node.State = state;
-                return stateA;
+                case Constrains _:
+                    return GetMergedState(stateB, stateA);
+                case RefTo refA:
+                {
+                    var state = GetMergedState(refA.Node.State, stateB);
+                    refA.Node.State = state;
+                    return stateA;
+                }
             }
 
             if (stateB is RefTo)
@@ -92,7 +83,7 @@ namespace NFun.Tic
             secondary.State = new RefTo(main);
         }
 
-        public static void MergeCycle(SolvingNode[] cycleRoute)
+        public static void MergeGroup(SolvingNode[] cycleRoute)
         {
             var main = cycleRoute.First();
 
@@ -632,19 +623,6 @@ namespace NFun.Tic
             
             foreach (var node in notSolved) 
                 node.State = ((Constrains) node.State).TrySolveOrNull() ?? node.State;
-
-            ////Все типы которые зависят от входов
-            //var inputNodes = toposortedNodes
-            //    .Where(t => t.Type == SolvingNodeType.Named)
-            //    .Except(outputNodes)
-            //    .SelectMany(s => s.GetAllLeafTypes())
-            //    .Distinct()
-            //    .ToArray();
-
-            ////Все выходные типы которые не пересекаются с входными
-            //var unsolvedOuts = outputTypes.Except(inputNodes).Where(t => t.State is Constrains).ToArray();
-            //foreach (var node in unsolvedOuts)
-            //    node.State = ((Constrains)node.State).TrySolveOrNull() ?? node.State;
 
             return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
         }

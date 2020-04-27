@@ -157,5 +157,6 @@ namespace NFun.Tic.SolvingStates
 
         }
 
+        public string Description => $"({string.Join(",", ArgNodes.Select(a => a.Name))})->{RetNode.Name}";
     }
 }

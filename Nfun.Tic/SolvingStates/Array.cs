@@ -81,5 +81,7 @@ namespace NFun.Tic.SolvingStates
                 return new[] {ElementNode};
             }
         }
+
+        public string Description => "arr(" + ElementNode.Name + ")";
     }
 }
