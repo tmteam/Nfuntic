@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.Win32.SafeHandles;
+using System.Linq;
 
-namespace nfun.Ti4
+namespace nfun.Ti4.SolvingStates
 {
     public class Constrains: IState
     {
@@ -23,6 +23,8 @@ namespace nfun.Ti4
 
         public Primitive TrySolveOrNull()
         {
+            if (Prefered != null && Fits(Prefered))
+                return Prefered;
             if (IsComparable)
                 return null;
             if (HasAncestor)
@@ -63,7 +65,20 @@ namespace nfun.Ti4
                 if (!array.IsSolved || !descArray.IsSolved)
                     return false;
             }
-            throw new NotImplementedException();
+            else if (type is Fun fun)
+            {
+                if (IsComparable)
+                    return false;
+                if (!HasDescendant)
+                    return true;
+                if (!(Descedant is Fun descfun))
+                    return false;
+                if (fun.Members.SequenceEqual(descfun.Members))
+                    return true;
+                if (!fun.IsSolved || !descfun.IsSolved)
+                    return false;
+            }
+            throw new NotSupportedException();
         }
 
         public bool Fits(Primitive primitive)
@@ -160,6 +175,17 @@ namespace nfun.Ti4
                     return null;
             }
 
+            if (Prefered == null)
+                result.Prefered = constrains.Prefered;
+            else if (constrains.Prefered == null)
+                result.Prefered = Prefered;
+            else if (constrains.Prefered.Equals(Prefered))
+                result.Prefered = Prefered;
+            else if (result.Fits(Prefered) && !result.Fits(constrains.Prefered))
+                result.Prefered = Prefered;
+            else
+                result.Prefered = constrains.Prefered;
+            
             return result;
         }
        

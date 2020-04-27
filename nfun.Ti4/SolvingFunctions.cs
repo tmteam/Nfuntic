@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
+using nfun.Ti4.SolvingStates;
 
 namespace nfun.Ti4
 {
@@ -104,7 +105,7 @@ namespace nfun.Ti4
                 if (current.State is RefTo refState)
                 {
                     if (!cycleRoute.Contains(refState.Node))
-                        throw new NotImplementedException();
+                        throw new InvalidOperationException();
                 }
                 else
                 {
@@ -462,7 +463,10 @@ namespace nfun.Ti4
                     if (nonRefDescendant.State is Constrains c && c.Fits(concreteAnc))
                     {
                         Console.Write("p+c");
-                        nonRefDescendant.State = concreteAnc;
+                        if (c.Prefered != null && c.Fits(c.Prefered))
+                            nonRefDescendant.State = c.Prefered;
+                        else
+                            nonRefDescendant.State = concreteAnc;
                     }
 
                     break;
@@ -630,18 +634,18 @@ namespace nfun.Ti4
             foreach (var node in notSolved) 
                 node.State = ((Constrains) node.State).TrySolveOrNull() ?? node.State;
 
-            //Все типы которые зависят от входов
-            var inputNodes = toposortedNodes
-                .Where(t => t.Type == SolvingNodeType.Named)
-                .Except(outputNodes)
-                .SelectMany(s => s.GetAllLeafTypes())
-                .Distinct()
-                .ToArray();
+            ////Все типы которые зависят от входов
+            //var inputNodes = toposortedNodes
+            //    .Where(t => t.Type == SolvingNodeType.Named)
+            //    .Except(outputNodes)
+            //    .SelectMany(s => s.GetAllLeafTypes())
+            //    .Distinct()
+            //    .ToArray();
 
-            //Все выходные типы которые не пересекаются с входными
-            var unsolvedOuts = outputTypes.Except(inputNodes).Where(t => t.State is Constrains).ToArray();
-            foreach (var node in unsolvedOuts)
-                node.State = ((Constrains)node.State).TrySolveOrNull() ?? node.State;
+            ////Все выходные типы которые не пересекаются с входными
+            //var unsolvedOuts = outputTypes.Except(inputNodes).Where(t => t.State is Constrains).ToArray();
+            //foreach (var node in unsolvedOuts)
+            //    node.State = ((Constrains)node.State).TrySolveOrNull() ?? node.State;
 
             return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
         }
@@ -681,7 +685,7 @@ namespace nfun.Ti4
             {
                 case ICompositeType composite:
                     return composite.AllLeafTypes;
-                case RefTo refTo:
+                case RefTo _:
                     return new[] {node.GetNonReference()};
                 default:
                     return new[] {node};

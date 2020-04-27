@@ -246,13 +246,6 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        //[Ignore("Не определено поведение дженериков и конкретных указаний типов")]
-        //Есть два пути решения. С одной стороны мы можем обосновано сказать что b это дженерик
-        //Но по логике - так как этот дженерик не участвует в выходе - нам нету смысла его держать дженериком
-        //и мы можем сказать что это чистый риал. Нипонятно
-
-        //Еще одна проблема - что есть "а"? Это Real или int?
-        // ToDo
         public void UpcastArgTypeThatIsAfter_EquationSolved()
         {
             //     0 2 1       3 
@@ -268,9 +261,9 @@ namespace nfun.ti4.tests
 
             var result = graph.Solve();
             
-            //Assert.AreEqual(0,result.GenericsCount);
+            Assert.AreEqual(0,result.GenericsCount);
             result.AssertNamed(Primitive.I32, "a");
-            //Assert.AreEqual(ConcreteType.Real, result.GetVariable("b"));
+            result.AssertNamed(Primitive.Real, "b");
             result.AssertNamed(Primitive.Real, "y");
         }
 
@@ -301,7 +294,7 @@ namespace nfun.ti4.tests
             result.AssertNamed(Primitive.Real, "y");
         }
         [Test]
-        [Ignore("Prefered Type")]
+        //[Ignore("Prefered Type")]
         public void UpcastArgType_ArithmOp_EquationSolved()
         {
             //        0        1 3 2       4

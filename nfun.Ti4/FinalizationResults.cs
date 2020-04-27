@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using nfun.Ti4.SolvingStates;
 
 namespace nfun.Ti4
 {

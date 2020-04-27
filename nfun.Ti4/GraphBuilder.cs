@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using nfun.Ti4.SolvingStates;
 using nfun.Ti4.Toposort;
 
 namespace nfun.Ti4
@@ -60,7 +61,7 @@ namespace nfun.Ti4
             }
             else
             {
-                throw new NotImplementedException();
+                throw new InvalidOperationException();
             }
         }
         
@@ -129,6 +130,10 @@ namespace nfun.Ti4
                     }
                     case Array array:
                     {
+                        //var node = GetOrCreateNode(argId);
+                        //var ancestor = CreateVarType(array);
+                        //ancestor.BecomeAncestorFor(node);
+
                         //todo Upcast support
                         GetOrCreateArrayNode(argId, array.ElementNode);
                         break;
@@ -161,12 +166,9 @@ namespace nfun.Ti4
             var defNode = GetNamedNode(name);
             _outputNodes.Add(defNode);
 
-            defNode.IsDefenitionNode = true;
-                //todo use prefered type
-           // if (exprNode.IsSolved)
-           //    defNode.BecomeReferenceFor(exprNode);
-           //else
-                defNode.BecomeAncestorFor(exprNode);
+            if (exprNode.State is Primitive primitive && defNode.State is Constrains constrains)
+                    constrains.Prefered = primitive;
+            defNode.BecomeAncestorFor(exprNode);
         }
         #endregion
         public SolvingNode[] Toposort()
@@ -182,35 +184,36 @@ namespace nfun.Ti4
 
                 var result = NodeToposortFunctions.Toposort(allNodes);
 
-                if (result.Status == SortStatus.MemebershipCycle)
-                    throw new InvalidOperationException("Reqursive type defenition");
-
-                else if (result.Status == SortStatus.AncestorCycle)
+                switch (result.Status)
                 {
-                    var cycle = result.Order;
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"Found cycle: ");
-                    Console.ResetColor();
-                    Console.WriteLine(string.Join("->", cycle.Select(r => r.Name)));
+                    case SortStatus.MemebershipCycle: throw new InvalidOperationException("Reqursive type defenition");
+                    case SortStatus.AncestorCycle:
+                    {
+                        var cycle = result.Order;
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"Found cycle: ");
+                        Console.ResetColor();
+                        Console.WriteLine(string.Join("->", cycle.Select(r => r.Name)));
 
-                    //main node. every other node has to reference on it
-                    SolvingFunctions.MergeCycle(cycle);
+                        //main node. every other node has to reference on it
+                        SolvingFunctions.MergeCycle(cycle);
 
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Cycle normalization results: ");
-                    Console.ResetColor();
-                    foreach (var solvingNode in cycle)
-                        solvingNode.PrintToConsole();
-                }
-                else if (result.Status == SortStatus.Sorted)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Toposort results: ");
-                    Console.ResetColor();
-                    Console.WriteLine(string.Join("->", result.Order.Select(r => r.Name)));
-                    Console.WriteLine("Refs:" + string.Join(",", result.Refs.Select(r => r.Name)));
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Cycle normalization results: ");
+                        Console.ResetColor();
+                        foreach (var solvingNode in cycle)
+                            solvingNode.PrintToConsole();
+                        break;
+                    }
 
-                    return result.Order.Union(result.Refs).ToArray();
+                    case SortStatus.Sorted:
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Toposort results: ");
+                        Console.ResetColor();
+                        Console.WriteLine(string.Join("->", result.Order.Select(r => r.Name)));
+                        Console.WriteLine("Refs:" + string.Join(",", result.Refs.Select(r => r.Name)));
+
+                        return result.Order.Union(result.Refs).ToArray();
                 }
             }
         }

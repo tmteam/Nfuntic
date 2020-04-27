@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using nfun.Ti4;
+using nfun.Ti4.SolvingStates;
 using NUnit.Framework;
 using Array = nfun.Ti4.Array;
 

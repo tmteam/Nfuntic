@@ -273,12 +273,11 @@ namespace nfun.ti4.tests
             graph.SetArrayInit(4,2, 3);
             graph.SetDef("x", 4);
             var res = graph.Solve();
-            //todo generic constants
-            //var t = res.AssertAndGetSingleArithGeneric();
-            //res.AssertNamed(Array.Of(t),"x");
+            
+            var t = res.AssertAndGetSingleGeneric(Primitive.U8, Primitive.Real);
+            res.AssertNamed(Array.Of(t),"x");
         }
         [Test]
-      //  [Ignore("Array def toposort")]
         public void Array_ReqursiveDefenition_throws()
         {
             //    1 0              
@@ -299,7 +298,6 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-       // [Ignore("Array def toposort")]
         public void Array_TwinReqursiveDefenition_throws()
         {
             //    2 0 1              
@@ -320,7 +318,6 @@ namespace nfun.ti4.tests
             }
         }
        [Test]
-       //[Ignore("Array def toposort")]
        public void Array_ComplexReqursiveDefenition_throws()
        {
            //    2 1 0             
@@ -341,7 +338,6 @@ namespace nfun.ti4.tests
            }
        }
         [Test]
-        //[Ignore("Array def toposort")]
         public void Array_ComplexReqursiveDefenition2_throws()
         {
             //    4 1 0  3 2           

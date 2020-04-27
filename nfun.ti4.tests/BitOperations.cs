@@ -65,7 +65,7 @@ namespace nfun.ti4.tests
         
 
         [Test]
-        //[Ignore("Todo - сделать оптимизацию для поиска подходящего типа")]
+        [Ignore("Todo - сделать оптимизацию для поиска подходящего типа")]
         public void BitwiseDifferentConstants()
         {
             //    0  2 1

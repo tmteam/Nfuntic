@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using nfun.Ti4.SolvingStates;
 
 namespace nfun.Ti4
 {
@@ -15,7 +16,6 @@ namespace nfun.Ti4
     {
         private IState _state;
         public int GraphId { get; set; } = -1;
-        public bool IsDefenitionNode { get; set; }
         public static SolvingNode CreateTypeNode(IType type) 
             => new SolvingNode(type.ToString(), type, SolvingNodeType.TypeVariable);
 
@@ -84,10 +84,8 @@ namespace nfun.Ti4
         public bool BecomeConcrete(Primitive primitive)
         {
             if (this.State is Primitive oldConcrete)
-            {
-                return oldConcrete == primitive;
-            }
-            else if (this.State is Constrains constrains)
+                return oldConcrete.Equals(primitive);
+            if (this.State is Constrains constrains)
             {
                 if (!constrains.Fits(primitive))
                     return false;
