@@ -236,7 +236,6 @@ namespace nfun.Ti4
                 }
             }
 
-
             if (descendant.State is Constrains constrainsDesc)
             {
                 switch (ancestor.State)
@@ -561,23 +560,11 @@ namespace nfun.Ti4
 
         #region Finalize
 
-        public static FinalizationResults FinalizeUp(SolvingNode[] toposortedNodes)
+        public static FinalizationResults FinalizeUp(SolvingNode[] toposortedNodes, SolvingNode[]outputNodes)
         {
             var typeVariables = new HashSet<SolvingNode>();
             var syntaxNodes = new SolvingNode[toposortedNodes.Length];
             var namedNodes = new List<SolvingNode>();
-
-            void TryAddTypeVar(SolvingNode member)
-            {
-                if (member.Type == SolvingNodeType.TypeVariable
-                    && member.State is Constrains)
-                {
-                     if (!typeVariables.Contains(member))
-                         typeVariables.Add(member);
-                }
-            }
-
-          
 
             void Finalize(SolvingNode node)
             {
@@ -587,9 +574,6 @@ namespace nfun.Ti4
                     
                     if (originalOne != node)
                     {
-                        if (node.IsDefenitionNode)
-                            originalOne.IsDefenitionNode = true;
-
                         Console.WriteLine($"\t{node.Name}->r");
                         node.State = new RefTo(originalOne);
                     }
@@ -607,30 +591,57 @@ namespace nfun.Ti4
                         node.State = composite.GetNonReferenced();
                         Console.WriteLine($"\t{node.Name}->ar");
                     }
-
-                    foreach (var member in composite.Members)
-                    {
+                    
+                    foreach (var member in composite.Members) 
                         Finalize(member);
-                    }
+                   
                 }
             }
 
-            foreach (var node in toposortedNodes)
+            foreach (var node in toposortedNodes.Reverse())
             {
                 Finalize(node);
 
-                if (node.State is ICompositeType composite)
+                foreach (var member in node.GetAllLeafTypes())
                 {
-                    foreach (var member in composite.AllLeafTypes)
-                        TryAddTypeVar(member);
+                    if (member.Type == SolvingNodeType.TypeVariable && member.State is Constrains)
+                    {
+                        if (!typeVariables.Contains(member))
+                            typeVariables.Add(member);
+                    }
                 }
-                else TryAddTypeVar(node);
-                
+
                 if (node.Type == SolvingNodeType.Named)
                     namedNodes.Add(node);
                 else if (node.Type == SolvingNodeType.SyntaxNode)
                     syntaxNodes[int.Parse(node.Name)] = node;
             }
+
+
+            var outputTypes = outputNodes
+                .SelectMany(s => s.GetAllLeafTypes())
+                .Distinct()
+                .ToArray();
+            var notSolved = toposortedNodes
+                .Where(t => t.State is Constrains)
+                .Except(outputTypes)
+                .ToArray(); 
+            
+            foreach (var node in notSolved) 
+                node.State = ((Constrains) node.State).TrySolveOrNull() ?? node.State;
+
+            //Все типы которые зависят от входов
+            var inputNodes = toposortedNodes
+                .Where(t => t.Type == SolvingNodeType.Named)
+                .Except(outputNodes)
+                .SelectMany(s => s.GetAllLeafTypes())
+                .Distinct()
+                .ToArray();
+
+            //Все выходные типы которые не пересекаются с входными
+            var unsolvedOuts = outputTypes.Except(inputNodes).Where(t => t.State is Constrains).ToArray();
+            foreach (var node in unsolvedOuts)
+                node.State = ((Constrains)node.State).TrySolveOrNull() ?? node.State;
 
             return new FinalizationResults(typeVariables.ToArray(), namedNodes.ToArray(), syntaxNodes);
         }
@@ -664,6 +675,18 @@ namespace nfun.Ti4
             Merge(referencedNode, original);
         }
 
+        private static IEnumerable<SolvingNode> GetAllLeafTypes(this SolvingNode node)
+        {
+            switch (node.State)
+            {
+                case ICompositeType composite:
+                    return composite.AllLeafTypes;
+                case RefTo refTo:
+                    return new[] {node.GetNonReference()};
+                default:
+                    return new[] {node};
+            }
+        }
 
 
         /// <summary>

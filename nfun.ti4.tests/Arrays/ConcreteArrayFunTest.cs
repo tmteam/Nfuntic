@@ -42,7 +42,7 @@ namespace nfun.ti4.tests.Arrays
 
 
         [Test(Description = "y = [1i,-1i].NoNans()")]
-        [Ignore("Upcast for complex types")]
+        //[Ignore("Upcast for complex types")]
         public void ConcreteCall_WithGenericArray()
         {
             //        3   2 0  1
@@ -52,8 +52,8 @@ namespace nfun.ti4.tests.Arrays
             graph.SetIntConst(1, Primitive.I16);
             graph.SetArrayInit(2, 0, 1);
 
-            graph.SetCall(new IState[] { Array.Of(Primitive.Real), Primitive.Bool }, new[] { 0, 1 });
-            graph.SetDef("y", 1);
+            graph.SetCall(new IState[] { Array.Of(Primitive.Real), Primitive.Bool }, new[] { 2, 3 });
+            graph.SetDef("y", 3);
 
             var result = graph.Solve();
             result.AssertNoGenerics();

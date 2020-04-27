@@ -246,7 +246,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        [Ignore("Не определено поведение дженериков и конкретных указаний типов")]
+        //[Ignore("Не определено поведение дженериков и конкретных указаний типов")]
         //Есть два пути решения. С одной стороны мы можем обосновано сказать что b это дженерик
         //Но по логике - так как этот дженерик не участвует в выходе - нам нету смысла его держать дженериком
         //и мы можем сказать что это чистый риал. Нипонятно
@@ -275,7 +275,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        [Ignore("Не определено поведение а. Какого она должна быть типа?")]
+        //[Ignore("Не определено поведение а. Какого она должна быть типа?")]
         //todo
         public void UpcastArgTypeThatIsBefore_EquationSolved()
         {
@@ -301,8 +301,7 @@ namespace nfun.ti4.tests
             result.AssertNamed(Primitive.Real, "y");
         }
         [Test]
-        [Ignore("Не определено поведение для b")]
-        //todo
+        [Ignore("Prefered Type")]
         public void UpcastArgType_ArithmOp_EquationSolved()
         {
             //        0        1 3 2       4

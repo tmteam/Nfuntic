@@ -10,7 +10,7 @@ namespace nfun.ti4.tests
     class TrickyPrimitives
     {
         [Test(Description = "y = isNan(1) ")]
-        [Ignore("Обобщенная входная константа")]
+        //[Ignore("Обобщенная входная константа")]
         public void SimpleConcreteFunctionWithConstant()
         {
             //node |    1     0
@@ -26,7 +26,7 @@ namespace nfun.ti4.tests
         }
 
         [Test(Description = "y = isNan(x) ")]
-        [Ignore("Обобщенный вход без выхода")]
+        //[Ignore("Обобщенный вход без выхода")]
         public void SimpleConcreteFunctionWithVariable()
         {
             //node |    1     0
@@ -43,7 +43,7 @@ namespace nfun.ti4.tests
         }
 
         [Test(Description = "x:int; y = isNan(x) ")]
-        [Ignore("Обобщенный вход без выхода")]
+        //[Ignore("Обобщенный вход без выхода")]
 
         public void SimpleConcreteFunctionWithVariableOfConcreteType()
         {
@@ -57,7 +57,7 @@ namespace nfun.ti4.tests
             var result = graph.Solve();
 
             result.AssertNoGenerics();
-            result.AssertNamed(Primitive.Real, "x");
+            result.AssertNamed(Primitive.I32, "x");
             result.AssertNamed(Primitive.Bool, "y");
         }
 
@@ -76,7 +76,7 @@ namespace nfun.ti4.tests
         }
 
         [Test(Description = "y = isNan(x); z = ~x")]
-        [Ignore("Обобщенный вход без выхода")]
+        //[Ignore("Обобщенный вход без выхода")]
 
         public void SimpleConcreteFunctionWithVariableThatLimitisAfterwards()
         {
@@ -145,7 +145,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        [Ignore("Обобщенная константа без выхода")]
+        //[Ignore("Обобщенная константа без выхода")]
         public void LimitCall_ComplexEquations_TypesSolved()
         {
             //     0 2 1      3 5  4      6 8 7
@@ -175,7 +175,7 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        [Ignore("Generic constants")]
+        //[Ignore("Generic constants")]
         public void SummReducecByBitShift_AllTypesAreInt()
         {
             //  0 2 1  4 3
@@ -199,19 +199,20 @@ namespace nfun.ti4.tests
         }
 
         [Test]
-        [Ignore("Generic constants")]
+        //[Ignore("Generic constants")]
         public void ConcreteTypeOfArithmetical_ConstantsAreConcrete()
         {
-            //3 4 0 2 1  
+            //0 4 1 3 2  
             //x<<(1 + 2)
 
             var graph = new GraphBuilder();
 
-            graph.SetIntConst(0, Primitive.U8);
+            graph.SetVar("x", 0);
+
             graph.SetIntConst(1, Primitive.U8);
-            graph.SetArith(0,1,2);
-            graph.SetVar("x", 3);
-            graph.SetBitShift(2, 3, 4);
+            graph.SetIntConst(2, Primitive.U8);
+            graph.SetArith(1,2,3);
+            graph.SetBitShift(0, 3, 4);
             graph.SetDef("out", 4);
 
             var result = graph.Solve();

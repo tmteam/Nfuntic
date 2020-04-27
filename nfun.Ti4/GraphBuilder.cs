@@ -11,7 +11,7 @@ namespace nfun.Ti4
         private readonly List<SolvingNode> _syntaxNodes = new List<SolvingNode>();
         private readonly List<SolvingNode> _typeVariables = new List<SolvingNode>();
         private int _varNodeId = 0;
-        
+        private readonly List<SolvingNode> _outputNodes = new List<SolvingNode>();
         public RefTo InitializeVarNode(IType desc = null, Primitive anc = null, bool isComparable = false) 
             => new RefTo(CreateVarType(new Constrains(desc, anc){IsComparable =  isComparable}));
 
@@ -157,9 +157,10 @@ namespace nfun.Ti4
         }
         public void SetDef(string name, int rightNodeId)
         {
-            
             var exprNode = GetOrCreateNode(rightNodeId);
             var defNode = GetNamedNode(name);
+            _outputNodes.Add(defNode);
+
             defNode.IsDefenitionNode = true;
                 //todo use prefered type
            // if (exprNode.IsSolved)
@@ -265,7 +266,7 @@ namespace nfun.Ti4
             PrintTrace();
 
             Console.WriteLine("Finalize");
-            var results = SolvingFunctions.FinalizeUp(sorted);
+            var results = SolvingFunctions.FinalizeUp(sorted, _outputNodes.ToArray());
 
             Console.WriteLine($"Type variables: {results.TypeVariables.Length}");
             foreach (var typeVariable in results.TypeVariables)

@@ -112,7 +112,7 @@ namespace nfun.ti4.tests.Funs
 
 
         [Test]
-        [Ignore("Input variable generic")]
+        //[Ignore("Input variable generic")]
         public void GenericFold_AllIsNan()
         {
             //      6  0  5      1  4    3   2
@@ -126,6 +126,7 @@ namespace nfun.ti4.tests.Funs
             graph.SetBoolCall(1,3,4);
             graph.CreateLambda(4, 5, "la", "lb");
             graph.SetFoldCall(0, 5, 6);
+            graph.SetDef("y",6);
             var result = graph.Solve();
 
             result.AssertNoGenerics();

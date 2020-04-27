@@ -9,6 +9,7 @@ namespace nfun.ti4.tests
     class Equality
     {
         [Test]
+        [Ignore("Not defined behaviour")]
         public void TwoVariableEquality()
         {
             //     0  2 1

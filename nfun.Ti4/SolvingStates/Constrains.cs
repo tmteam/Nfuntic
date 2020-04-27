@@ -21,6 +21,15 @@ namespace nfun.Ti4
             return result;
         }
 
+        public Primitive TrySolveOrNull()
+        {
+            if (IsComparable)
+                return null;
+            if (HasAncestor)
+                return Ancestor;
+            
+            return Primitive.Any;
+        }
         public bool Fits(IType type)
         {
             if (HasAncestor)
